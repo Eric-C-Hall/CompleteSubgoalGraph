@@ -102,8 +102,10 @@ $(OBJ_DIR)/%.o: $(CPP_DIR)/%.cpp
 	g++ -Wall -c $< -std=c++11 $(OPTIMIZATION_LEVEL) $(ADDITIONAL_ARGUMENTS) $(CONCURRENCY_ARGUMENTS) $(ASSERTION_ARGUMENTS) -o $@
 
 clean:
-	rm -f $(OBJ_DIR)/*.o
+	rm -f $(OBJ)
 	rm -f cornergraph
+
+cleanpre:
 	rm -f $(MAP_DIR)/*.map.cornergraph
 
 # eof
