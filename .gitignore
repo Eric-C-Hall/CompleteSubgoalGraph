@@ -1,0 +1,8 @@
+*.map
+*.map.scen
+*.map.cornergraph
+*.o
+.nfs00000000a*
+
+#ignore the compiled executable
+cornergraph
