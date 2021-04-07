@@ -7,6 +7,8 @@
 
 #include "../Graph/ExactDistance.hpp"
 
+#include "../Utility/Timer.h"
+
 PreprocessingData::PreprocessingData(const Graph &input_graph) : graph(input_graph)
 {
 }
@@ -194,9 +196,11 @@ void PreprocessingData::_find_nearby_corners()
   // From every corner, find nearby points, and remember that this corner is near these points.
   for (corner_index i = 0; i < _corners.size(); i++)
   {
+    if (i % 100 == 0)
+      std::cout << i << (i != _corners.size() - 1 ? ", " : "") << std::flush;
     _find_points_near_corner(i);
   }
-
+  std::cout << "\n";
 }
 
 void PreprocessingData::_find_optimal_distances_from_corner(corner_index i)
@@ -264,13 +268,20 @@ void PreprocessingData::_find_complete_corner_graph()
 
   for (corner_index i = 0; i < _corners.size(); i++)
   {
+
+    if (i % 100 == 0)
+      std::cout << i << (i != _corners.size() - 1 ? ", " : "") << std::flush;
     _find_optimal_distances_from_corner(i);
   }
+  std::cout << std::endl;
 
   for (corner_index i = 0; i < _corners.size(); i++)
   {
+    if (i % 100 == 0)
+      std::cout << i << (i != _corners.size() - 1 ? ", " : "") << std::flush;
     _find_optimal_first_corners_from_corner(i);
   }
+  std::cout << std::endl;
 }
 
 void PreprocessingData::_save(std::ostream & stream) const
@@ -385,12 +396,23 @@ void PreprocessingData::load(const std::string &filename)
 
 void PreprocessingData::preprocess()
 {
+  Timer t;
+
   std::cout << "Computing corners" << std::endl;
+  t.StartTimer();
   _compute_corners();
+  t.EndTimer();
+  std::cout << "Corners computed in " << t.GetElapsedTime() << std::endl;
   std::cout << "Finding nearby corners" << std::endl;
+  t.StartTimer();
   _find_nearby_corners();
+  t.EndTimer();
+  std::cout << "Nearby corners found in " << t.GetElapsedTime() << std::endl;
   std::cout << "Finding complete corner graph" << std::endl;
-  _find_complete_corner_graph();  
+  t.StartTimer();
+  _find_complete_corner_graph(); 
+  t.EndTimer(); 
+  std::cout << "Complete corner graph found in " << t.GetElapsedTime() << std::endl;
   std::cout << "Preprocessing complete" << std::endl;
 }
 
