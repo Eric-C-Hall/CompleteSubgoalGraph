@@ -11,6 +11,7 @@
 #include "Run/RunScenario/RunScenario.hpp"
 #include "Test/Test.hpp"
 #include "Visualise/VisualisePreprocessed.hpp"
+#include "Time/Time.hpp"
 
 const std::string ALGORITHM_NAME("cornergraph");
 
@@ -103,12 +104,10 @@ int main(int argc, char **argv)
     Test(preprocessing_data);
 
   // If desired, time Brigitte
-  // (see TimeBrigitte.cpp)
-  //if (time)
-  //  TimeBrigitte(reference, width, height, mapData, 10000);
+  if (time)
+    Time(preprocessing_data, 10000);
 
   // If desired, test how fast the algorithm performs
-  // (see RunScenario.cpp)
   if (run)
   {
     RunScenario(scen_filename, preprocessing_data);
