@@ -99,9 +99,8 @@ int main(int argc, char **argv)
     Visualise(preprocessing_data);
 
   // If desired, test whether the results on the preprocessed map are what we would expect
-  // (see TestBrigitte.cpp)
-  //if (test)
-  //  Test(preprocessing_data);
+  if (test)
+    Test(preprocessing_data);
 
   // If desired, time Brigitte
   // (see TimeBrigitte.cpp)
