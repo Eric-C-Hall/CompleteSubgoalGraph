@@ -472,6 +472,9 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
   exact_distance shortest_distance = MAX_EXACT_DISTANCE;
   corner_index best_start_index;
   corner_index best_end_index;
+
+  //std::cout << _point_to_nearby_corner_indices[start].size() << " " << _point_to_nearby_corner_indices[goal].size() << " " << _point_to_nearby_corner_indices[start].size() * _point_to_nearby_corner_indices[goal].size() << std::endl;
+
   for (corner_index i : _point_to_nearby_corner_indices[start])
   {
     exact_distance i_dist = graph.octile_distance(start, _corners[i]);
@@ -494,13 +497,19 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
   corner_index start_index = best_start_index;
   corner_index end_index = best_end_index;
 
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
   xyLoc b = graph.loc(_corners[start_index]);
+  #pragma GCC diagnostic pop
 
   _compute_octile_path<false>(a, b, path);
   while (start_index != end_index)
   {
     a = b;
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     corner_index new_index = _pair_of_corner_indices_to_first_corner[start_index][end_index];
+    #pragma GCC diagnostic pop
     assert(new_index != start_index);
     start_index = new_index;
     b = graph.loc(_corners[start_index]);

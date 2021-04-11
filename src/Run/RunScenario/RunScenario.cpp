@@ -32,7 +32,7 @@ void RunScenario(const std::string &scen_filename, const PreprocessingData &prep
       g.y = scen.GetNthExperiment(x).GetGoalY();
 
       t.StartTimer();
-      done = GetPath(preprocessing_data, s, g, thePath);
+      done = GetPath(preprocessing_data, s + xyLoc(1,1), g + xyLoc(1,1), thePath);
       t.EndTimer();
 
       experimentStats[x].times.push_back(t.GetElapsedTime());

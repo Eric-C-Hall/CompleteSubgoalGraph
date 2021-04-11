@@ -1,7 +1,7 @@
 CPP_DIR = src
 OBJ_DIR = obj
 MAP_DIR = maps
-CPP_DIRECTORIES = Graph Preprocess Run/GetPath Run/RunScenario Test Utility
+CPP_DIRECTORIES = Graph Preprocess Run/GetPath Run/RunScenario Test Utility Visualise
 CPP_FILES = $(wildcard $(CPP_DIR)/*.cpp) $(foreach dir,$(CPP_DIRECTORIES),$(wildcard $(CPP_DIR)/$(dir)/*.cpp))
 OBJ = $(patsubst $(CPP_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(CPP_FILES))
 
@@ -59,7 +59,21 @@ rundbg:
 ifneq ($(MAP),)
 	gdb --args cornergraph -run $(MAP_DIR)/$(MAP).map $(MAP_DIR)/$(MAP).map.scen
 else
-	@echo "Pass in a map using 'make run MAP=...'. Do not include the file extension."
+	@echo "Pass in a map using 'make rundbg MAP=...'. Do not include the file extension."
+endif
+
+vis:
+ifneq ($(MAP),)
+	./cornergraph -vis $(MAP_DIR)/$(MAP).map $(MAP_DIR)/$(MAP).map.scen
+else
+	@echo "Pass in a map using 'make vis MAP=...'. Do not include the file extension."
+endif
+
+visdbg:
+ifneq ($(MAP),)
+	gdb --args ./cornergraph -vis $(MAP_DIR)/$(MAP).map $(MAP_DIR)/$(MAP).map.scen
+else
+	@echo "Pass in a map using 'make visdbg MAP=...'. Do not include the file extension."
 endif
 
 test:
@@ -73,7 +87,7 @@ testdbg:
 ifneq ($(MAP),)
 	gdb --args cornergraph -test $(MAP_DIR)/$(MAP).map $(MAP_DIR)/$(MAP).map.scen
 else
-	@echo "Pass in a map using 'make test MAP=...'. Do not include the file extension."
+	@echo "Pass in a map using 'make testdbg MAP=...'. Do not include the file extension."
 endif
 
 testprof:
@@ -82,7 +96,7 @@ ifneq ($(MAP),)
 	valgrind --tool=callgrind ./cornergraph -test $(MAP_DIR)/$(MAP).map $(MAP_DIR)/$(MAP).map.scen
 	kcachegrind
 else
-	@echo "Pass in a map using 'make test MAP=...'. Do not include the file extension."
+	@echo "Pass in a map using 'make testprof MAP=...'. Do not include the file extension."
 endif
 
 time:

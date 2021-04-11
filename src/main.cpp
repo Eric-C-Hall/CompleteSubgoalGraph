@@ -9,6 +9,8 @@
 #include "Graph/Graph.hpp"
 #include "Preprocess/Preprocess.hpp"
 #include "Run/RunScenario/RunScenario.hpp"
+#include "Test/Test.hpp"
+#include "Visualise/VisualisePreprocessed.hpp"
 
 const std::string ALGORITHM_NAME("cornergraph");
 
@@ -35,9 +37,10 @@ int main(int argc, char **argv)
 
   bool pre = false;
   bool run = false;
+  bool vis = false;
   bool test = false;
   bool time = false;
-  bool load = false;
+  bool load = true;
 
   // Ensure number of arguments is correct
   if (argc != 4)
@@ -64,13 +67,15 @@ int main(int argc, char **argv)
 
   // Determine which operating mode we should run in
   if (operating_mode.compare("-pre") == 0)
-    pre = true;
+    pre = true, load = false;
   else if (operating_mode.compare("-run") == 0)
-    load = run = true;
+    run = true;
+  else if (operating_mode.compare("-vis") == 0)
+    vis = true;
   else if (operating_mode.compare("-test") == 0)
-    load = test = true;
+    test = true;
   else if (operating_mode.compare("-time") == 0)
-    load = time = true;
+    time = true;
   else {
     print_usage(program_name);
     exit(0);
@@ -79,7 +84,6 @@ int main(int argc, char **argv)
   PreprocessingData preprocessing_data(graph);
 
   // If desired, preprocess the map
-  // (see Preprocess.cpp)
   if (pre)
   {
     preprocessing_data.preprocess();
@@ -87,14 +91,17 @@ int main(int argc, char **argv)
   }
   
   // If necessary, load the preprocessed map
-  // (see Entry.cpp)
   if (load)
     preprocessing_data.load(processed_filename.c_str());
+
+  // If desired, visualise the map
+  if (vis)
+    Visualise(preprocessing_data);
 
   // If desired, test whether the results on the preprocessed map are what we would expect
   // (see TestBrigitte.cpp)
   //if (test)
-  //  Test(reference, width, height, mapData);
+  //  Test(preprocessing_data);
 
   // If desired, time Brigitte
   // (see TimeBrigitte.cpp)

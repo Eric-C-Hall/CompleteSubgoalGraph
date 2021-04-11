@@ -67,6 +67,7 @@ class Graph {
   inline unsigned int get_height() const {return _height;}
 
   inline map_position pos(const unsigned int x, const unsigned int y) const {return y*get_width() + x;}
+  inline map_position pos(const xyLoc &loc) const {return pos(loc.x, loc.y);}
   inline xyLoc loc(map_position p) const {return xyLoc(x(p), y(p));}
 };
 

@@ -10,6 +10,11 @@ struct xyLoc {
   int16_t x;
   int16_t y;
 
+  xyLoc operator+(const xyLoc &other) const
+  {
+    return xyLoc(x + other.x, y + other.y);
+  }
+
   xyLoc operator-(const xyLoc &other) const
   {
     return xyLoc(x - other.x, y - other.y);
