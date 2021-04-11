@@ -520,3 +520,16 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
   return true;
 }
 
+std::vector<map_position> PreprocessingData::get_nearby_corners(map_position p) const
+{
+  std::vector<map_position> return_value;
+  auto nearby_indices = _point_to_nearby_corner_indices[p];
+  return_value.reserve(nearby_indices.size());
+
+  for (corner_index i : nearby_indices)
+  {
+    return_value.push_back(_corners[i]);
+  }
+
+  return return_value;
+}

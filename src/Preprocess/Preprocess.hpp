@@ -49,9 +49,9 @@ class PreprocessingData {
   void load(const std::string &filename);
 
   bool get_path(map_position start, map_position goal, std::vector<xyLoc> &path) const;
-
   const Graph &get_graph() const {return graph;}
 
+  std::vector<map_position> get_nearby_corners(map_position p) const;
 };
 
 #endif

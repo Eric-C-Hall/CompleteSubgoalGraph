@@ -16,7 +16,7 @@ void VisualiseRequestInput(std::string &input)
 // If performance becomes an issue, maybe these could all be stored in a vector from map_position to path/cursor
 // Then it would only take constant time to check if is cursor or on path
 // It's not worth doing this unless performance is actually an issue, though
-void print_point(int x, int y, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path)
+void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby)
 {
   map_position pos = graph.pos(x,y);
 
@@ -35,6 +35,18 @@ void print_point(int x, int y, const Graph &graph, const std::vector<map_positio
     if (pos == graph.pos(l))
     {
       std::cout << "\e[42m";
+    }
+  }
+
+  // Highlight nearby
+  if (show_nearby && cursors.size() > 0)
+  {
+    for (map_position c : preprocessing_data.get_nearby_corners(cursors[0]))
+    {
+      if (pos == c)
+      {
+        std::cout << "\e[43m";
+      }
     }
   }
 
@@ -104,7 +116,7 @@ void print_topbar(const unsigned int width, const unsigned int max_y)
 }
 
 
-void print_graph(const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path)
+void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby)
 {
   print_topbar(graph.get_width(), graph.get_height() - 1);
 
@@ -113,7 +125,7 @@ void print_graph(const Graph &graph, const std::vector<map_position> &cursors, c
     print_sidebar(y, graph.get_height() - 1);
     for (unsigned int x = 0; x < graph.get_width(); x++)
     {
-      print_point(x,y,graph,cursors,path);
+      print_point(x,y,preprocessing_data,graph,cursors,path,show_nearby);
     }
     std::cout << "\n";
   }
@@ -151,8 +163,9 @@ void Visualise(const PreprocessingData &preprocessing_data)
   std::string input = "";
   std::vector<map_position> cursors;
   std::vector<xyLoc> path;
+  bool show_nearby = false;
 
-  print_graph(graph, cursors, path);
+  print_graph(preprocessing_data, graph, cursors, path, show_nearby);
   VisualiseRequestInput(input);
 
   while (input != "quit")
@@ -166,8 +179,12 @@ void Visualise(const PreprocessingData &preprocessing_data)
       path.clear();
       GetPath(preprocessing_data, graph.loc(cursors[0]), graph.loc(cursors[1]), path);
     }
+    else if (input == "nearby")
+    {
+      show_nearby = !show_nearby;
+    }
 
-    print_graph(graph, cursors, path);
+    print_graph(preprocessing_data, graph, cursors, path, show_nearby);
 
     if (input == "help")
     {
@@ -175,6 +192,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "cursor n x y: moves the nth cursor to (x,y)" << std::endl;
       std::cout << "cursort n x y: translate the nth cursor by (x,y)" << std::endl;
       std::cout << "compute: compute the path between cursors 1 and 2" << std::endl;
+      std::cout << "nearby: show corners near the zeroth cursor" << std::endl;
       std::cout << std::endl;
     }
 
