@@ -4,10 +4,12 @@
 #include <iostream>
 #include <fstream>
 #include <deque>
+#include <tuple>
 
 #include "../Graph/ExactDistance.hpp"
 
 #include "../Utility/Timer.h"
+#include "../Utility/Stats.hpp"
 
 PreprocessingData::PreprocessingData(const Graph &input_graph) : graph(input_graph)
 {
@@ -394,6 +396,44 @@ void PreprocessingData::load(const std::string &filename)
   _load(file);
 }
 
+void PreprocessingData::_output_debug_stats() const
+{
+  std::cout << "Outputting debug stats" << std::endl;
+
+  int num_non_obstacles = 0;
+  for (map_position p = 0; p < graph.num_positions(); p++)
+    if (!graph.is_obstacle(p))
+      num_non_obstacles++;
+
+  std::cout << std::endl;
+  std::cout << "Width: " << graph.get_width() << std::endl;
+  std::cout << "Height: " << graph.get_height() << std::endl;
+  std::cout << "Num squares: " << graph.get_width() * graph.get_height() << std::endl;
+  std::cout << "Non-obstacles: " << num_non_obstacles << std::endl;
+
+  std::vector<unsigned int> num_nearby;
+  num_nearby.reserve(graph.num_positions()); 
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    if (!graph.is_obstacle(p))
+      num_nearby.push_back(_point_to_nearby_corner_indices[p].size());
+  }
+
+  auto stats = get_stats(num_nearby);
+  
+  std::cout << std::endl;
+  std::cout << "Min num nearby " << std::get<0>(stats) << std::endl;
+  std::cout << "Qt1 num nearby " << std::get<5>(stats) << std::endl;
+  std::cout << "Median num nearby " << std::get<3>(stats) << std::endl;
+  std::cout << "Qt2 num nearby " << std::get<6>(stats) << std::endl;
+  std::cout << "Max num nearby " << std::get<1>(stats) << std::endl;
+  std::cout << "Mean num nearby " << std::get<2>(stats) << std::endl;
+  std::cout << "Mode num nearby " << std::get<4>(stats) << std::endl;
+
+  
+
+}
+
 void PreprocessingData::preprocess()
 {
   Timer t;
@@ -414,6 +454,8 @@ void PreprocessingData::preprocess()
   t.EndTimer(); 
   std::cout << "Complete corner graph found in " << t.GetElapsedTime() << std::endl;
   std::cout << "Preprocessing complete" << std::endl;
+
+  _output_debug_stats();
 }
 
 // Doesn't add start to path, but does add end.
