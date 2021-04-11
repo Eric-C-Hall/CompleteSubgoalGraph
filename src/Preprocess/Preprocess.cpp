@@ -480,7 +480,7 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
     exact_distance i_dist = graph.octile_distance(start, _corners[i]);
     for (corner_index j : _point_to_nearby_corner_indices[goal])
     {
-      exact_distance j_dist = graph.octile_distance(goal, _corners[i]);
+      exact_distance j_dist = graph.octile_distance(goal, _corners[j]);
       exact_distance current_dist = i_dist + _pair_of_corner_indices_to_dist[i][j] + j_dist;
       if (current_dist < shortest_distance)
       {
