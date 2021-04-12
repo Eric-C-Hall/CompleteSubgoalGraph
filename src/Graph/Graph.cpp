@@ -131,8 +131,8 @@ bool check_parallelogram_clear(xyLoc start, const int long_distance, const int s
 
 bool safe_reachable_xyloc(xyLoc a, xyLoc b, const Graph &graph)
 {
-  int x_diff = a.x - b.x;
-  int y_diff = a.y - b.y;
+  int x_diff = b.x - a.x;
+  int y_diff = b.y - a.y;
   
   int abs_x_diff = std::abs(x_diff);
   int abs_y_diff = std::abs(y_diff);
@@ -140,25 +140,25 @@ bool safe_reachable_xyloc(xyLoc a, xyLoc b, const Graph &graph)
   if (abs_y_diff >= abs_x_diff)
     if (y_diff >= 0)
       if (x_diff >= 0)
-        return check_parallelogram_clear<true, true, true>(a, abs_y_diff - abs_x_diff, abs_x_diff, graph);
+        return check_parallelogram_clear<true, true, true>(a, abs_y_diff - abs_x_diff + 1, abs_x_diff + 1, graph);
       else
-        return check_parallelogram_clear<true, true, false>(a, abs_y_diff - abs_x_diff, abs_x_diff, graph);
+        return check_parallelogram_clear<true, true, false>(a, abs_y_diff - abs_x_diff + 1, abs_x_diff + 1, graph);
     else
       if (x_diff >= 0)
-        return check_parallelogram_clear<true, false, true>(a, abs_y_diff - abs_x_diff, abs_x_diff, graph);
+        return check_parallelogram_clear<true, false, true>(a, abs_y_diff - abs_x_diff + 1, abs_x_diff + 1, graph);
       else
-        return check_parallelogram_clear<true, false, false>(a, abs_y_diff - abs_x_diff, abs_x_diff, graph);
+        return check_parallelogram_clear<true, false, false>(a, abs_y_diff - abs_x_diff + 1, abs_x_diff + 1, graph);
   else
     if (y_diff >= 0)
       if (x_diff >= 0)
-        return check_parallelogram_clear<false, true, true>(a, abs_x_diff - abs_y_diff, abs_y_diff, graph);
+        return check_parallelogram_clear<false, true, true>(a, abs_x_diff - abs_y_diff + 1, abs_y_diff + 1, graph);
       else
-        return check_parallelogram_clear<false, false, true>(a, abs_x_diff - abs_y_diff, abs_y_diff, graph);
+        return check_parallelogram_clear<false, false, true>(a, abs_x_diff - abs_y_diff + 1, abs_y_diff + 1, graph);
     else
       if (x_diff >= 0)
-        return check_parallelogram_clear<false, true, false>(a, abs_x_diff - abs_y_diff, abs_y_diff, graph);
+        return check_parallelogram_clear<false, true, false>(a, abs_x_diff - abs_y_diff + 1, abs_y_diff + 1, graph);
       else
-        return check_parallelogram_clear<false, false, false>(a, abs_x_diff - abs_y_diff, abs_y_diff, graph);
+        return check_parallelogram_clear<false, false, false>(a, abs_x_diff - abs_y_diff + 1, abs_y_diff + 1, graph);
     
 }
 
