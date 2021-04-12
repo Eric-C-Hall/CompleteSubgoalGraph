@@ -10,8 +10,8 @@ std::tuple<unsigned int, unsigned int, float, unsigned int, unsigned int, unsign
   std::sort(vec.begin(), vec.end());
 
   // Min, max
-  unsigned int min = *vec.begin();
-  unsigned int max = *vec.end();
+  unsigned int min = vec[0];
+  unsigned int max = vec[vec.size()-1];
 
   // Mean
   unsigned int total = 0;
