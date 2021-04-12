@@ -10,7 +10,7 @@
 // correctness
 
 SimpleDijkstraExactDistance::SimpleDijkstraExactDistance(map_position pos, exact_distance* distances, const Graph &input_graph)
-  : _distances(distances), graph(input_graph)
+  : graph(input_graph), _distances(distances)
 {
   for (unsigned int i = 0; i < graph.num_positions(); i++)
   {

@@ -103,4 +103,68 @@ std::vector<std::pair<map_position, exact_distance>> Graph::adjacent_locations_a
   return return_value;
 }
 
+template<bool is_y_long, bool is_long_positive, bool is_short_positive>
+bool check_parallelogram_clear(xyLoc start, const int long_distance, const int short_distance, const Graph &graph)
+{
+
+  for (int i = 0; i < short_distance; i++)
+  {
+    for (int j = 0; j < long_distance; j++)
+    {
+      xyLoc check_loc;
+      
+      int translate_short = (is_short_positive ? i : -i);
+      int translate_long = (is_long_positive ? i + j : -i-j);
+      
+      if (is_y_long)
+        check_loc = xyLoc(start.x + translate_short, start.y + translate_long);
+      else
+        check_loc = xyLoc(start.x + translate_long, start.y + translate_short);
+        
+      if (graph.is_obstacle(graph.pos(check_loc)))
+        return false;
+    }
+  }
+
+  return true;
+}
+
+bool safe_reachable_xyloc(xyLoc a, xyLoc b, const Graph &graph)
+{
+  int x_diff = a.x - b.x;
+  int y_diff = a.y - b.y;
+  
+  int abs_x_diff = std::abs(x_diff);
+  int abs_y_diff = std::abs(y_diff);
+  
+  if (abs_y_diff >= abs_x_diff)
+    if (y_diff >= 0)
+      if (x_diff >= 0)
+        return check_parallelogram_clear<true, true, true>(a, abs_y_diff - abs_x_diff, abs_x_diff, graph);
+      else
+        return check_parallelogram_clear<true, true, false>(a, abs_y_diff - abs_x_diff, abs_x_diff, graph);
+    else
+      if (x_diff >= 0)
+        return check_parallelogram_clear<true, false, true>(a, abs_y_diff - abs_x_diff, abs_x_diff, graph);
+      else
+        return check_parallelogram_clear<true, false, false>(a, abs_y_diff - abs_x_diff, abs_x_diff, graph);
+  else
+    if (y_diff >= 0)
+      if (x_diff >= 0)
+        return check_parallelogram_clear<false, true, true>(a, abs_x_diff - abs_y_diff, abs_y_diff, graph);
+      else
+        return check_parallelogram_clear<false, false, true>(a, abs_x_diff - abs_y_diff, abs_y_diff, graph);
+    else
+      if (x_diff >= 0)
+        return check_parallelogram_clear<false, true, false>(a, abs_x_diff - abs_y_diff, abs_y_diff, graph);
+      else
+        return check_parallelogram_clear<false, false, false>(a, abs_x_diff - abs_y_diff, abs_y_diff, graph);
+    
+}
+
+bool Graph::safe_reachable(map_position a, map_position b) const
+{
+  return safe_reachable_xyloc(loc(a), loc(b), *this);
+}
+
 // eof

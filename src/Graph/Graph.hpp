@@ -35,7 +35,8 @@ class Graph {
 
   void load_map(const char *fname);
 
-  std::vector<std::pair<map_position, exact_distance>> adjacent_locations_and_dists(map_position p) const;
+  std::vector<std::pair<map_position, exact_distance>> adjacent_locations_and_dists(map_position p) const;  
+  bool safe_reachable(map_position a, map_position b) const;
 
   inline bool is_obstacle(map_position p) const {return _obstacles[p];}
 
@@ -60,6 +61,9 @@ class Graph {
   inline map_position down(map_position p) const {return p - get_width();}
   inline map_position left(map_position p) const {return p - 1;}
   inline map_position right(map_position p) const {return p + 1;}
+  
+  inline map_position translate_x(map_position p, int num) const {return p + num;}
+  inline map_position translate_y(map_position p, int num) const {return p + num * get_width();}
 
   inline map_position num_positions() const {return _obstacles.size();}
 

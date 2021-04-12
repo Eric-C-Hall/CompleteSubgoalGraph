@@ -5,6 +5,7 @@
 #include <fstream>
 #include <deque>
 #include <tuple>
+#include <algorithm>
 
 #include "../Graph/ExactDistance.hpp"
 
@@ -422,6 +423,7 @@ void PreprocessingData::_output_debug_stats() const
   auto stats = get_stats(num_nearby);
   
   std::cout << std::endl;
+  std::cout << "The following stats only include non-obstacles" << std::endl;
   std::cout << "Min num nearby " << std::get<0>(stats) << std::endl;
   std::cout << "Qt1 num nearby " << std::get<5>(stats) << std::endl;
   std::cout << "Median num nearby " << std::get<3>(stats) << std::endl;
@@ -430,31 +432,202 @@ void PreprocessingData::_output_debug_stats() const
   std::cout << "Mean num nearby " << std::get<2>(stats) << std::endl;
   std::cout << "Mode num nearby " << std::get<4>(stats) << std::endl;
 
-  
+  // Warn user about positions without nearby corners
+  if (std::get<0>(stats) == 0)
+  {
+    std::cout << "-------------------------------------------------------------------------" << std::endl;
+    std::cout << "WARNING: THERE SHOULDN'T BE NON-OBSTACLE POSITIONS WITHOUT NEARBY CORNERS" << std::endl;
+    std::cout << std::endl;
+    std::cout << "The following positions have no nearby corners:" << std::endl;
+    std::cout << std::endl;
+    
+    int num_printed = 0;
+    int num_unprinted = 0;
+    
+    for (map_position p = 0; p < graph.num_positions(); p++)
+    {
+      if (!graph.is_obstacle(p) && _point_to_nearby_corner_indices[p].size() == 0)
+      {
+        if (num_printed < 10)
+        {
+          std::cout << p << ": (" << graph.x(p) << ", " << graph.y(p) << ")" << std::endl;
+          num_printed++;
+        }
+        else
+        {
+          num_unprinted++;
+        }
+      }
+    }
+    if (num_unprinted > 0)
+    {
+      std::cout << "..." << std::endl;
+      std::cout << "And " << num_unprinted << " more" << std::endl;
+    }
+    std::cout << "-------------------------------------------------------------------------" << std::endl;
+  }
 
+}
+
+template <int x_dir, int y_dir>
+bool is_useful_corner_dir(map_position corner, const Graph &graph)
+{
+  if (x_dir >= 0 && graph.is_obstacle(graph.left(corner)))
+    return true;
+    
+  if (x_dir <= 0 && graph.is_obstacle(graph.right(corner)))
+    return true;
+    
+  if (y_dir >= 0 && graph.is_obstacle(graph.down(corner)))
+    return true;
+    
+  if (y_dir <= 0 && graph.is_obstacle(graph.up(corner)))
+    return true;
+    
+  return false;
+}
+
+bool is_useful_nearby_corner(map_position pos, map_position corner, const Graph &graph)
+{
+  int x_diff = (int)graph.x(corner) - (int)graph.x(pos);
+  int y_diff = (int)graph.y(corner) - (int)graph.y(pos);
+  
+  if (x_diff > 0)
+    if (y_diff > 0)
+      return is_useful_corner_dir<1,1>(corner, graph);
+    else if (y_diff < 0)
+      return is_useful_corner_dir<1,-1>(corner, graph);
+    else
+      return is_useful_corner_dir<1,0>(corner, graph);
+  else if (x_diff < 0)
+    if (y_diff > 0)
+      return is_useful_corner_dir<-1,1>(corner, graph);
+    else if (y_diff < 0)
+      return is_useful_corner_dir<-1,-1>(corner, graph);
+    else
+      return is_useful_corner_dir<-1,0>(corner, graph);
+  else
+    if (y_diff > 0)
+      return is_useful_corner_dir<0,1>(corner, graph);
+    else if (y_diff < 0)
+      return is_useful_corner_dir<0,-1>(corner, graph);
+    else
+      return is_useful_corner_dir<0,0>(corner, graph);
+}
+
+
+void PreprocessingData::_replace_removed_corner(const map_position p, const map_position c, std::vector<corner_index> &nearby_corner_indices, int & num_added, int & num_added_more_than_removed)
+{
+  // When a corner is removed, a new corner may need to be added, because
+  // that corner may not have been direct reachable due to the corner that
+  // has just now been removed, but it may now effectively be direct
+  // reachable
+  int num_added_to_replace_this_index = 0;
+  for (corner_index i : _point_to_nearby_corner_indices[c])
+  {
+    // Check if distance to new corner is optimal through old
+    if (graph.octile_distance(p, _corners[i]) != graph.octile_distance(p, c) + graph.octile_distance(c, _corners[i]))
+      continue;
+    
+    // Check if new corner is not already contained in nearby corner indices
+    if (std::find(nearby_corner_indices.begin(), nearby_corner_indices.end(), i) != nearby_corner_indices.end())
+      continue;
+    
+    // Check if new corner is safe-reachable
+    if (!graph.safe_reachable(p, _corners[i]))
+      continue;
+    
+    nearby_corner_indices.push_back(i);
+    num_added_to_replace_this_index++;
+    num_added++;
+  }
+  if (num_added_to_replace_this_index > 1)
+  {
+    num_added_more_than_removed++;
+  }
+}
+
+void PreprocessingData::_remove_useless_nearby_corners()
+{
+  int num_removed = 0;
+  int num_retained = 0;
+  int num_added = 0;
+  int num_added_more_than_removed = 0;
+  
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    auto &nearby_corner_indices = _point_to_nearby_corner_indices[p];
+    
+    for (unsigned int which_nearby_corner = 0; which_nearby_corner < nearby_corner_indices.size();)
+    {
+      corner_index nearby_corner_index = nearby_corner_indices[which_nearby_corner];
+      map_position c = _corners[nearby_corner_index];
+      
+      if (!is_useful_nearby_corner(p, c, graph))
+      {
+        nearby_corner_indices.erase(nearby_corner_indices.begin() + which_nearby_corner);
+        num_removed++;
+        
+        _replace_removed_corner(p, c, nearby_corner_indices, num_added, num_added_more_than_removed);
+      }
+      else
+      {
+        which_nearby_corner++;
+        num_retained++;
+      }
+    }
+  }
+  
+  std::cout << "Num useless nearby corners removed: " << num_removed << std::endl;
+  std::cout << "Num useless nearby corners retained: " << num_retained << std::endl;
+  std::cout << "Num nearby corners added: " << num_added << std::endl;
+  
+  if (num_added_more_than_removed > 0)
+  {
+    std::cout << "-----------------------------------------------------------------------" << std::endl;
+    std::cout << "WARNING: more than one corner added to replace corner, for " << num_added_more_than_removed << " corners" << std::endl;
+    std::cout << "Maybe we shouldn't have removed these corners." << std::endl;
+    std::cout << "-----------------------------------------------------------------------" << std::endl;
+  }
 }
 
 void PreprocessingData::preprocess()
 {
   Timer t;
+  double total_time = 0;
 
   std::cout << "Computing corners" << std::endl;
   t.StartTimer();
   _compute_corners();
   t.EndTimer();
   std::cout << "Corners computed in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+  
   std::cout << "Finding nearby corners" << std::endl;
   t.StartTimer();
   _find_nearby_corners();
   t.EndTimer();
   std::cout << "Nearby corners found in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+  
+  std::cout << "Removing pointless nearby corners" << std::endl;
+  t.StartTimer();
+  //_remove_useless_nearby_corners();
+  t.EndTimer();
+  std::cout << "Pointless nearby corners removed in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+  
   std::cout << "Finding complete corner graph" << std::endl;
   t.StartTimer();
   _find_complete_corner_graph(); 
   t.EndTimer(); 
   std::cout << "Complete corner graph found in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+  
   std::cout << "Preprocessing complete" << std::endl;
-
+  
+  std::cout << "Total preprocessing time: " << total_time << std::endl;
+  
   _output_debug_stats();
 }
 
