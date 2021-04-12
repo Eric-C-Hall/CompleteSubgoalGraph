@@ -48,7 +48,11 @@ void RunScenario(const std::string &scen_filename, const PreprocessingData &prep
     printf("%s\ttotal-time\t%f\tmax-time-step\t%f\ttime-20-moves\t%f\ttotal-len\t%f\tsubopt\t%f\t", scen_filename.c_str(),
          experimentStats[x].GetTotalTime(), experimentStats[x].GetMaxTimestep(), experimentStats[x].Get20MoveTime(),
          experimentStats[x].GetPathLength(), experimentStats[x].GetPathLength()/scen.GetNthExperiment(x).GetDistance());
-    if (scen.GetNthExperiment(x).GetStartX() != experimentStats[x].path[0].x - 1 ||
+    if (experimentStats[x].path.size() == 0)
+    {
+      printf("path not returned\n");
+    }
+    else if (scen.GetNthExperiment(x).GetStartX() != experimentStats[x].path[0].x - 1 ||
         scen.GetNthExperiment(x).GetStartY() != experimentStats[x].path[0].y - 1 ||
         scen.GetNthExperiment(x).GetGoalX() != experimentStats[x].path.back().x - 1 ||
         scen.GetNthExperiment(x).GetGoalY() != experimentStats[x].path.back().y - 1)
