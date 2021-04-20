@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "../Graph/ExactDistance.hpp"
+#include "../Graph/Directions.hpp"
 
 #include "../Utility/Timer.h"
 #include "../Utility/Stats.hpp"
@@ -469,51 +470,146 @@ void PreprocessingData::_output_debug_stats() const
 
 }
 
-template <int x_dir, int y_dir>
-bool is_useful_corner_dir(map_position corner, const Graph &graph)
+
+// Assume that pos and corner are safe-reachable from each other.
+//
+// Here are some examples of when the corner is useful:
+//
+//--|||||||/-------
+//---|||||/--------
+//----|||/---------
+//-----|/----------
+//-----c###########
+//-----|\----------
+//----|||\---------
+//---|||||\--------
+//--|||||||\-------
+//
+//
+//
+//--||||----------
+//---|||----------
+//----||----------
+//-----|##########
+//-----c##########
+//------\---------
+//------|\--------
+//------||\-------
+//------|||\------
+//
+//
+//
+//-\|||||||/-------
+//--\|||||/--------
+//---\|||/---------
+//----\|/----------
+//#####c###########
+//----/|\----------
+//---/|||\---------
+//--/|||||\--------
+//-/|||||||\-------
+
+
+inline bool is_obstacle_in_direction(map_position corner, Direction dir, const Graph &graph)
 {
-  if (x_dir >= 0 && graph.is_obstacle(graph.left(corner)))
-    return true;
-    
-  if (x_dir <= 0 && graph.is_obstacle(graph.right(corner)))
-    return true;
-    
-  if (y_dir >= 0 && graph.is_obstacle(graph.down(corner)))
-    return true;
-    
-  if (y_dir <= 0 && graph.is_obstacle(graph.up(corner)))
-    return true;
-    
-  return false;
+  moving_direction(dir, corner, graph);
+  return graph.is_obstacle(corner);
 }
 
 bool is_useful_nearby_corner(map_position pos, map_position corner, const Graph &graph)
 {
-  int x_diff = (int)graph.x(corner) - (int)graph.x(pos);
-  int y_diff = (int)graph.y(corner) - (int)graph.y(pos);
-  
-  if (x_diff > 0)
-    if (y_diff > 0)
-      return is_useful_corner_dir<1,1>(corner, graph);
-    else if (y_diff < 0)
-      return is_useful_corner_dir<1,-1>(corner, graph);
-    else
-      return is_useful_corner_dir<1,0>(corner, graph);
-  else if (x_diff < 0)
-    if (y_diff > 0)
-      return is_useful_corner_dir<-1,1>(corner, graph);
-    else if (y_diff < 0)
-      return is_useful_corner_dir<-1,-1>(corner, graph);
-    else
-      return is_useful_corner_dir<-1,0>(corner, graph);
-  else
-    if (y_diff > 0)
-      return is_useful_corner_dir<0,1>(corner, graph);
-    else if (y_diff < 0)
-      return is_useful_corner_dir<0,-1>(corner, graph);
-    else
-      return is_useful_corner_dir<0,0>(corner, graph);
+  xyLoc pos_xy = graph.loc(pos);
+  xyLoc corner_xy = graph.loc(corner);
+
+  for (Direction dir : get_cardinal_directions())
+  {
+    if (is_obstacle_in_direction(corner, dir, graph))
+    {
+      Direction clockwise_diagonal = get_45_degrees_clockwise(dir);
+      Direction clockwise_straight = get_45_degrees_clockwise(clockwise_diagonal);
+      Direction anticlockwise_diagonal = get_45_degrees_anticlockwise(dir);
+      Direction anticlockwise_straight = get_45_degrees_anticlockwise(anticlockwise_diagonal);
+
+      if (!is_obstacle_in_direction(corner, clockwise_diagonal, graph))
+      {
+        if (in_direction_from_point(corner_xy, pos_xy, clockwise_diagonal))
+          return true;
+
+        if (within_45_degrees_clockwise_from_point(corner_xy, pos_xy, clockwise_diagonal))
+          return true;
+
+        if (in_direction_from_point(corner_xy, pos_xy, anticlockwise_straight))
+          return true;
+
+        if (within_45_degrees_anticlockwise_from_point(corner_xy, pos_xy, anticlockwise_straight))
+          return true;
+      }
+
+      if (!is_obstacle_in_direction(corner, anticlockwise_diagonal, graph))
+      {
+        if (in_direction_from_point(corner_xy, pos_xy, anticlockwise_diagonal))
+          return true;
+
+        if (within_45_degrees_anticlockwise_from_point(corner_xy, pos_xy, anticlockwise_diagonal))
+          return true;
+
+        if (in_direction_from_point(corner_xy, pos_xy, clockwise_straight))
+          return true;
+
+        if (within_45_degrees_clockwise_from_point(corner_xy, pos_xy, clockwise_straight))
+          return true;
+      }
+    }
+  }
+
+  return false;
 }
+
+//template <int x_dir, int y_dir>
+//bool is_useful_corner_dir(map_position corner, const Graph &graph)
+//{
+//  if (x_dir >= 0 && graph.is_obstacle(graph.left(corner)))
+//    return true;
+//    
+//  if (x_dir <= 0 && graph.is_obstacle(graph.right(corner)))
+//    return true;
+//    
+//  if (y_dir >= 0 && graph.is_obstacle(graph.down(corner)))
+//    return true;
+//    
+//  if (y_dir <= 0 && graph.is_obstacle(graph.up(corner)))
+//    return true;
+//    
+//  return false;
+//}
+
+//bool is_useful_nearby_corner(map_position pos, map_position corner, const Graph &graph)
+//{
+//  int x_diff = (int)graph.x(corner) - (int)graph.x(pos);
+//  int y_diff = (int)graph.y(corner) - (int)graph.y(pos);
+//  
+//  if (x_diff > 0)
+//    if (y_diff > 0)
+//      return is_useful_corner_dir<1,1>(corner, graph);
+//    else if (y_diff < 0)
+//      return is_useful_corner_dir<1,-1>(corner, graph);
+//    else
+//      return is_useful_corner_dir<1,0>(corner, graph);
+//  else if (x_diff < 0)
+//    if (y_diff > 0)
+//      return is_useful_corner_dir<-1,1>(corner, graph);
+//    else if (y_diff < 0)
+//      return is_useful_corner_dir<-1,-1>(corner, graph);
+//    else
+//      return is_useful_corner_dir<-1,0>(corner, graph);
+//  else
+//    if (y_diff > 0)
+//      return is_useful_corner_dir<0,1>(corner, graph);
+//    else if (y_diff < 0)
+//      return is_useful_corner_dir<0,-1>(corner, graph);
+//    else
+//      return is_useful_corner_dir<0,0>(corner, graph);
+//}
 
 
 void PreprocessingData::_replace_removed_corner(const map_position p, const map_position c, std::vector<corner_index> &nearby_corner_indices, int & num_added, int & num_added_more_than_removed)

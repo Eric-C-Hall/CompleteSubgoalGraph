@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "../Graph/Graph.hpp"
-#include "Directions.hpp"
+#include "../Graph/Directions.hpp"
 
 // The purpose of this class is to be a simple pathfinding implementation to
 // compare against more complex pathfinding implementations to test for
