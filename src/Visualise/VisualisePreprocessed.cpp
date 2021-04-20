@@ -132,27 +132,44 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
   std::cout << std::flush;
 }
 
-void move_cursor(std::vector<map_position> &cursors, const Graph &graph, const std::string &input)
+void set_cursor_to_pos(std::vector<map_position> &cursors, unsigned int which_cursor, map_position pos)
 {
-  unsigned int which_cursor;
-  std::cin >> which_cursor;
+  if (which_cursor < 0)
+  {
+    std::cerr << "Error: negative cursor selected" << std::endl;
+    return;
+  }
+
   if (which_cursor >= cursors.size())
   {
     cursors.resize(which_cursor + 1, 0);
   }
+  cursors[which_cursor] = pos;
+}
+
+void move_cursor(std::vector<map_position> &cursors, const Graph &graph, const std::string &input)
+{
+  unsigned int which_cursor;
+  std::cin >> which_cursor;
 
   int x,y;
   std::cin >> x >> y;
   
   if (input == "cursor")
   {
-    cursors[which_cursor] = graph.pos(x,y);
+    if (x < 0 || y < 0)
+    {
+      std::cerr << "Error: cursor set to negative position" << std::endl;
+      return;
+    }
+
+    set_cursor_to_pos(cursors, which_cursor, graph.pos(x,y));
   }
   else
   {
     unsigned int old_x = graph.x(cursors[which_cursor]);
     unsigned int old_y = graph.y(cursors[which_cursor]);
-    cursors[which_cursor] = graph.pos((int)old_x + x, (int)old_y + y);
+    set_cursor_to_pos(cursors, which_cursor, graph.pos((int)old_x + x, (int)old_y + y));
   }
 }
 
@@ -174,6 +191,12 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       move_cursor(cursors, graph, input);
     }
+    else if (input == "corner")
+    {
+      int n, m;
+      std::cin >> n >> m;
+      set_cursor_to_pos(cursors, n, preprocessing_data.get_corners()[m]);
+    }
     else if (input == "compute" && cursors.size() >= 2)
     {
       path.clear();
@@ -183,6 +206,12 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       show_nearby = !show_nearby;
     }
+    else if (input == "swap")
+    {
+      int n, m;
+      std::cin >> n >> m;
+      std::swap(cursors[n], cursors[m]);
+    }
 
     print_graph(preprocessing_data, graph, cursors, path, show_nearby);
 
@@ -191,8 +220,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << std::endl;
       std::cout << "cursor n x y: moves the nth cursor to (x,y)" << std::endl;
       std::cout << "cursort n x y: translate the nth cursor by (x,y)" << std::endl;
+      std::cout << "swap n m: swap the nth and mth cursors" << std::endl;
       std::cout << "compute: compute the path between cursors 1 and 2" << std::endl;
       std::cout << "nearby: show corners near the zeroth cursor" << std::endl;
+      std::cout << "corner n m: move the nth cursor to select the mth corner" << std::endl;
       std::cout << std::endl;
     }
 

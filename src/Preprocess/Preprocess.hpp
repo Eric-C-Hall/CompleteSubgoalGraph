@@ -2,9 +2,11 @@
 #define CORNERGRAPH_PROJECT__PREPROCESS_HPP
 
 #include <vector>
+#include <climits>
 
 #include "../Graph/Graph.hpp"
 #include "../Graph/XYLoc.hpp"
+#include "../Graph/Directions.hpp"
 
 typedef unsigned int corner_index;
 
@@ -24,12 +26,15 @@ class PreprocessingData {
 
   void _add_if_corner(map_position p);
   void _compute_corners();
+  template<Direction dir, Direction step_dir>
+  void _find_points_near_corner_straight(map_position initial_pos, corner_index i, int num_step_bound = INT_MAX);
   void _find_points_near_corner(corner_index i);
   void _find_nearby_corners();
   void _replace_removed_corner(const map_position p, const map_position c, std::vector<corner_index> &nearby_corner_indices, int & num_added, int & num_added_more_than_removed);
   void _remove_useless_nearby_corners();
 
   void _find_optimal_distances_from_corner(corner_index i);
+  void _find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j);
   void _find_optimal_first_corners_from_corner(corner_index i);
   void _find_complete_corner_graph();
 
@@ -56,6 +61,8 @@ class PreprocessingData {
   const Graph &get_graph() const {return graph;}
 
   std::vector<map_position> get_nearby_corners(map_position p) const;
+
+  inline const std::vector<map_position> & get_corners() const {return _corners;}
 };
 
 #endif

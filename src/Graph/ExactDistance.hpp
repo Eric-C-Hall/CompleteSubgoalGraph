@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include <climits>
+#include <ostream>
 
 struct exact_distance
 {
@@ -86,6 +87,11 @@ inline exact_distance operator+=(exact_distance &d1, const exact_distance &d2)
   d1.num_straight += d2.num_straight;
   d1.num_diagonal += d2.num_diagonal;
   return d1;
+}
+
+inline std::ostream& operator<<(std::ostream & stream, exact_distance dist)
+{
+  return stream << dist.num_straight << "s" << dist.num_diagonal << "d";
 }
 
 #endif

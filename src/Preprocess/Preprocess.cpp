@@ -100,96 +100,51 @@ void PreprocessingData::_compute_corners()
   std::cout << "Number of corners: " << _corners.size() << std::endl;
 }
 
-// Maybe using exact distances here is slow?
+// Hitting an obstacle decreases num_step_bound, to ensure that all points are safe-reachable rather than just octile-reachable
+template<Direction dir, Direction step_dir>
+void PreprocessingData::_find_points_near_corner_straight(map_position initial_pos, corner_index i, int num_step_bound)
+{
+  map_position curr_pos = initial_pos;
+  int num_steps = 0;
+
+  while (!graph.is_obstacle(curr_pos) && num_steps < num_step_bound)
+  {
+    // The first iteration is done twice with two different step directions.
+    // So the same point may be reached multiple times, so only add this corner index the first time
+    if (_point_to_nearby_corner_indices[curr_pos].empty() || _point_to_nearby_corner_indices[curr_pos].back() != i)
+      _point_to_nearby_corner_indices[curr_pos].push_back(i);
+
+    moving_direction(dir, curr_pos, graph);
+    num_steps++;
+  }
+
+  if (num_steps != 0)
+  {
+    moving_direction(step_dir, initial_pos, graph);
+    _find_points_near_corner_straight<dir, step_dir>(initial_pos, i, num_steps);
+  }
+}
+
 void PreprocessingData::_find_points_near_corner(corner_index i)
 {
-  if (graph.is_obstacle(_corners[i]))
-  {
-    return;
-  }
+  assert (!graph.is_obstacle(_corners[i]));
 
-  const corner_index NO_CORNER = _corners.size();
+  map_position c = _corners[i];
 
-  std::deque<map_position> buckets[3];
-  std::vector<exact_distance> distances(graph.num_positions(), MAX_EXACT_DISTANCE);
-  std::vector<bool> has_found_corner(graph.num_positions(), false);
-  std::vector<bool> is_closed(graph.num_positions(), false);
+  _find_points_near_corner_straight<Dir_N, Dir_NW>(c, i);
+  _find_points_near_corner_straight<Dir_N, Dir_NE>(c, i);
+  _find_points_near_corner_straight<Dir_E, Dir_NE>(c, i);
+  _find_points_near_corner_straight<Dir_E, Dir_SE>(c, i);
+  _find_points_near_corner_straight<Dir_S, Dir_SE>(c, i);
+  _find_points_near_corner_straight<Dir_S, Dir_SW>(c, i);
+  _find_points_near_corner_straight<Dir_W, Dir_SW>(c, i);
+  _find_points_near_corner_straight<Dir_W, Dir_NW>(c, i);
 
-  // This decides whether a new position should go into the second or third bucket. It is the smallest value that should go in the third bucket.  
-  exact_distance bucket_decider = 2 * STRAIGHT_EXACT_DISTANCE;
-
-  buckets[0].push_back(_corners[i]);
-  distances[_corners[i]] = ZERO_EXACT_DISTANCE;
-  int last_bucket_containing_point_that_hasnt_found_corner = 0;
-  
-  while (last_bucket_containing_point_that_hasnt_found_corner > -1)
-  {
-    while (!buckets[0].empty())
-    {
-      const map_position curr_pos = buckets[0].front();
-      buckets[0].pop_front();
-
-      if (is_closed[curr_pos])
-      {
-        continue;
-      }
-      is_closed[curr_pos] = true;
-
-      const corner_index curr_corner_index = _corner_to_corner_index[curr_pos];
-      if (curr_corner_index != i)
-      {
-        if (!has_found_corner[curr_pos])
-        _point_to_nearby_corner_indices[curr_pos].push_back(i);
-
-        if (curr_corner_index != NO_CORNER)
-          has_found_corner[curr_pos] = true;
-      }
-
-      for (auto loc_and_dist : graph.adjacent_locations_and_dists(curr_pos))
-      {
-        map_position other_pos = loc_and_dist.first;
-
-        if (graph.is_obstacle(other_pos))
-        {
-          continue;
-        }
-
-        const exact_distance other_distance = distances[curr_pos] + loc_and_dist.second;
-        if (distances[other_pos] < other_distance)
-        {
-          continue;
-        }
-        else if (distances[other_pos] == other_distance && (!has_found_corner[curr_pos] || has_found_corner[other_pos]))
-        {
-          continue;
-        }
-
-        distances[other_pos] = other_distance;
-        has_found_corner[other_pos] = has_found_corner[curr_pos];
-
-        if (other_distance < bucket_decider)
-        {
-          buckets[1].push_back(other_pos);
-          if (!has_found_corner[other_pos])
-          {
-            last_bucket_containing_point_that_hasnt_found_corner = std::max(1, last_bucket_containing_point_that_hasnt_found_corner);
-          }
-        }
-        else
-        {
-          buckets[2].push_back(other_pos);
-          if (!has_found_corner[other_pos])
-          {
-            last_bucket_containing_point_that_hasnt_found_corner = 2;
-          }
-        }
-      }
-    }
-    buckets[0].swap(buckets[1]);
-    buckets[1].swap(buckets[2]);
-    bucket_decider += STRAIGHT_EXACT_DISTANCE;
-    last_bucket_containing_point_that_hasnt_found_corner--;
-  }
+  // Due to the way the nearby point finding algorithm works, the corner will be considered near itself.
+  // This isn't what we want so we reverse this effect
+  assert(_point_to_nearby_corner_indices[c].back() == i);
+  _point_to_nearby_corner_indices[c].pop_back();
+  assert(_point_to_nearby_corner_indices[c].empty() || _point_to_nearby_corner_indices[c].back() != i);
 }
 
 void PreprocessingData::_find_nearby_corners()
@@ -211,7 +166,9 @@ void PreprocessingData::_find_optimal_distances_from_corner(corner_index i)
 {
   std::deque<corner_index> open;
   std::vector<bool> corner_index_is_closed(_corners.size(), false);
-  std::vector<exact_distance> corner_index_to_distance(_corners.size(), MAX_EXACT_DISTANCE);
+
+  std::vector<exact_distance> &corner_index_to_distance = _pair_of_corner_indices_to_dist[i];
+  corner_index_to_distance.resize(_corners.size(), MAX_EXACT_DISTANCE);
 
   open.push_back(i);
   corner_index_to_distance[i] = ZERO_EXACT_DISTANCE;
@@ -228,11 +185,10 @@ void PreprocessingData::_find_optimal_distances_from_corner(corner_index i)
     }
     corner_index_is_closed[curr_index] = true;
 
-    _pair_of_corner_indices_to_dist[i][curr_index] = corner_index_to_distance[curr_index];
-
     for (corner_index neighbour_index : _point_to_nearby_corner_indices[_corners[curr_index]])
     {
       exact_distance new_distance = corner_index_to_distance[curr_index] + graph.octile_distance(_corners[curr_index], _corners[neighbour_index]);
+      assert(new_distance >= ZERO_EXACT_DISTANCE);
       if (new_distance < corner_index_to_distance[neighbour_index])
       {
         open.push_back(neighbour_index);
@@ -241,22 +197,97 @@ void PreprocessingData::_find_optimal_distances_from_corner(corner_index i)
       }
     }
   }
+
+  // It may be the case that the target corner isn't relevant to the last
+  // corner on the optimal path towards the target corner. If this occurs,
+  // then the optimal path towards the target corner may be broken and the
+  // optimal distance may not be saved. In order to fix this, at the end,
+  // loop over all corners and go one step in the reverse direction and see
+  // if this gives a better distance
+
+  for (corner_index j = 0; j < _corners.size(); j++)
+  {
+    for (corner_index j_neighbour_index : _point_to_nearby_corner_indices[_corners[j]])
+    {
+      const map_position j_neighbour = _corners[j_neighbour_index];
+      const exact_distance j_neighbour_distance = corner_index_to_distance[j_neighbour_index];
+      if (j_neighbour_distance == MAX_EXACT_DISTANCE)
+      {
+        continue; // Otherwise we would have overflow
+      }
+      const exact_distance via_j_neighbour_distance = j_neighbour_distance + graph.octile_distance(j_neighbour, _corners[j]);
+
+      if (via_j_neighbour_distance < corner_index_to_distance[j])
+      {
+        corner_index_to_distance[j] = via_j_neighbour_distance;
+      }
+    }
+  }
+
+  // It may be the case that both corners are safe-reachable from each other,
+  // but neither is relevant to the other. In this case, the optimal distance
+  // should be the octile distance.
+
+  for (corner_index j = 0; j < _corners.size(); j++)
+  {
+    if (graph.safe_reachable(_corners[i], _corners[j]))
+    {
+      corner_index_to_distance[j] = graph.octile_distance(_corners[i], _corners[j]);
+    }
+  }
+}
+
+void PreprocessingData::_find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j)
+{
+  for (corner_index first_index : _point_to_nearby_corner_indices[_corners[i]])
+  {
+    assert(first_index != i);
+    const exact_distance i_to_first_dist = _pair_of_corner_indices_to_dist[i][first_index];
+    const exact_distance first_to_j_dist = _pair_of_corner_indices_to_dist[first_index][j];
+    const exact_distance i_to_j_dist = _pair_of_corner_indices_to_dist[i][j];
+
+    assert(i_to_first_dist + first_to_j_dist >= i_to_j_dist || i_to_j_dist == MAX_EXACT_DISTANCE);
+    if (i_to_first_dist + first_to_j_dist == i_to_j_dist)
+    {
+      _pair_of_corner_indices_to_first_corner[i][j] = first_index;
+      return;
+    }
+  }
+
+  if (i == j)
+  {
+    _pair_of_corner_indices_to_first_corner[i][j] = _corners.size();
+    return;
+  }
+
+  // It's possible that both corners are safe-reachable from each other.
+  // If so, either we found a first corner on the path earlier, or
+  // the corners are safe-reachable from each other.
+  if (_pair_of_corner_indices_to_dist[i][j] == graph.octile_distance(_corners[i], _corners[j]))
+  {
+    _pair_of_corner_indices_to_first_corner[i][j] = j;
+    return;
+  }
+
+  // It's possible to have two elements in different components, so there is no
+  // way to reach one from the other
+  // TODO: check more thoroughly that they really are in different components
+  // and it's not just that for example the algorithm failed to find a path
+  // due to a bug. I think we should probably have a component id for each
+  // connected component, which would make it quick to check this.
+  if (_pair_of_corner_indices_to_dist[i][j] == MAX_EXACT_DISTANCE)
+  {
+    return;
+  }
+
+  assert(false);
 }
 
 void PreprocessingData::_find_optimal_first_corners_from_corner(corner_index i)
 {
-  const auto nearby_indices = _point_to_nearby_corner_indices[_corners[i]];
   for (corner_index other_index = 0; other_index < _corners.size(); other_index++)
   {
-    for (corner_index first_index : nearby_indices)
-    {
-      assert(first_index != i);
-      if (_pair_of_corner_indices_to_dist[i][first_index] + _pair_of_corner_indices_to_dist[first_index][other_index] == _pair_of_corner_indices_to_dist[i][other_index])
-      {
-        _pair_of_corner_indices_to_first_corner[i][other_index] = first_index;
-        break;
-      }
-    }
+    _find_optimal_first_corners_from_corner_to_corner(i, other_index);
   }
 }
 
@@ -266,8 +297,7 @@ void PreprocessingData::_find_complete_corner_graph()
   _pair_of_corner_indices_to_first_corner.resize(_corners.size());
   for (corner_index i = 0; i < _corners.size(); i++)
   {
-    _pair_of_corner_indices_to_dist[i].resize(_corners.size());
-    _pair_of_corner_indices_to_first_corner[i].resize(_corners.size());
+    _pair_of_corner_indices_to_first_corner[i].resize(_corners.size(), _corners.size());
   }
 
   for (corner_index i = 0; i < _corners.size(); i++)
@@ -315,6 +345,7 @@ void PreprocessingData::_save(std::ostream & stream) const
     {
       exact_distance d = _pair_of_corner_indices_to_dist[i][j];
       stream << d.num_straight << " " << d.num_diagonal << " ";
+      assert(_pair_of_corner_indices_to_first_corner[i][j] != i);
       stream << _pair_of_corner_indices_to_first_corner[i][j] << " ";
     }
     stream << "\n";
@@ -382,6 +413,7 @@ void PreprocessingData::_load(std::istream &stream)
 
       corner_index first_corner;
       stream >> first_corner;
+      assert(first_corner != i);
       _pair_of_corner_indices_to_first_corner[i].push_back(first_corner);
     }
   }
@@ -565,52 +597,6 @@ bool is_useful_nearby_corner(map_position pos, map_position corner, const Graph 
   return false;
 }
 
-//template <int x_dir, int y_dir>
-//bool is_useful_corner_dir(map_position corner, const Graph &graph)
-//{
-//  if (x_dir >= 0 && graph.is_obstacle(graph.left(corner)))
-//    return true;
-//    
-//  if (x_dir <= 0 && graph.is_obstacle(graph.right(corner)))
-//    return true;
-//    
-//  if (y_dir >= 0 && graph.is_obstacle(graph.down(corner)))
-//    return true;
-//    
-//  if (y_dir <= 0 && graph.is_obstacle(graph.up(corner)))
-//    return true;
-//    
-//  return false;
-//}
-
-//bool is_useful_nearby_corner(map_position pos, map_position corner, const Graph &graph)
-//{
-//  int x_diff = (int)graph.x(corner) - (int)graph.x(pos);
-//  int y_diff = (int)graph.y(corner) - (int)graph.y(pos);
-//  
-//  if (x_diff > 0)
-//    if (y_diff > 0)
-//      return is_useful_corner_dir<1,1>(corner, graph);
-//    else if (y_diff < 0)
-//      return is_useful_corner_dir<1,-1>(corner, graph);
-//    else
-//      return is_useful_corner_dir<1,0>(corner, graph);
-//  else if (x_diff < 0)
-//    if (y_diff > 0)
-//      return is_useful_corner_dir<-1,1>(corner, graph);
-//    else if (y_diff < 0)
-//      return is_useful_corner_dir<-1,-1>(corner, graph);
-//    else
-//      return is_useful_corner_dir<-1,0>(corner, graph);
-//  else
-//    if (y_diff > 0)
-//      return is_useful_corner_dir<0,1>(corner, graph);
-//    else if (y_diff < 0)
-//      return is_useful_corner_dir<0,-1>(corner, graph);
-//    else
-//      return is_useful_corner_dir<0,0>(corner, graph);
-//}
-
 
 void PreprocessingData::_replace_removed_corner(const map_position p, const map_position c, std::vector<corner_index> &nearby_corner_indices, int & num_added, int & num_added_more_than_removed)
 {
@@ -675,7 +661,7 @@ void PreprocessingData::_remove_useless_nearby_corners()
   }
   
   std::cout << "Num useless nearby corners removed: " << num_removed << std::endl;
-  std::cout << "Num useless nearby corners retained: " << num_retained << std::endl;
+  std::cout << "Num useful nearby corners retained: " << num_retained << std::endl;
   std::cout << "Num nearby corners added: " << num_added << std::endl;
   
   if (num_added_more_than_removed > 0)
@@ -708,7 +694,7 @@ void PreprocessingData::preprocess()
   
   std::cout << "Removing pointless nearby corners" << std::endl;
   t.StartTimer();
-  //_remove_useless_nearby_corners();
+  _remove_useless_nearby_corners();
   t.EndTimer();
   std::cout << "Pointless nearby corners removed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
@@ -781,8 +767,8 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
   path.clear();
 
   exact_distance shortest_distance = MAX_EXACT_DISTANCE;
-  corner_index best_start_index;
-  corner_index best_end_index;
+  corner_index best_start_index = _corners.size();
+  corner_index best_end_index = _corners.size();
 
   //std::cout << _point_to_nearby_corner_indices[start].size() << " " << _point_to_nearby_corner_indices[goal].size() << " " << _point_to_nearby_corner_indices[start].size() * _point_to_nearby_corner_indices[goal].size() << std::endl;
 
@@ -808,19 +794,15 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
   corner_index start_index = best_start_index;
   corner_index end_index = best_end_index;
 
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
   xyLoc b = graph.loc(_corners[start_index]);
-  #pragma GCC diagnostic pop
 
   _compute_octile_path<false>(a, b, path);
   while (start_index != end_index)
   {
     a = b;
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+    assert(start_index != _corners.size());
+    assert(end_index != _corners.size());
     corner_index new_index = _pair_of_corner_indices_to_first_corner[start_index][end_index];
-    #pragma GCC diagnostic pop
     assert(new_index != start_index);
     start_index = new_index;
     b = graph.loc(_corners[start_index]);

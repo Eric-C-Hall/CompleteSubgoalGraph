@@ -16,6 +16,21 @@ enum Direction {
   Dir_MAX = Dir_NW,
 };
 
+inline std::vector<Direction> get_cardinal_directions();
+
+inline Direction get_45_degrees_clockwise(Direction dir);
+inline Direction get_45_degrees_anticlockwise(Direction dir);
+
+inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir);
+inline bool within_45_degrees_clockwise_from_point(xyLoc a, xyLoc b, Direction dir);
+inline bool within_45_degrees_anticlockwise_from_point(xyLoc a, xyLoc b, Direction dir);
+
+inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph);
+
+inline exact_distance exact_distance_of_direction(Direction dir);
+
+// --------------------------------------------------------
+
 inline std::vector<Direction> get_cardinal_directions()
 {
   return std::vector<Direction>{Dir_N, Dir_E, Dir_S, Dir_W};
@@ -56,9 +71,6 @@ inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir)
       throw std::logic_error("No valid direction given");
   }
 }
-
-inline bool within_45_degrees_clockwise_from_point(xyLoc a, xyLoc b, Direction dir);
-inline bool within_45_degrees_anticlockwise_from_point(xyLoc a, xyLoc b, Direction dir);
 
 // Is the direction to travel towards b from a strictly between the directions dir and dir + 45 degrees clockwise? 
 inline bool within_45_degrees_clockwise_from_point(xyLoc a, xyLoc b, Direction dir)
@@ -112,9 +124,6 @@ inline bool within_45_degrees_anticlockwise_from_point(xyLoc a, xyLoc b, Directi
       throw std::logic_error("No valid direction given");
   }
 }
-
-inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph);
-inline exact_distance exact_distance_of_direction(Direction dir);
 
 inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph)
 {
