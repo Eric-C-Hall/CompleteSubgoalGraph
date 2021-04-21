@@ -153,12 +153,15 @@ void PreprocessingData::_find_nearby_corners()
   _point_to_nearby_corner_indices.resize(graph.get_width() * graph.get_height());
 
   // From every corner, find nearby points, and remember that this corner is near these points.
-  for (corner_index i = 0; i < _corners.size(); i++)
+  corner_index i;
+  for (i = 0; i < _corners.size(); i++)
   {
     if (i % 100 == 0)
       std::cout << i << (i != _corners.size() - 1 ? ", " : "") << std::flush;
     _find_points_near_corner(i);
   }
+  if ((i - 1) % 100 != 0)
+    std::cout << i - 1;
   std::cout << "\n";
 }
 
@@ -300,21 +303,26 @@ void PreprocessingData::_find_complete_corner_graph()
     _pair_of_corner_indices_to_first_corner[i].resize(_corners.size(), _corners.size());
   }
 
-  for (corner_index i = 0; i < _corners.size(); i++)
+  corner_index i;
+  for (i = 0; i < _corners.size(); i++)
   {
 
     if (i % 100 == 0)
       std::cout << i << (i != _corners.size() - 1 ? ", " : "") << std::flush;
     _find_optimal_distances_from_corner(i);
   }
+  if ((i - 1) % 100 != 0)
+    std::cout << i - 1;
   std::cout << std::endl;
 
-  for (corner_index i = 0; i < _corners.size(); i++)
+  for (i = 0; i < _corners.size(); i++)
   {
     if (i % 100 == 0)
       std::cout << i << (i != _corners.size() - 1 ? ", " : "") << std::flush;
     _find_optimal_first_corners_from_corner(i);
   }
+  if ((i - 1) % 100 != 0)
+    std::cout << i - 1;
   std::cout << std::endl;
 }
 
@@ -636,8 +644,12 @@ void PreprocessingData::_remove_useless_nearby_corners()
   int num_added = 0;
   int num_added_more_than_removed = 0;
   
-  for (map_position p = 0; p < graph.num_positions(); p++)
+  map_position p;
+  for (p = 0; p < graph.num_positions(); p++)
   {
+    if (p % 10000 == 0)
+      std::cout << p << (p != graph.num_positions() - 1 ? ", " : "") << std::flush;
+
     auto &nearby_corner_indices = _point_to_nearby_corner_indices[p];
     
     for (unsigned int which_nearby_corner = 0; which_nearby_corner < nearby_corner_indices.size();)
@@ -659,6 +671,9 @@ void PreprocessingData::_remove_useless_nearby_corners()
       }
     }
   }
+  if ((p - 1) % 10000 != 0)
+    std::cout << p - 1;
+  std::cout << std::endl;
   
   std::cout << "Num useless nearby corners removed: " << num_removed << std::endl;
   std::cout << "Num useful nearby corners retained: " << num_retained << std::endl;
