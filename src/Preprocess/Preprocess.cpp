@@ -692,6 +692,58 @@ void PreprocessingData::_remove_useless_nearby_corners()
   }
 }
 
+void PreprocessingData::_remove_indirect_nearby_corners()
+{
+  int num_removed = 0;
+  int num_retained = 0;
+  
+  map_position p;
+  for (p = 0; p < graph.num_positions(); p++)
+  {
+    if (p % 10000 == 0)
+      std::cout << p << (p != graph.num_positions() - 1 ? ", " : "") << std::flush;
+
+    auto &nearby_corner_indices = _point_to_nearby_corner_indices[p];
+    
+    for (unsigned int which_nearby_corner = 0; which_nearby_corner < nearby_corner_indices.size();)
+    {
+      const corner_index nearby_corner_index = nearby_corner_indices[which_nearby_corner];
+      const map_position nearby_corner = _corners[nearby_corner_index];
+
+      bool is_indirect = false;
+      for (unsigned int other_nearby_corner = 0; other_nearby_corner < nearby_corner_indices.size(); other_nearby_corner++)
+      {
+        if (other_nearby_corner == which_nearby_corner)
+          continue;
+        const corner_index other_corner_index = nearby_corner_indices[other_nearby_corner];
+        const map_position other_corner = _corners[other_corner_index];
+        if (graph.octile_distance(p, nearby_corner) == graph.octile_distance(p, other_corner) + _pair_of_corner_indices_to_dist[nearby_corner_index][other_corner_index])
+        {
+          is_indirect = true;
+          break;
+        }
+      }
+      
+      if (is_indirect)
+      {
+        nearby_corner_indices.erase(nearby_corner_indices.begin() + which_nearby_corner);
+        num_removed++;
+      }
+      else
+      {
+        which_nearby_corner++;
+        num_retained++;
+      }
+    }
+  }
+  if ((p - 1) % 10000 != 0)
+    std::cout << p - 1;
+  std::cout << std::endl;
+  
+  std::cout << "Num indirect nearby corners removed: " << num_removed << std::endl;
+  std::cout << "Num direct nearby corners retained: " << num_retained << std::endl;
+}
+
 void PreprocessingData::preprocess()
 {
   Timer t;
@@ -735,6 +787,14 @@ void PreprocessingData::preprocess()
   _remove_useless_nearby_corners();
   t.EndTimer();
   std::cout << "Pointless nearby corners removed in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+
+  // Remove indirect nearby corners
+  std::cout << "Removing indirect nearby corners" << std::endl;
+  t.StartTimer();
+  _remove_indirect_nearby_corners();
+  t.EndTimer();
+  std::cout << "Indirect nearby corners removed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
   
   std::cout << "Preprocessing complete" << std::endl;

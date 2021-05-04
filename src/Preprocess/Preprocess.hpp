@@ -33,6 +33,8 @@ class PreprocessingData {
   void _replace_removed_corner(const map_position p, const map_position c, std::vector<corner_index> &nearby_corner_indices, int & num_added, int & num_added_more_than_removed);
   void _remove_useless_nearby_corners();
 
+  void _remove_indirect_nearby_corners();
+
   void _find_optimal_distances_from_corner(corner_index i);
   void _find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j);
   void _find_optimal_first_corners_from_corner(corner_index i);
