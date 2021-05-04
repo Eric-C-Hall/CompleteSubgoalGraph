@@ -272,6 +272,65 @@ void PreprocessingData::_find_complete_corner_graph()
   std::cout << std::endl;
 }
 
+void PreprocessingData::_push_corners_in_corner_graph()
+{
+  int num_pushed = 0;
+  int num_unpushed = 0;
+
+  // initialize replacement first corner map
+  std::vector<std::vector<corner_index>> new_first_corner_map;
+  new_first_corner_map.resize(_corners.size());
+  for (corner_index i = 0; i < _corners.size(); i++)
+    new_first_corner_map[i].resize(_corners.size(), _corners.size());
+
+  // For every target and source index, see how far you can get using compute_octile_path
+  std::vector<xyLoc> try_path;
+  corner_index target_index;
+  for (target_index = 0; target_index < _corners.size(); target_index++)
+  {
+    if (target_index % 100 == 0)
+      std::cout << target_index << (target_index != _corners.size() - 1 ? ", " : "") << std::flush;
+    for (corner_index source_index = 0; source_index < _corners.size(); source_index++)
+    {
+      const map_position source = _corners[source_index];
+      if (source_index == target_index || _pair_of_corner_indices_to_dist[target_index][source_index] == MAX_EXACT_DISTANCE)
+      {
+        continue;
+      }
+
+      // See how far you can get
+      corner_index furthest_index = source_index;
+      while (furthest_index != target_index)
+      {
+        const corner_index next_index = _pair_of_corner_indices_to_first_corner[target_index][furthest_index];
+        const map_position next_corner = _corners[next_index];
+        try_path.clear();
+        _compute_octile_path<true>(graph.loc(source), graph.loc(next_corner), try_path);
+        if (graph.pos(try_path.back()) != next_corner)
+        {
+          break;
+        }
+        furthest_index = next_index;
+      }
+      if (furthest_index != source_index)
+      {
+        new_first_corner_map[target_index][source_index] = furthest_index;
+        if (furthest_index == _pair_of_corner_indices_to_first_corner[target_index][source_index])
+          num_unpushed++;
+        else
+          num_pushed++;
+      }
+    }
+  }
+  if ((target_index - 1) % 100 != 0)
+    std::cout << target_index - 1;
+  std::cout << std::endl;
+
+  _pair_of_corner_indices_to_first_corner.swap(new_first_corner_map);
+  std::cout << num_pushed << " pushed" << std::endl;
+  std::cout << num_unpushed << " unpushed" << std::endl;
+}
+
 void PreprocessingData::_save(std::ostream & stream) const
 {
   stream << _corners.size() << "\n";
@@ -660,6 +719,14 @@ void PreprocessingData::preprocess()
   _find_complete_corner_graph(); 
   t.EndTimer(); 
   std::cout << "Complete corner graph found in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+
+  // Push first corners as far as they will go
+  std::cout << "Pushing first corners in corner graph" << std::endl;
+  t.StartTimer();
+  _push_corners_in_corner_graph(); 
+  t.EndTimer(); 
+  std::cout << "Corners pushed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
 
   // Remove pointless nearby corners
