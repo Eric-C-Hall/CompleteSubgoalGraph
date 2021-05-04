@@ -7,6 +7,6 @@
 
 void Visualise(const PreprocessingData &preprocessing_data);
 
-void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby);
+void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby);
 
 #endif
