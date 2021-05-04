@@ -14,6 +14,7 @@ bool GetPath(const PreprocessingData &preprocessing_data, xyLoc s, xyLoc g, std:
 
 bool PreprocessingData::get_path(map_position start, map_position goal, std::vector<xyLoc> &path) const
 {
+  // Try some octile path
   path.push_back(graph.loc(start));
   _compute_octile_path<true>(graph.loc(start), graph.loc(goal), path);
   if (path.back() == graph.loc(goal))

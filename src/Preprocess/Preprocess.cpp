@@ -90,13 +90,6 @@ void PreprocessingData::_compute_corners()
     }
   }
 
-  _corner_to_corner_index.clear();
-  _corner_to_corner_index.resize(graph.num_positions(), _corners.size());  
-  for (corner_index i = 0; i < _corners.size(); i++)
-  {
-    _corner_to_corner_index[_corners[i]] = i;
-  }
-
   std::cout << "Number of corners: " << _corners.size() << std::endl;
 }
 
@@ -200,44 +193,6 @@ void PreprocessingData::_find_optimal_distances_from_corner(corner_index i)
       }
     }
   }
-
-  // It may be the case that the target corner isn't relevant to the last
-  // corner on the optimal path towards the target corner. If this occurs,
-  // then the optimal path towards the target corner may be broken and the
-  // optimal distance may not be saved. In order to fix this, at the end,
-  // loop over all corners and go one step in the reverse direction and see
-  // if this gives a better distance
-
-  for (corner_index j = 0; j < _corners.size(); j++)
-  {
-    for (corner_index j_neighbour_index : _point_to_nearby_corner_indices[_corners[j]])
-    {
-      const map_position j_neighbour = _corners[j_neighbour_index];
-      const exact_distance j_neighbour_distance = corner_index_to_distance[j_neighbour_index];
-      if (j_neighbour_distance == MAX_EXACT_DISTANCE)
-      {
-        continue; // Otherwise we would have overflow
-      }
-      const exact_distance via_j_neighbour_distance = j_neighbour_distance + graph.octile_distance(j_neighbour, _corners[j]);
-
-      if (via_j_neighbour_distance < corner_index_to_distance[j])
-      {
-        corner_index_to_distance[j] = via_j_neighbour_distance;
-      }
-    }
-  }
-
-  // It may be the case that both corners are safe-reachable from each other,
-  // but neither is relevant to the other. In this case, the optimal distance
-  // should be the octile distance.
-
-  for (corner_index j = 0; j < _corners.size(); j++)
-  {
-    if (graph.safe_reachable(_corners[i], _corners[j]))
-    {
-      corner_index_to_distance[j] = graph.octile_distance(_corners[i], _corners[j]);
-    }
-  }
 }
 
 void PreprocessingData::_find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j)
@@ -260,15 +215,6 @@ void PreprocessingData::_find_optimal_first_corners_from_corner_to_corner(corner
   if (i == j)
   {
     _pair_of_corner_indices_to_first_corner[i][j] = _corners.size();
-    return;
-  }
-
-  // It's possible that both corners are safe-reachable from each other.
-  // If so, either we found a first corner on the path earlier, or
-  // the corners are safe-reachable from each other.
-  if (_pair_of_corner_indices_to_dist[i][j] == graph.octile_distance(_corners[i], _corners[j]))
-  {
-    _pair_of_corner_indices_to_first_corner[i][j] = j;
     return;
   }
 
@@ -377,7 +323,6 @@ void PreprocessingData::save(const std::string &filename) const
 void PreprocessingData::_load(std::istream &stream)
 {
   _corners.clear();
-  _corner_to_corner_index.clear();
   _point_to_nearby_corner_indices.clear();
   _pair_of_corner_indices_to_dist.clear();
   _pair_of_corner_indices_to_first_corner.clear();
@@ -709,28 +654,20 @@ void PreprocessingData::preprocess()
   std::cout << "Nearby corners found in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
   
-  // Remove pointless nearby corners
-  std::cout << "Removing pointless nearby corners" << std::endl;
-  t.StartTimer();
-  _remove_useless_nearby_corners();
-  t.EndTimer();
-  std::cout << "Pointless nearby corners removed in " << t.GetElapsedTime() << std::endl;
-  total_time += t.GetElapsedTime();
-
-  // Remove redundant nearby corners
-  //std::cout << "Removing redundant nearby corners" << std::endl;
-  //t.StartTimer();
-  //_remove_redundant_nearby_corners();
-  //t.EndTimer();
-  //std::cout << "Redundant nearby corners removed in " << t.GetElapsedTime() << std::endl;
-  //total_time += t.GetElapsedTime();
-  
   // Find complete corner graph
   std::cout << "Finding complete corner graph" << std::endl;
   t.StartTimer();
   _find_complete_corner_graph(); 
   t.EndTimer(); 
   std::cout << "Complete corner graph found in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+
+  // Remove pointless nearby corners
+  std::cout << "Removing pointless nearby corners" << std::endl;
+  t.StartTimer();
+  _remove_useless_nearby_corners();
+  t.EndTimer();
+  std::cout << "Pointless nearby corners removed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
   
   std::cout << "Preprocessing complete" << std::endl;

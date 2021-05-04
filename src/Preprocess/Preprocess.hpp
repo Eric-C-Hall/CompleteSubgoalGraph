@@ -17,8 +17,7 @@ class PreprocessingData {
   const Graph &graph;
 
   std::vector<map_position> _corners;
-  std::vector<corner_index> _corner_to_corner_index;
-  std::vector<std::vector<corner_index>> _point_to_nearby_corner_indices; // "nearby" = safe-reachable
+  std::vector<std::vector<corner_index>> _point_to_nearby_corner_indices;
 
   std::vector<std::vector<exact_distance>> _pair_of_corner_indices_to_dist;
   std::vector<std::vector<corner_index>> _pair_of_corner_indices_to_first_corner;
