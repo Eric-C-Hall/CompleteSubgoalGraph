@@ -636,44 +636,10 @@ bool is_useful_nearby_corner(map_position pos, map_position corner, const Graph 
   return false;
 }
 
-
-void PreprocessingData::_replace_removed_corner(const map_position p, const map_position c, std::vector<corner_index> &nearby_corner_indices, int & num_added, int & num_added_more_than_removed)
-{
-  // When a corner is removed, a new corner may need to be added, because
-  // that corner may not have been direct reachable due to the corner that
-  // has just now been removed, but it may now effectively be direct
-  // reachable
-  int num_added_to_replace_this_index = 0;
-  for (corner_index i : _point_to_nearby_corner_indices[c])
-  {
-    // Check if distance to new corner is optimal through old
-    if (graph.octile_distance(p, _corners[i]) != graph.octile_distance(p, c) + graph.octile_distance(c, _corners[i]))
-      continue;
-    
-    // Check if new corner is not already contained in nearby corner indices
-    if (std::find(nearby_corner_indices.begin(), nearby_corner_indices.end(), i) != nearby_corner_indices.end())
-      continue;
-    
-    // Check if new corner is safe-reachable
-    if (!graph.safe_reachable(p, _corners[i]))
-      continue;
-    
-    nearby_corner_indices.push_back(i);
-    num_added_to_replace_this_index++;
-    num_added++;
-  }
-  if (num_added_to_replace_this_index > 1)
-  {
-    num_added_more_than_removed++;
-  }
-}
-
 void PreprocessingData::_remove_useless_nearby_corners()
 {
   int num_removed = 0;
   int num_retained = 0;
-  int num_added = 0;
-  int num_added_more_than_removed = 0;
   
   map_position p;
   for (p = 0; p < graph.num_positions(); p++)
@@ -692,8 +658,6 @@ void PreprocessingData::_remove_useless_nearby_corners()
       {
         nearby_corner_indices.erase(nearby_corner_indices.begin() + which_nearby_corner);
         num_removed++;
-        
-        _replace_removed_corner(p, c, nearby_corner_indices, num_added, num_added_more_than_removed);
       }
       else
       {
@@ -708,15 +672,6 @@ void PreprocessingData::_remove_useless_nearby_corners()
   
   std::cout << "Num useless nearby corners removed: " << num_removed << std::endl;
   std::cout << "Num useful nearby corners retained: " << num_retained << std::endl;
-  std::cout << "Num nearby corners added: " << num_added << std::endl;
-  
-  if (num_added_more_than_removed > 0)
-  {
-    std::cout << "-----------------------------------------------------------------------" << std::endl;
-    std::cout << "WARNING: more than one corner added to replace corner, for " << num_added_more_than_removed << " corners" << std::endl;
-    std::cout << "Maybe we shouldn't have removed these corners." << std::endl;
-    std::cout << "-----------------------------------------------------------------------" << std::endl;
-  }
 }
 
 void PreprocessingData::_remove_indirect_nearby_corners()
@@ -825,7 +780,7 @@ void PreprocessingData::preprocess()
   total_time += t.GetElapsedTime();
 
   // Get corner_index, incoming direction to relevant neighbour corner_indices
-  std::vector<std::vector<std::vector<corner_index>>> corner_and_direction_to_neighbours;
+  //std::vector<std::vector<std::vector<corner_index>>> corner_and_direction_to_neighbours;
  
   std::cout << "Preprocessing complete" << std::endl;
   

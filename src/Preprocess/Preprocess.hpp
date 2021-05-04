@@ -30,7 +30,6 @@ class PreprocessingData {
   void _find_points_near_corner_straight(map_position initial_pos, corner_index i, int num_step_bound = INT_MAX);
   void _find_points_near_corner(corner_index i);
   void _find_nearby_corners();
-  void _replace_removed_corner(const map_position p, const map_position c, std::vector<corner_index> &nearby_corner_indices, int & num_added, int & num_added_more_than_removed);
   void _remove_useless_nearby_corners();
 
   void _remove_indirect_nearby_corners();
