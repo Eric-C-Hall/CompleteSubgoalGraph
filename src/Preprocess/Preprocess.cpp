@@ -197,21 +197,6 @@ void PreprocessingData::_find_optimal_distances_from_corner(corner_index i)
 
 void PreprocessingData::_find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j)
 {
-  for (corner_index first_index : _point_to_nearby_corner_indices[_corners[i]])
-  {
-    assert(first_index != i);
-    const exact_distance i_to_first_dist = _pair_of_corner_indices_to_dist[i][first_index];
-    const exact_distance first_to_j_dist = _pair_of_corner_indices_to_dist[first_index][j];
-    const exact_distance i_to_j_dist = _pair_of_corner_indices_to_dist[i][j];
-
-    assert(i_to_first_dist + first_to_j_dist >= i_to_j_dist || i_to_j_dist == MAX_EXACT_DISTANCE);
-    if (i_to_first_dist + first_to_j_dist == i_to_j_dist)
-    {
-      _pair_of_corner_indices_to_first_corner[i][j] = first_index;
-      return;
-    }
-  }
-
   if (i == j)
   {
     _pair_of_corner_indices_to_first_corner[i][j] = _corners.size();
@@ -227,6 +212,21 @@ void PreprocessingData::_find_optimal_first_corners_from_corner_to_corner(corner
   if (_pair_of_corner_indices_to_dist[i][j] == MAX_EXACT_DISTANCE)
   {
     return;
+  }
+
+  for (corner_index first_index : _point_to_nearby_corner_indices[_corners[i]])
+  {
+    assert(first_index != i);
+    const exact_distance i_to_first_dist = _pair_of_corner_indices_to_dist[i][first_index];
+    const exact_distance first_to_j_dist = _pair_of_corner_indices_to_dist[first_index][j];
+    const exact_distance i_to_j_dist = _pair_of_corner_indices_to_dist[i][j];
+
+    assert(i_to_first_dist + first_to_j_dist >= i_to_j_dist);
+    if (i_to_first_dist + first_to_j_dist == i_to_j_dist)
+    {
+      _pair_of_corner_indices_to_first_corner[i][j] = first_index;
+      return;
+    }
   }
 
   assert(false);
