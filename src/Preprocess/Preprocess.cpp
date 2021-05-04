@@ -5,6 +5,7 @@
 #include <fstream>
 #include <deque>
 #include <tuple>
+#include <set>
 #include <algorithm>
 
 #include "../Graph/ExactDistance.hpp"
@@ -442,6 +443,32 @@ void PreprocessingData::load(const std::string &filename)
   _load(file);
 }
 
+void PreprocessingData::_output_warnings() const
+{
+  int num_with_duplicate = 0;
+  int total_num_duplicate = 0;
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    const auto &nearby = _point_to_nearby_corner_indices[p];
+    std::set<corner_index> temp = std::set<corner_index>(nearby.begin(), nearby.end());
+    if (temp.size() != nearby.size())
+    {
+      num_with_duplicate++;
+      total_num_duplicate += (nearby.size() - temp.size());
+    }
+  }
+
+  if (num_with_duplicate != 0)
+  {
+    std::cout << "------------------------------------" << std::endl;
+    std::cout << "Warning: there are duplicate corners" << std::endl;
+    std::cout << "Num dupliate corners:   " << num_with_duplicate << std::endl;
+    std::cout << "Total num duplicates:   " << total_num_duplicate << std::endl;
+    std::cout << "Average num duplicates: " << ((float)(total_num_duplicate)) / ((float)(num_with_duplicate)) << std::endl;
+    std::cout << "------------------------------------" << std::endl;
+  }
+}
+
 void PreprocessingData::_output_debug_stats() const
 {
   std::cout << "Outputting debug stats" << std::endl;
@@ -796,11 +823,15 @@ void PreprocessingData::preprocess()
   t.EndTimer();
   std::cout << "Indirect nearby corners removed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
-  
+
+  // Get corner_index, incoming direction to relevant neighbour corner_indices
+  std::vector<std::vector<std::vector<corner_index>>> corner_and_direction_to_neighbours;
+ 
   std::cout << "Preprocessing complete" << std::endl;
   
   std::cout << "Total preprocessing time: " << total_time << std::endl;
   
+  _output_warnings();
   _output_debug_stats();
 }
 
