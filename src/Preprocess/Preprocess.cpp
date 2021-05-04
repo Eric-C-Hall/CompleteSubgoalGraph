@@ -224,7 +224,7 @@ void PreprocessingData::_find_optimal_first_corners_from_corner_to_corner(corner
     assert(i_to_first_dist + first_to_j_dist >= i_to_j_dist);
     if (i_to_first_dist + first_to_j_dist == i_to_j_dist)
     {
-      _pair_of_corner_indices_to_first_corner[i][j] = first_index;
+      _pair_of_corner_indices_to_first_corner[j][i] = first_index;
       return;
     }
   }
@@ -299,7 +299,7 @@ void PreprocessingData::_save(std::ostream & stream) const
     {
       exact_distance d = _pair_of_corner_indices_to_dist[i][j];
       stream << d.num_straight << " " << d.num_diagonal << " ";
-      assert(_pair_of_corner_indices_to_first_corner[i][j] != i);
+      assert(_pair_of_corner_indices_to_first_corner[i][j] != j);
       stream << _pair_of_corner_indices_to_first_corner[i][j] << " ";
     }
     stream << "\n";
@@ -366,7 +366,7 @@ void PreprocessingData::_load(std::istream &stream)
 
       corner_index first_corner;
       stream >> first_corner;
-      assert(first_corner != i);
+      assert(first_corner != j);
       _pair_of_corner_indices_to_first_corner[i].push_back(first_corner);
     }
   }

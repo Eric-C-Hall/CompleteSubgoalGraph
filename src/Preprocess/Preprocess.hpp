@@ -20,6 +20,7 @@ class PreprocessingData {
   std::vector<std::vector<corner_index>> _point_to_nearby_corner_indices;
 
   std::vector<std::vector<exact_distance>> _pair_of_corner_indices_to_dist;
+  // _pair_of_corner_indices_to_first_corner[i][j] is first corner from j to i
   std::vector<std::vector<corner_index>> _pair_of_corner_indices_to_first_corner;
 
 

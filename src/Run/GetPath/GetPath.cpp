@@ -51,6 +51,8 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
   corner_index start_index = best_start_index;
   corner_index end_index = best_end_index;
 
+  const auto &corner_index_to_next_corner = _pair_of_corner_indices_to_first_corner[end_index];
+
   xyLoc b = graph.loc(_corners[start_index]);
 
   _compute_octile_path<false>(a, b, path);
@@ -59,7 +61,7 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
     a = b;
     assert(start_index != _corners.size());
     assert(end_index != _corners.size());
-    corner_index new_index = _pair_of_corner_indices_to_first_corner[start_index][end_index];
+    corner_index new_index = corner_index_to_next_corner[start_index];
     assert(new_index != start_index);
     start_index = new_index;
     b = graph.loc(_corners[start_index]);
