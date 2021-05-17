@@ -1,6 +1,8 @@
 #ifndef CORNERGRAPH_PROJECT__DIRECTIONS_HPP
 #define CORNERGRAPH_PROJECT__DIRECTIONS_HPP
 
+#include <cassert>
+
 #include "XYLoc.hpp"
 
 enum Direction {
@@ -17,9 +19,17 @@ enum Direction {
 };
 
 inline std::vector<Direction> get_cardinal_directions();
+inline bool is_cardinal_direction(const Direction dir);
 
 inline Direction get_45_degrees_clockwise(Direction dir);
 inline Direction get_45_degrees_anticlockwise(Direction dir);
+inline Direction get_opposite_direction(Direction dir);
+template <int n>
+inline Direction get_n_steps_clockwise(Direction dir);
+template <int n>
+inline Direction get_n_steps_anticlockwise(Direction dir);
+
+inline Direction get_direction_between_points(xyLoc source, xyLoc target);
 
 inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir);
 inline bool within_45_degrees_clockwise_from_point(xyLoc a, xyLoc b, Direction dir);
@@ -36,6 +46,16 @@ inline std::vector<Direction> get_cardinal_directions()
   return std::vector<Direction>{Dir_N, Dir_E, Dir_S, Dir_W};
 };
 
+inline std::vector<Direction> get_directions()
+{
+  return std::vector<Direction>{Dir_N, Dir_NE, Dir_E, Dir_SE, Dir_S, Dir_SW, Dir_W, Dir_NW};
+};
+
+inline bool is_cardinal_direction(const Direction dir)
+{
+  return dir == (Direction)(2 * (dir >> 1));
+};
+
 inline Direction get_45_degrees_clockwise(Direction dir)
 {
   return (dir == Dir_MAX ? Dir_MIN : (Direction)(dir + 1));
@@ -44,6 +64,24 @@ inline Direction get_45_degrees_clockwise(Direction dir)
 inline Direction get_45_degrees_anticlockwise(Direction dir)
 {
   return (dir == Dir_MIN ? Dir_MAX : (Direction)(dir - 1));
+}
+
+inline Direction get_opposite_direction(Direction dir)
+{
+  return (Direction)(dir >= 4 ?  dir - 4 : dir + 4);
+}
+
+template <int n>
+inline Direction get_n_steps_clockwise(Direction dir)
+{
+  int temp = dir + n;
+  return (temp <= Dir_MAX ? (Direction)temp : (Direction)(temp - 8));
+}
+
+template <int n>
+inline Direction get_n_steps_anticlockwise(Direction dir)
+{
+  return (dir >= n ? (Direction)(dir - n) : (Direction)(dir + 8 - n));
 }
 
 inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir)
@@ -70,6 +108,32 @@ inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir)
     default:
       throw std::logic_error("No valid direction given");
   }
+}
+
+inline Direction get_direction_between_points(xyLoc source, xyLoc target)
+{
+  assert(source != target);
+  xyLoc delta = target - source;
+
+  if (delta.x > 0)
+    if (delta.y > 0)
+      return Dir_NE;
+    else if (delta.y == 0)
+      return Dir_E;
+    else // delta.y < 0
+      return Dir_SE;
+  else if (delta.x == 0)
+    if (delta.y > 0)
+      return Dir_N;
+    else // delta.y <= 0
+      return Dir_S;
+  else // delta.x < 0
+    if (delta.y > 0)
+      return Dir_NW;
+    else if (delta.y == 0)
+      return Dir_W;
+    else // delta.y < 0
+      return Dir_SW;
 }
 
 // Is the direction to travel towards b from a strictly between the directions dir and dir + 45 degrees clockwise? 

@@ -31,8 +31,9 @@ class PreprocessingData {
   void _find_points_near_corner(corner_index i);
   void _find_nearby_corners();
   void _remove_useless_nearby_corners();
-
   void _remove_indirect_nearby_corners();
+
+  void _compute_neighbouring_relevant_corners(std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners);
 
   void _find_optimal_distances_from_corner(corner_index i);
   void _find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j);

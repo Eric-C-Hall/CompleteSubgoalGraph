@@ -587,19 +587,20 @@ inline bool is_obstacle_in_direction(map_position corner, Direction dir, const G
   return graph.is_obstacle(corner);
 }
 
-bool is_useful_nearby_corner(map_position pos, map_position corner, const Graph &graph)
+// TODO: Maybe this can be sped up by only checking for relevant obstacles when coming from the relevant direction from pos to corner
+bool is_useful_nearby_corner_1(const map_position pos, const map_position corner, const Graph &graph)
 {
-  xyLoc pos_xy = graph.loc(pos);
-  xyLoc corner_xy = graph.loc(corner);
+  const xyLoc pos_xy = graph.loc(pos);
+  const xyLoc corner_xy = graph.loc(corner);
 
   for (Direction dir : get_cardinal_directions())
   {
     if (is_obstacle_in_direction(corner, dir, graph))
     {
-      Direction clockwise_diagonal = get_45_degrees_clockwise(dir);
-      Direction clockwise_straight = get_45_degrees_clockwise(clockwise_diagonal);
-      Direction anticlockwise_diagonal = get_45_degrees_anticlockwise(dir);
-      Direction anticlockwise_straight = get_45_degrees_anticlockwise(anticlockwise_diagonal);
+      const Direction clockwise_diagonal = get_45_degrees_clockwise(dir);
+      const Direction clockwise_straight = get_45_degrees_clockwise(clockwise_diagonal);
+      const Direction anticlockwise_diagonal = get_45_degrees_anticlockwise(dir);
+      const Direction anticlockwise_straight = get_45_degrees_anticlockwise(anticlockwise_diagonal);
 
       if (!is_obstacle_in_direction(corner, clockwise_diagonal, graph))
       {
@@ -634,6 +635,71 @@ bool is_useful_nearby_corner(map_position pos, map_position corner, const Graph 
   }
 
   return false;
+}
+
+// When entering corner from direction dir, is corner useful in getting to pos?
+// Note: assume pos and corner are safe-reachable from each other
+bool is_useful_nearby_corner_for_direction(const map_position pos, const map_position corner, const Graph &graph, const Direction dir)
+{
+  const bool is_dir_cardinal = is_cardinal_direction(dir);
+
+  const Direction opposite_dir = get_opposite_direction(dir);
+  map_position opposite_pos = corner;
+  moving_direction(opposite_dir, opposite_pos, graph);
+  const bool is_opposite_obstacle = graph.is_obstacle(opposite_pos);
+
+  if (is_opposite_obstacle)
+    return false;
+
+  const Direction clockwise_obstacle_dir = (is_dir_cardinal ? get_n_steps_clockwise<2>(opposite_dir) : get_45_degrees_clockwise(opposite_dir));
+  map_position clockwise_obstacle_pos = corner;
+  moving_direction(clockwise_obstacle_dir, clockwise_obstacle_pos, graph);
+  const bool is_clockwise_obstacle = graph.is_obstacle(clockwise_obstacle_pos);
+
+  const Direction anticlockwise_obstacle_dir = (is_dir_cardinal ? get_n_steps_anticlockwise<2>(opposite_dir) : get_45_degrees_anticlockwise(opposite_dir));
+  map_position anticlockwise_obstacle_pos = corner;
+  moving_direction(anticlockwise_obstacle_dir, anticlockwise_obstacle_pos, graph);
+  const bool is_anticlockwise_obstacle = graph.is_obstacle(anticlockwise_obstacle_pos);
+
+  const xyLoc pos_loc = graph.loc(pos);
+  const xyLoc corner_loc = graph.loc(corner);
+
+  if (is_clockwise_obstacle)
+  {
+    if (in_direction_from_point(corner_loc, pos_loc, get_45_degrees_anticlockwise(dir)))
+      return true;
+
+    if (within_45_degrees_anticlockwise_from_point(corner_loc, pos_loc, dir))
+      return true;
+  }
+
+  if (is_anticlockwise_obstacle)
+  {
+    if (in_direction_from_point(corner_loc, pos_loc, get_45_degrees_clockwise(dir)))
+      return true;
+
+    if (within_45_degrees_clockwise_from_point(corner_loc, pos_loc, dir))
+      return true;
+  }
+
+  return false;
+}
+
+bool is_useful_nearby_corner_2(const map_position pos, const map_position corner, const Graph &graph)
+{
+  for (Direction dir : get_directions())
+  {
+    if (is_useful_nearby_corner_for_direction(pos, corner, graph, dir))
+      return true;
+  }
+  return false;
+}
+
+bool is_useful_nearby_corner(const map_position pos, const map_position corner, const Graph &graph)
+{
+  assert(is_useful_nearby_corner_1(pos, corner, graph) == is_useful_nearby_corner_2(pos, corner, graph));
+
+  return is_useful_nearby_corner_1(pos, corner, graph);
 }
 
 void PreprocessingData::_remove_useless_nearby_corners()
@@ -726,6 +792,27 @@ void PreprocessingData::_remove_indirect_nearby_corners()
   std::cout << "Num direct nearby corners retained: " << num_retained << std::endl;
 }
 
+void PreprocessingData::_compute_neighbouring_relevant_corners(std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners)
+{
+  corner_and_direction_to_neighbouring_relevant_corners.resize(_corners.size());
+  for (auto &row : corner_and_direction_to_neighbouring_relevant_corners)
+  {
+    row.resize((int)Dir_MAX + 1);
+  }
+
+  for (corner_index i = 0; i < _corners.size(); i++)
+  {
+    for (corner_index nearby_index : _point_to_nearby_corner_indices[_corners[i]])
+    {
+      Direction dir = get_direction_between_points(graph.loc(_corners[i]), graph.loc(_corners[nearby_index]));
+      if (is_useful_nearby_corner_for_direction(_corners[i], _corners[nearby_index], graph, dir))
+      {
+        corner_and_direction_to_neighbouring_relevant_corners[i][dir].push_back(nearby_index);
+      }
+    }
+  }
+}
+
 void PreprocessingData::preprocess()
 {
   Timer t;
@@ -780,7 +867,13 @@ void PreprocessingData::preprocess()
   total_time += t.GetElapsedTime();
 
   // Get corner_index, incoming direction to relevant neighbour corner_indices
-  //std::vector<std::vector<std::vector<corner_index>>> corner_and_direction_to_neighbours;
+  std::vector<std::vector<std::vector<corner_index>>> corner_and_direction_to_neighbouring_relevant_corners;
+  std::cout << "Computing neighbouring relevant corners for corner and direction" << std::endl;
+  t.StartTimer();
+  _compute_neighbouring_relevant_corners(corner_and_direction_to_neighbouring_relevant_corners);
+  t.EndTimer();
+  std::cout << "Neighbouring relevant corners computed in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
  
   std::cout << "Preprocessing complete" << std::endl;
   
