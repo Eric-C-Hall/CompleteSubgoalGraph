@@ -5,6 +5,7 @@
 
 #include "../Graph/MapPosition.hpp"
 #include "../Run/GetPath/GetPath.hpp"
+#include "../Graph/Islands.hpp"
 
 void VisualiseRequestInput(std::string &input)
 {
@@ -12,11 +13,31 @@ void VisualiseRequestInput(std::string &input)
   std::cin >> input;
 }
 
+char int_to_drawn_char(int i)
+{
+  if (i <= 9)
+  {
+    return '0' + i;
+  }
+  else if (i <= 9 + 26)
+  {
+    return 'a' + i - 9;
+  }
+  else if (i <= 9 + 26 + 26)
+  {
+    return 'A' + i - (9 + 26);
+  }
+  else
+  {
+    return '>';
+  }
+}
+
 // TODO: looping through all cursors and path positions on every call to this seems slow.
 // If performance becomes an issue, maybe these could all be stored in a vector from map_position to path/cursor
 // Then it would only take constant time to check if is cursor or on path
 // It's not worth doing this unless performance is actually an issue, though
-void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next)
+void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next, const bool show_islands, const Islands &islands)
 {
   map_position pos = graph.pos(x,y);
 
@@ -69,25 +90,11 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
   else if (show_num_nearby)
   {
     const int num_nearby = preprocessing_data.get_nearby_corners(pos).size();
-    char c;
-    if (num_nearby <= 9)
-    {
-      c = '0' + num_nearby;
-    }
-    else if (num_nearby <= 9 + 26)
-    {
-      c = 'a' + num_nearby - 9;
-    }
-    else if (num_nearby <= 9 + 26 + 26)
-    {
-      c = 'A' + num_nearby - (9 + 26);
-    }
-    else
-    {
-      c = '>';
-    }
-
-    std::cout << c;
+    std::cout << int_to_drawn_char(num_nearby);
+  }
+  else if (show_islands)
+  {
+    std::cout << int_to_drawn_char(islands.get_island_index(pos));
   }
   else
   {
@@ -151,8 +158,11 @@ void print_topbar(const unsigned int width, const unsigned int max_y)
 }
 
 
-void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next)
+void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next, const bool show_islands)
 {
+  // TODO: Maybe don't compute this every time, on the other hand maybe it's not important to be efficient
+  const Islands islands(graph);
+
   print_topbar(graph.get_width(), graph.get_height() - 1);
 
   for (unsigned int y = 0; y < graph.get_height(); y++)
@@ -160,7 +170,7 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
     print_sidebar(y, graph.get_height() - 1);
     for (unsigned int x = 0; x < graph.get_width(); x++)
     {
-      print_point(x,y,preprocessing_data,graph,cursors,path,show_nearby,show_num_nearby,show_nearby_with_next);
+      print_point(x,y,preprocessing_data,graph,cursors,path,show_nearby,show_num_nearby,show_nearby_with_next, show_islands, islands);
     }
     std::cout << "\n";
   }
@@ -218,8 +228,9 @@ void Visualise(const PreprocessingData &preprocessing_data)
   bool show_nearby = false;
   bool show_num_nearby = false;
   bool show_nearby_with_next = false;
+  bool show_islands = false;
 
-  print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_nearby_with_next);
+  print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_nearby_with_next, show_islands);
   VisualiseRequestInput(input);
 
   while (input != "quit")
@@ -251,6 +262,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       show_nearby_with_next = !show_nearby_with_next;
     }
+    else if (input == "islands")
+    {
+      show_islands = !show_islands;
+    }
     else if (input == "swap")
     {
       int n, m;
@@ -258,7 +273,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::swap(cursors[n], cursors[m]);
     }
 
-    print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_nearby_with_next);
+    print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_nearby_with_next, show_islands);
 
     if (input == "help")
     {
