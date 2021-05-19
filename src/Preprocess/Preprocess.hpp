@@ -18,6 +18,8 @@ class PreprocessingData {
 
   std::vector<map_position> _corners;
   std::vector<std::vector<corner_index>> _point_to_nearby_corner_indices;
+  // A subset of the above vector, which only includes corner indices that are relevent to some corner when entered from the direction of the origin point
+  std::vector<std::vector<corner_index>> _point_to_nearby_corner_indices_with_next;
 
   std::vector<std::vector<exact_distance>> _pair_of_corner_indices_to_dist;
   // _pair_of_corner_indices_to_first_corner[i][j] is first corner from j to i
@@ -33,7 +35,8 @@ class PreprocessingData {
   void _remove_useless_nearby_corners();
   void _remove_indirect_nearby_corners();
 
-  void _compute_neighbouring_relevant_corners(std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners);
+  void _compute_neighbouring_relevant_corners(std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners) const;
+  void _find_corners_with_relevant_next_corners(std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners);
 
   void _find_optimal_distances_from_corner(corner_index i);
   void _find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j);
@@ -66,6 +69,7 @@ class PreprocessingData {
   const Graph &get_graph() const {return graph;}
 
   std::vector<map_position> get_nearby_corners(map_position p) const;
+  std::vector<map_position> get_nearby_corners_with_next(map_position p) const;
 
   inline const std::vector<map_position> & get_corners() const {return _corners;}
 };

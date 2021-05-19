@@ -42,6 +42,7 @@ class Graph {
 
   inline unsigned int y(map_position p) const {return p / get_width();}
   inline unsigned int x(map_position p) const {return p % get_width();}
+  // TODO: maybe this can be done without converting to xyLoc? Maybe not though
   inline exact_distance octile_distance(map_position a, map_position b) const
   {
     unsigned int x_a = x(a);

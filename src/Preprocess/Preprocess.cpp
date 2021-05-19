@@ -336,12 +336,14 @@ void PreprocessingData::_save(std::ostream & stream) const
 {
   stream << _corners.size() << "\n";
 
+  // Save corners
   for (unsigned int corner : _corners)
   {
     stream << corner << " ";
   }
   stream << "\n\n";
 
+  // Save _point_to_nearby_corner_indices
   for (map_position p = 0; p < graph.num_positions(); p++)
   {
     for (unsigned int corner : _point_to_nearby_corner_indices[p])
@@ -353,6 +355,19 @@ void PreprocessingData::_save(std::ostream & stream) const
 
   stream << "\n";
 
+  // Save _point_to_nearby_corner_indices_without_relevant_next_corner
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    for (unsigned int corner : _point_to_nearby_corner_indices_with_next[p])
+    {
+      stream << corner << " ";
+    }
+    stream << _corners.size() << "\n";
+  }
+
+  stream << "\n";
+
+  // Save _pair_of_corner_indices_to_first_corner and _pair_of_corner_indices_to_dist
   for (corner_index i = 0; i < _corners.size(); i++)
   {
     for (corner_index j = 0; j < _corners.size(); j++)
@@ -384,12 +399,14 @@ void PreprocessingData::_load(std::istream &stream)
 {
   _corners.clear();
   _point_to_nearby_corner_indices.clear();
+  _point_to_nearby_corner_indices_with_next.clear();
   _pair_of_corner_indices_to_dist.clear();
   _pair_of_corner_indices_to_first_corner.clear();
 
   unsigned int num_corners;
   stream >> num_corners;
 
+  // Load corners
   _corners.reserve(num_corners);
   for (unsigned int i = 0; i < num_corners; i++)
   {
@@ -398,6 +415,7 @@ void PreprocessingData::_load(std::istream &stream)
     _corners.push_back(corner_pos);
   }
 
+  // Load _point_to_nearby_corner_indices
   _point_to_nearby_corner_indices.resize(graph.num_positions());
   for (map_position p = 0; p < graph.num_positions(); p++)
   {
@@ -410,6 +428,20 @@ void PreprocessingData::_load(std::istream &stream)
     }
   }
 
+  // Load _point_to_nearby_corner_indices_with_next
+  _point_to_nearby_corner_indices_with_next.resize(graph.num_positions());
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    map_position corner_index;
+    stream >> corner_index;
+    while (corner_index != num_corners)
+    {
+      _point_to_nearby_corner_indices_with_next[p].push_back(corner_index);
+      stream >> corner_index;
+    }
+  }
+
+  // Load _pair_of_corner_indices_to_dist and _pair_of_corner_indices_to_first_corner
   _pair_of_corner_indices_to_dist.resize(_corners.size());
   _pair_of_corner_indices_to_first_corner.resize(_corners.size());
   for (corner_index i = 0; i < _corners.size(); i++)
@@ -445,6 +477,9 @@ void PreprocessingData::load(const std::string &filename)
 
 void PreprocessingData::_output_warnings() const
 {
+  // -----------------
+  // check no duplicates in _point_to_nearby_corner_indices
+  // TODO: ensure no duplicates in _point_to_nearby_corner_indices_with_next
   int num_with_duplicate = 0;
   int total_num_duplicate = 0;
   for (map_position p = 0; p < graph.num_positions(); p++)
@@ -461,12 +496,43 @@ void PreprocessingData::_output_warnings() const
   if (num_with_duplicate != 0)
   {
     std::cout << "------------------------------------" << std::endl;
-    std::cout << "Warning: there are duplicate corners" << std::endl;
+    std::cout << "WARNING: THERE ARE DUPLICATE CORNERS" << std::endl;
     std::cout << "Num dupliate corners:   " << num_with_duplicate << std::endl;
     std::cout << "Total num duplicates:   " << total_num_duplicate << std::endl;
     std::cout << "Average num duplicates: " << ((float)(total_num_duplicate)) / ((float)(num_with_duplicate)) << std::endl;
     std::cout << "------------------------------------" << std::endl;
   }
+  // -----------------
+  
+  // The following are supposed to be sorted:
+  //  _point_to_nearby_corner_indices and _point_to_nearby_corner_indices_with_next
+  int num_unsorted = 0;
+  int num_unsorted_no_next = 0;
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    const std::vector<corner_index> &nearby = _point_to_nearby_corner_indices[p];
+    if (!std::is_sorted(nearby.begin(), nearby.end()))
+    {
+      num_unsorted++;
+    }
+
+    const std::vector<corner_index> &nearby_no_next = _point_to_nearby_corner_indices_with_next[p];
+    if (!std::is_sorted(nearby_no_next.begin(), nearby_no_next.end()))
+    {
+      num_unsorted_no_next++;
+    }
+  }
+
+  if (num_unsorted != 0 || num_unsorted_no_next != 0)
+  {
+    std::cout << "------------------------------------" << std::endl;
+    std::cout << "WARNING: SOME CORNERS UNSORTED" << std::endl;
+    std::cout << "Num unsorted:         " << num_unsorted << std::endl;
+    std::cout << "Num unsorted no next: " << num_unsorted_no_next << std::endl;
+    std::cout << "------------------------------------" << std::endl;
+  }
+  // -----------------
+
 }
 
 void PreprocessingData::_output_debug_stats() const
@@ -503,6 +569,27 @@ void PreprocessingData::_output_debug_stats() const
   std::cout << "Max num nearby " << std::get<1>(stats) << std::endl;
   std::cout << "Mean num nearby " << std::get<2>(stats) << std::endl;
   std::cout << "Mode num nearby " << std::get<4>(stats) << std::endl;
+
+  std::vector<unsigned int> num_nearby_with_next_corner;
+  num_nearby_with_next_corner.reserve(graph.num_positions()); 
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    if (!graph.is_obstacle(p))
+      num_nearby_with_next_corner.push_back(_point_to_nearby_corner_indices_with_next[p].size());
+  }
+
+  // TODO: This is a modified copy of the above. Abstract the above out, and combine it with the warning below, and
+  // replace this and the above with calls to the abstracted version.
+  auto stats_with_next_corner = get_stats(num_nearby_with_next_corner);
+  
+  std::cout << std::endl;
+  std::cout << "Min num nearby with next corner " << std::get<0>(stats_with_next_corner) << std::endl;
+  std::cout << "Qt1 num nearby with next corner " << std::get<5>(stats_with_next_corner) << std::endl;
+  std::cout << "Median num nearby with next corner " << std::get<3>(stats_with_next_corner) << std::endl;
+  std::cout << "Qt2 num nearby with next corner " << std::get<6>(stats_with_next_corner) << std::endl;
+  std::cout << "Max num nearby with next corner " << std::get<1>(stats_with_next_corner) << std::endl;
+  std::cout << "Mean num nearby with next corner " << std::get<2>(stats_with_next_corner) << std::endl;
+  std::cout << "Mode num nearby with next corner " << std::get<4>(stats_with_next_corner) << std::endl;
 
   // Warn user about positions without nearby corners
   if (std::get<0>(stats) == 0)
@@ -639,6 +726,8 @@ bool is_useful_nearby_corner_1(const map_position pos, const map_position corner
 
 // When entering corner from direction dir, is corner useful in getting to pos?
 // Note: assume pos and corner are safe-reachable from each other
+// TODO: might currently be some situations in which this is not correct. Consider the hourglass situation when entering ...
+// TODO: ... from the diagonal. The 90 degree diagonal should be relevant, too.
 bool is_useful_nearby_corner_for_direction(const map_position pos, const map_position corner, const Graph &graph, const Direction dir)
 {
   const bool is_dir_cardinal = is_cardinal_direction(dir);
@@ -666,20 +755,44 @@ bool is_useful_nearby_corner_for_direction(const map_position pos, const map_pos
 
   if (is_clockwise_obstacle)
   {
-    if (in_direction_from_point(corner_loc, pos_loc, get_45_degrees_anticlockwise(dir)))
+    const Direction anticlockwise_45 = get_45_degrees_anticlockwise(dir);
+    const Direction anticlockwise_90 = get_45_degrees_anticlockwise(anticlockwise_45);
+
+    if (in_direction_from_point(corner_loc, pos_loc, anticlockwise_45))
       return true;
 
     if (within_45_degrees_anticlockwise_from_point(corner_loc, pos_loc, dir))
       return true;
+
+    if (!is_dir_cardinal)
+    {
+      if (in_direction_from_point(corner_loc, pos_loc, anticlockwise_90))
+        return true;
+
+      if (within_45_degrees_anticlockwise_from_point(corner_loc, pos_loc, anticlockwise_45))
+        return true;
+    }
   }
 
   if (is_anticlockwise_obstacle)
   {
-    if (in_direction_from_point(corner_loc, pos_loc, get_45_degrees_clockwise(dir)))
+    const Direction clockwise_45 = get_45_degrees_clockwise(dir);
+    const Direction clockwise_90 = get_45_degrees_clockwise(clockwise_45);
+
+    if (in_direction_from_point(corner_loc, pos_loc, clockwise_45))
       return true;
 
     if (within_45_degrees_clockwise_from_point(corner_loc, pos_loc, dir))
       return true;
+
+    if (!is_dir_cardinal)
+    {
+      if (in_direction_from_point(corner_loc, pos_loc, clockwise_90))
+        return true;
+
+      if (within_45_degrees_clockwise_from_point(corner_loc, pos_loc, clockwise_45))
+        return true;
+    }
   }
 
   return false;
@@ -792,8 +905,10 @@ void PreprocessingData::_remove_indirect_nearby_corners()
   std::cout << "Num direct nearby corners retained: " << num_retained << std::endl;
 }
 
-void PreprocessingData::_compute_neighbouring_relevant_corners(std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners)
+void PreprocessingData::_compute_neighbouring_relevant_corners(std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners) const
 {
+  int num_indices_added = 0;
+
   corner_and_direction_to_neighbouring_relevant_corners.resize(_corners.size());
   for (auto &row : corner_and_direction_to_neighbouring_relevant_corners)
   {
@@ -804,13 +919,53 @@ void PreprocessingData::_compute_neighbouring_relevant_corners(std::vector<std::
   {
     for (corner_index nearby_index : _point_to_nearby_corner_indices[_corners[i]])
     {
-      Direction dir = get_direction_between_points(graph.loc(_corners[i]), graph.loc(_corners[nearby_index]));
-      if (is_useful_nearby_corner_for_direction(_corners[i], _corners[nearby_index], graph, dir))
+      for (Direction dir : get_directions())
       {
-        corner_and_direction_to_neighbouring_relevant_corners[i][dir].push_back(nearby_index);
+        if (is_useful_nearby_corner_for_direction(_corners[nearby_index], _corners[i], graph, dir))
+        {
+          corner_and_direction_to_neighbouring_relevant_corners[i][dir].push_back(nearby_index);
+          num_indices_added++;
+        }
       }
     }
   }
+
+  std::cout << "Num corners relevant for corner and direction: " << num_indices_added << std::endl;
+}
+
+void PreprocessingData::_find_corners_with_relevant_next_corners(std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners)
+{
+  _point_to_nearby_corner_indices_with_next.resize(graph.num_positions());
+
+  int num_without = 0;
+  int num_with = 0;
+
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    for (const corner_index curr_index : _point_to_nearby_corner_indices[p])
+    {
+      const xyLoc p_loc = graph.loc(p);
+      const xyLoc curr_corner_loc = graph.loc(_corners[curr_index]);
+      Direction dir = get_direction_between_points(p_loc, curr_corner_loc);
+      Direction alt_dir = get_alt_direction_between_points(p_loc, curr_corner_loc);
+
+      if (corner_and_direction_to_neighbouring_relevant_corners[curr_index][dir].size() == 0
+          && corner_and_direction_to_neighbouring_relevant_corners[curr_index][alt_dir].size() == 0)
+      {
+        num_without++;
+        continue;
+      }
+      else
+      {
+        _point_to_nearby_corner_indices_with_next[p].push_back(curr_index);
+        num_with++;
+        continue;
+      }
+    }
+  }
+
+  std::cout << "Num corners found with no relevant next corners: " << num_without << std::endl;
+  std::cout << "Num corners found with relevant next corners: " << num_with << std::endl;
 }
 
 void PreprocessingData::preprocess()
@@ -825,6 +980,7 @@ void PreprocessingData::preprocess()
   t.EndTimer();
   std::cout << "Corners computed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
+  std::cout << std::endl;
   
   // Find nearby corners
   std::cout << "Finding nearby corners" << std::endl;
@@ -833,6 +989,7 @@ void PreprocessingData::preprocess()
   t.EndTimer();
   std::cout << "Nearby corners found in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
+  std::cout << std::endl;
   
   // Find complete corner graph
   std::cout << "Finding complete corner graph" << std::endl;
@@ -841,6 +998,7 @@ void PreprocessingData::preprocess()
   t.EndTimer(); 
   std::cout << "Complete corner graph found in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
+  std::cout << std::endl;
 
   // Push first corners as far as they will go
   std::cout << "Pushing first corners in corner graph" << std::endl;
@@ -849,6 +1007,7 @@ void PreprocessingData::preprocess()
   t.EndTimer(); 
   std::cout << "Corners pushed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
+  std::cout << std::endl;
 
   // Remove pointless nearby corners
   std::cout << "Removing pointless nearby corners" << std::endl;
@@ -857,16 +1016,10 @@ void PreprocessingData::preprocess()
   t.EndTimer();
   std::cout << "Pointless nearby corners removed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
-
-  // Remove indirect nearby corners
-  std::cout << "Removing indirect nearby corners" << std::endl;
-  t.StartTimer();
-  _remove_indirect_nearby_corners();
-  t.EndTimer();
-  std::cout << "Indirect nearby corners removed in " << t.GetElapsedTime() << std::endl;
-  total_time += t.GetElapsedTime();
+  std::cout << std::endl;
 
   // Get corner_index, incoming direction to relevant neighbour corner_indices
+  // TODO: work out if it is OK to remove indirect nearby corners from here
   std::vector<std::vector<std::vector<corner_index>>> corner_and_direction_to_neighbouring_relevant_corners;
   std::cout << "Computing neighbouring relevant corners for corner and direction" << std::endl;
   t.StartTimer();
@@ -874,6 +1027,25 @@ void PreprocessingData::preprocess()
   t.EndTimer();
   std::cout << "Neighbouring relevant corners computed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
+  std::cout << std::endl;
+
+  // Move corners with no relevant next corners into their own map
+  std::cout << "Finding corners with relevant next corners" << std::endl;
+  t.StartTimer();
+  _find_corners_with_relevant_next_corners(corner_and_direction_to_neighbouring_relevant_corners);
+  t.EndTimer();
+  std::cout << "Corners with relevant next corners computed in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+  std::cout << std::endl;
+
+  // Remove indirect nearby corners
+  /*std::cout << "Removing indirect nearby corners" << std::endl;
+  t.StartTimer();
+  _remove_indirect_nearby_corners();
+  t.EndTimer();
+  std::cout << "Indirect nearby corners removed in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+  std::cout << std::endl;*/
  
   std::cout << "Preprocessing complete" << std::endl;
   
@@ -887,6 +1059,20 @@ std::vector<map_position> PreprocessingData::get_nearby_corners(map_position p) 
 {
   std::vector<map_position> return_value;
   auto nearby_indices = _point_to_nearby_corner_indices[p];
+  return_value.reserve(nearby_indices.size());
+
+  for (corner_index i : nearby_indices)
+  {
+    return_value.push_back(_corners[i]);
+  }
+
+  return return_value;
+}
+
+std::vector<map_position> PreprocessingData::get_nearby_corners_with_next(map_position p) const
+{
+  std::vector<map_position> return_value;
+  auto nearby_indices = _point_to_nearby_corner_indices_with_next[p];
   return_value.reserve(nearby_indices.size());
 
   for (corner_index i : nearby_indices)

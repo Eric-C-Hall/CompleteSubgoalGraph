@@ -30,6 +30,7 @@ template <int n>
 inline Direction get_n_steps_anticlockwise(Direction dir);
 
 inline Direction get_direction_between_points(xyLoc source, xyLoc target);
+inline Direction get_alt_direction_between_points(xyLoc source, xyLoc target);
 
 inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir);
 inline bool within_45_degrees_clockwise_from_point(xyLoc a, xyLoc b, Direction dir);
@@ -134,6 +135,32 @@ inline Direction get_direction_between_points(xyLoc source, xyLoc target)
       return Dir_W;
     else // delta.y < 0
       return Dir_SW;
+}
+
+inline Direction get_alt_direction_between_points(xyLoc source, xyLoc target)
+{
+  assert(source != target);
+  xyLoc delta = target - source;
+
+  if (delta.y > delta.x)
+    if (delta.y > -delta.x)
+      return Dir_N;
+    else if (delta.y == -delta.x)
+      return Dir_NW;
+    else // delta.y < -delta.x
+      return Dir_W;
+  else if (delta.y == delta.x)
+    if (delta.y > 0)
+      return Dir_NE;
+    else // delta.y <= 0
+      return Dir_SW;
+  else // delta.y < delta.x
+    if (delta.y > -delta.x)
+      return Dir_E;
+    else if (delta.y == -delta.x)
+      return Dir_SE;
+    else // delta.y < -delta.x
+      return Dir_S;
 }
 
 // Is the direction to travel towards b from a strictly between the directions dir and dir + 45 degrees clockwise? 

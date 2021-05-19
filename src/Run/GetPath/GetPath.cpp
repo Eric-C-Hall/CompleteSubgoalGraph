@@ -27,12 +27,13 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
   corner_index best_start_index = _corners.size();
   corner_index best_end_index = _corners.size();
 
-  //std::cout << _point_to_nearby_corner_indices[start].size() << " " << _point_to_nearby_corner_indices[goal].size() << " " << _point_to_nearby_corner_indices[start].size() * _point_to_nearby_corner_indices[goal].size() << std::endl;
+  //std::cout << _point_to_nearby_corner_indices_with_next[start].size() << " " << _point_to_nearby_corner_indices_with_next[goal].size() << " " << _point_to_nearby_corner_indices_with_next[start].size() * _point_to_nearby_corner_indices_with_next[goal].size() << std::endl;
 
-  for (corner_index i : _point_to_nearby_corner_indices[start])
+  // Test going through each pair of nearby indices
+  for (corner_index i : _point_to_nearby_corner_indices_with_next[start])
   {
     exact_distance i_dist = graph.octile_distance(start, _corners[i]);
-    for (corner_index j : _point_to_nearby_corner_indices[goal])
+    for (corner_index j : _point_to_nearby_corner_indices_with_next[goal])
     {
       exact_distance j_dist = graph.octile_distance(goal, _corners[j]);
       exact_distance current_dist = i_dist + _pair_of_corner_indices_to_dist[i][j] + j_dist;
@@ -45,6 +46,48 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
     }
   }
 
+  // Test going through single nearby index possibly with no relevant next corner
+  const auto &start_nearby = _point_to_nearby_corner_indices[start];
+  const auto &goal_nearby = _point_to_nearby_corner_indices[goal];
+
+  auto s_iter = start_nearby.begin();
+  auto g_iter = goal_nearby.begin();
+
+  while (true)
+  {
+    if (*s_iter < *g_iter)
+    {
+      s_iter++;
+      if (s_iter == start_nearby.end())
+        break;
+    }
+    else
+    {
+      if (*s_iter == *g_iter)
+      {
+        const exact_distance current_dist = graph.octile_distance(start, _corners[*s_iter]) + graph.octile_distance(goal, _corners[*s_iter]);
+        if (current_dist < shortest_distance)
+        {
+          shortest_distance = current_dist;
+          best_start_index = best_end_index = *s_iter;
+        }
+        s_iter++;
+        if (s_iter == start_nearby.end())
+          break;
+        g_iter++;
+        if (g_iter == goal_nearby.end())
+          break;
+      }
+      else
+      {
+        g_iter++;
+        if (g_iter == goal_nearby.end())
+          break;
+      }
+    }
+  }
+
+  // Compute best path found
   xyLoc a = graph.loc(start);
   path.push_back(a);
   
