@@ -3,6 +3,7 @@
 #include "Time.hpp"
 #include "../Utility/Timer.h"
 #include "../Run/GetPath/GetPath.hpp"
+#include "../Graph/Islands.hpp"
 
 xyLoc GetRandomValidLocation(std::mt19937 &gen,
                              std::uniform_int_distribution<> &width_distr,
@@ -26,6 +27,8 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
   const unsigned int width = graph.get_width();
   const unsigned int height = graph.get_height();
 
+  const Islands islands(graph);
+
   // A vector of pairs of locations, to calculate the distance from one to the other.
   std::vector<xyLoc> testLocs;
   testLocs.reserve(2 * num_tests);
@@ -41,7 +44,11 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
   {
     xyLoc sourceLoc = GetRandomValidLocation(gen, width_distr, height_distr, graph);
     xyLoc destLoc = GetRandomValidLocation(gen, width_distr, height_distr, graph);
-    // TODO: Perhaps check if these points are on the same island
+    // Check if these points are on the same island
+    if (islands.get_island_index(graph.pos(sourceLoc)) != islands.get_island_index(graph.pos(destLoc)))
+    {
+      continue;
+    }
     testLocs.push_back(sourceLoc);
     testLocs.push_back(destLoc);
   }

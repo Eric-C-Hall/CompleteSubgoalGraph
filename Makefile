@@ -106,6 +106,13 @@ else
 	@echo "Pass in a map using 'make time MAP=...'. Do not include the file extension."
 endif
 
+timedbg:
+ifneq ($(MAP),)
+	gdb --args cornergraph -time $(MAP_DIR)/$(MAP).map $(MAP_DIR)/$(MAP).map.scen
+else
+	@echo "Pass in a map using 'make timedbg MAP=...'. Do not include the file extension."
+endif
+
 $(OBJ_DIR)/%.o: $(CPP_DIR)/%.cpp $(CPP_DIR)/%.h
 	g++ -Wall -c $< -std=c++11 $(OPTIMIZATION_LEVEL) $(ADDITIONAL_ARGUMENTS) $(CONCURRENCY_ARGUMENTS) $(ASSERTION_ARGUMENTS) -o $@
 
