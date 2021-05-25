@@ -18,18 +18,22 @@ class PreprocessingData {
 
   std::vector<map_position> _corners;
   std::vector<std::vector<corner_index>> _point_to_nearby_corner_indices;
-  // A subset of the above vector, which only includes corner indices that are relevent to some corner when entered from the direction of the origin point
+  // A subset of the above vector, which only includes corner indices that are
+  // relevent to some corner when entered from the direction of the origin point
   std::vector<std::vector<corner_index>> _point_to_nearby_corner_indices_with_next;
 
   std::vector<std::vector<exact_distance>> _pair_of_corner_indices_to_dist;
   // _pair_of_corner_indices_to_first_corner[i][j] is first corner from j to i
   std::vector<std::vector<corner_index>> _pair_of_corner_indices_to_first_corner;
 
+  // Given a point, and a nearby corner with next, give me some bounds within
+  // which all optimal destinations fall, when passing through these points.
+  // first is the lower x and y bound, while second is the upper x and y bound
+  std::vector<std::vector<std::pair<xyLoc, xyLoc>>> _point_and_corner_to_bounds;
+
 
   void _add_if_corner(map_position p);
   void _compute_corners();
-  template<Direction dir, Direction step_dir>
-  void _find_points_near_corner_straight(map_position initial_pos, corner_index i, int num_step_bound = INT_MAX);
   void _find_points_near_corner(corner_index i);
   void _find_nearby_corners();
   void _remove_useless_nearby_corners();

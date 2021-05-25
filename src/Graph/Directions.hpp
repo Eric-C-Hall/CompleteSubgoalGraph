@@ -36,8 +36,6 @@ inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir);
 inline bool within_45_degrees_clockwise_from_point(xyLoc a, xyLoc b, Direction dir);
 inline bool within_45_degrees_anticlockwise_from_point(xyLoc a, xyLoc b, Direction dir);
 
-inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph);
-
 inline exact_distance exact_distance_of_direction(Direction dir);
 
 // --------------------------------------------------------
@@ -213,39 +211,6 @@ inline bool within_45_degrees_anticlockwise_from_point(xyLoc a, xyLoc b, Directi
       return within_45_degrees_clockwise_from_point(a,b,Dir_W);
     default:
       throw std::logic_error("No valid direction given");
-  }
-}
-
-inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph)
-{
-  switch (dir) {
-  case Dir_N:
-  case Dir_NE:
-  case Dir_NW:
-    pos = graph.up(pos);
-    break;
-  case Dir_S:
-  case Dir_SE:
-  case Dir_SW:
-    pos = graph.down(pos);
-    break;
-  default:
-    break;
-  }
-  
-  switch (dir) {
-  case Dir_E:
-  case Dir_NE:
-  case Dir_SE:
-    pos = graph.right(pos);
-    break;
-  case Dir_W:
-  case Dir_NW:
-  case Dir_SW:
-    pos = graph.left(pos);
-    break;
-  default:
-    break;
   }
 }
 

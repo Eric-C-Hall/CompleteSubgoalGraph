@@ -4,17 +4,14 @@
 #include <string>
 #include <vector>
 #include <set>
-
-#define VISIBLE_ONE (2048*2048)
-#define VISIBLE_ONE_PLUS  (2048*4*(512+1))
-#define VISIBLE_ONE_MINUS (2048*4*(512-1))
+#include <climits>
 
 #include "MapPosition.hpp"
 #include "ExactDistance.hpp"
 #include "XYLoc.hpp"
+#include "Directions.hpp"
 
 // top left is zero
-
 
 // NOTE: Graph has a collar of obstacles added to it.
 // Obstacles are added around all the edges.
@@ -74,6 +71,44 @@ class Graph {
   inline map_position pos(const unsigned int x, const unsigned int y) const {return y*get_width() + x;}
   inline map_position pos(const xyLoc &loc) const {return pos(loc.x, loc.y);}
   inline xyLoc loc(map_position p) const {return xyLoc(x(p), y(p));}
+
+  void get_safe_reachable_in_directions(std::vector<map_position> &output, const map_position origin, const Direction straight_direction, const Direction diagonal_direction, const int num_step_bound = INT_MAX) const;
+  std::vector<map_position> get_safe_reachable_in_all_directions(const map_position origin) const;
 };
+
+inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph);
+
+inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph)
+{
+  switch (dir) {
+  case Dir_N:
+  case Dir_NE:
+  case Dir_NW:
+    pos = graph.up(pos);
+    break;
+  case Dir_S:
+  case Dir_SE:
+  case Dir_SW:
+    pos = graph.down(pos);
+    break;
+  default:
+    break;
+  }
+  
+  switch (dir) {
+  case Dir_E:
+  case Dir_NE:
+  case Dir_SE:
+    pos = graph.right(pos);
+    break;
+  case Dir_W:
+  case Dir_NW:
+  case Dir_SW:
+    pos = graph.left(pos);
+    break;
+  default:
+    break;
+  }
+}
 
 #endif

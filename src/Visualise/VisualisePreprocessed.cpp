@@ -283,8 +283,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "swap n m: swap the nth and mth cursors" << std::endl;
       std::cout << "compute: compute the path between cursors 1 and 2" << std::endl;
       std::cout << "nearby: show corners near the zeroth cursor" << std::endl;
+      std::cout << "nearbywithnext: show corners near the zeroth cursor with a next corner" << std::endl;
       std::cout << "corner n m: move the nth cursor to select the mth corner" << std::endl;
       std::cout << "numnearby: show number of nearby corners" << std::endl;
+      std::cout << "islands: show islands" << std::endl;
       std::cout << std::endl;
     }
 

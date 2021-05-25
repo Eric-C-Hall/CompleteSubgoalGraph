@@ -94,51 +94,17 @@ void PreprocessingData::_compute_corners()
   std::cout << "Number of corners: " << _corners.size() << std::endl;
 }
 
-// Hitting an obstacle decreases num_step_bound, to ensure that all points are safe-reachable rather than just octile-reachable
-template<Direction dir, Direction step_dir>
-void PreprocessingData::_find_points_near_corner_straight(map_position initial_pos, corner_index i, int num_step_bound)
-{
-  map_position curr_pos = initial_pos;
-  int num_steps = 0;
-
-  while (!graph.is_obstacle(curr_pos) && num_steps < num_step_bound)
-  {
-    // The first iteration is done twice with two different step directions.
-    // So the same point may be reached multiple times, so only add this corner index the first time
-    if (_point_to_nearby_corner_indices[curr_pos].empty() || _point_to_nearby_corner_indices[curr_pos].back() != i)
-      _point_to_nearby_corner_indices[curr_pos].push_back(i);
-
-    moving_direction(dir, curr_pos, graph);
-    num_steps++;
-  }
-
-  if (num_steps != 0)
-  {
-    moving_direction(step_dir, initial_pos, graph);
-    _find_points_near_corner_straight<dir, step_dir>(initial_pos, i, num_steps);
-  }
-}
-
 void PreprocessingData::_find_points_near_corner(corner_index i)
 {
   assert (!graph.is_obstacle(_corners[i]));
 
-  map_position c = _corners[i];
-
-  _find_points_near_corner_straight<Dir_N, Dir_NW>(c, i);
-  _find_points_near_corner_straight<Dir_N, Dir_NE>(c, i);
-  _find_points_near_corner_straight<Dir_E, Dir_NE>(c, i);
-  _find_points_near_corner_straight<Dir_E, Dir_SE>(c, i);
-  _find_points_near_corner_straight<Dir_S, Dir_SE>(c, i);
-  _find_points_near_corner_straight<Dir_S, Dir_SW>(c, i);
-  _find_points_near_corner_straight<Dir_W, Dir_SW>(c, i);
-  _find_points_near_corner_straight<Dir_W, Dir_NW>(c, i);
-
-  // Due to the way the nearby point finding algorithm works, the corner will be considered near itself.
-  // This isn't what we want so we reverse this effect
-  assert(_point_to_nearby_corner_indices[c].back() == i);
-  _point_to_nearby_corner_indices[c].pop_back();
-  assert(_point_to_nearby_corner_indices[c].empty() || _point_to_nearby_corner_indices[c].back() != i);
+  for (map_position p : graph.get_safe_reachable_in_all_directions(_corners[i]))
+  {
+    if (p != _corners[i])
+    {
+      _point_to_nearby_corner_indices[p].push_back(i);
+    }
+  }
 }
 
 void PreprocessingData::_find_nearby_corners()
@@ -1039,11 +1005,31 @@ void PreprocessingData::preprocess()
   std::cout << std::endl;
 
   // Remove indirect nearby corners
+  // TODO: does not work with current algorithm, but probably would work if we changed corners_with_next reachable through other corners_with_next into ordinary corners without next
   /*std::cout << "Removing indirect nearby corners" << std::endl;
   t.StartTimer();
   _remove_indirect_nearby_corners();
   t.EndTimer();
   std::cout << "Indirect nearby corners removed in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+  std::cout << std::endl;*/
+
+  /*// Get corner_index, incoming direction to safe-reachable bounds
+  std::vector<std::vector<std::vector<map_position>>> corner_and_direction_to_bounds;
+  std::cout << "Computing safe-reachable bounds for corner and direction" << std::endl;
+  t.StartTimer();
+  _compute_safe_reachable_bounds();
+  t.EndTimer();
+  std::cout << "Safe-reachable bounds computed in " << t.GetElapsedTime() << std::endl;
+  total_time += t.GetElapsedTime();
+  std::cout << std::endl;*/
+
+  /*// Find geometric containers
+  std::cout << "Finding geometric containers" << std::endl;
+  t.StartTimer();
+  _find_geometric_containers(corner_and_direction_to_neighbouring_relevant_corners);
+  t.EndTimer();
+  std::cout << "Geometric containers computed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
   std::cout << std::endl;*/
  
