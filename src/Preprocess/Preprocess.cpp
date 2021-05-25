@@ -345,6 +345,21 @@ void PreprocessingData::_save(std::ostream & stream) const
     }
     stream << "\n";
   }
+
+  stream << "\n";
+
+  // Save _point_and_corner_to_bounds
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    for (corner_index i = 0; i < _point_to_nearby_corner_indices_with_next[p].size(); i++)
+    {
+      stream << _point_and_corner_to_bounds[p][i].first.x << " ";
+      stream << _point_and_corner_to_bounds[p][i].first.y << " ";
+      stream << _point_and_corner_to_bounds[p][i].second.x << " ";
+      stream << _point_and_corner_to_bounds[p][i].second.y << " ";
+    }
+    stream << "\n";
+  }
 }
 
 void PreprocessingData::save(const std::string &filename) const
@@ -368,6 +383,7 @@ void PreprocessingData::_load(std::istream &stream)
   _point_to_nearby_corner_indices_with_next.clear();
   _pair_of_corner_indices_to_dist.clear();
   _pair_of_corner_indices_to_first_corner.clear();
+  _point_and_corner_to_bounds.clear();
 
   unsigned int num_corners;
   stream >> num_corners;
@@ -426,6 +442,24 @@ void PreprocessingData::_load(std::istream &stream)
       stream >> first_corner;
       assert(first_corner != j);
       _pair_of_corner_indices_to_first_corner[i].push_back(first_corner);
+    }
+  }
+
+  // Load _point_and_corner_to_bounds
+  _point_and_corner_to_bounds.resize(graph.num_positions());
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    const int nearby_corners_size = _point_to_nearby_corner_indices_with_next[p].size();
+    _point_and_corner_to_bounds[p].resize(nearby_corners_size);
+  }
+
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    for (corner_index i = 0; i < _point_to_nearby_corner_indices_with_next[p].size(); i++)
+    {
+      std::pair<xyLoc, xyLoc> bounds;
+      stream >> bounds.first.x >> bounds.first.y >> bounds.second.x >> bounds.second.y;
+      _point_and_corner_to_bounds[p][i] = bounds;
     }
   }
 }
@@ -948,6 +982,89 @@ void PreprocessingData::_compute_safe_reachable_bounds(std::vector<std::pair<xyL
   }
 }
 
+void PreprocessingData::_find_geometric_container(map_position p, unsigned int i, std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds, const std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners)
+{
+  corner_index c = _point_to_nearby_corner_indices_with_next[p][i];
+
+  std::pair<xyLoc, xyLoc> bounds;
+  bounds.first = graph.loc(_corners[c]);
+  bounds.second = bounds.first;
+
+  std::vector<bool> visited_corners(_corners.size(), false);
+  std::vector<corner_index> unvisited_corners;
+  std::vector<map_position> previous_positions;
+  unvisited_corners.push_back(c);
+  previous_positions.push_back(p);
+  assert(unvisited_corners.size() == previous_positions.size());
+
+  while (!unvisited_corners.empty())
+  {
+    // Pop next corner
+    corner_index curr_corner_index = unvisited_corners.back();
+    unvisited_corners.pop_back();
+    map_position curr_corner = _corners[curr_corner_index];
+
+    map_position previous_position = previous_positions.back();
+    previous_positions.pop_back();
+    assert(unvisited_corners.size() == previous_positions.size());
+
+    // Check if corner already visited
+    if (visited_corners[curr_corner_index])
+    {
+      continue;
+    }
+    visited_corners[curr_corner_index] = true;
+
+    // Update bounds based on corner
+    bounds = graph.get_bounds_of_points(bounds, corner_to_bounds[curr_corner_index]);
+
+    // Add new corners to list of corners to visit
+    const Direction dir = get_direction_between_points(graph.loc(previous_position), graph.loc(curr_corner));
+    const auto &new_corners = corner_and_direction_to_neighbouring_relevant_corners[curr_corner_index][dir];
+    unvisited_corners.insert(unvisited_corners.end(), new_corners.begin(), new_corners.end());
+    for (const auto & _ [[maybe_unused]] : new_corners)
+    {
+      previous_positions.insert(previous_positions.end(), _corners[curr_corner_index]);
+    }
+    assert(unvisited_corners.size() == previous_positions.size());
+
+    const Direction alt_dir = get_alt_direction_between_points(graph.loc(previous_position), graph.loc(curr_corner));
+    const auto &new_corners_alt = corner_and_direction_to_neighbouring_relevant_corners[curr_corner_index][alt_dir];
+    unvisited_corners.insert(unvisited_corners.end(), new_corners_alt.begin(), new_corners_alt.end());
+    for (const auto & _ [[maybe_unused]] : new_corners_alt)
+    {
+      previous_positions.insert(previous_positions.end(), _corners[curr_corner_index]);
+    }
+    assert(unvisited_corners.size() == previous_positions.size());
+  }
+
+  _point_and_corner_to_bounds[p][i] = bounds;
+}
+
+void PreprocessingData::_find_geometric_containers(std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds, const std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners)
+{
+  _point_and_corner_to_bounds.resize(graph.num_positions());
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    const int nearby_corners_size = _point_to_nearby_corner_indices_with_next[p].size();
+    _point_and_corner_to_bounds[p].resize(nearby_corners_size);
+  }
+
+  map_position p;
+  for (p = 0; p < graph.num_positions(); p++)
+  {
+    if (p % 10000 == 0)
+      std::cout << p << (p != graph.num_positions() ? ", " : "") << std::flush;
+    for (unsigned int i = 0; i < _point_to_nearby_corner_indices_with_next[p].size(); i++)
+    {
+      _find_geometric_container(p, i, corner_to_bounds, corner_and_direction_to_neighbouring_relevant_corners);
+    }
+  }
+  if ((p - 1) % 10000 != 0)
+    std::cout << p - 1;
+  std::cout << std::endl;
+}
+
 void PreprocessingData::preprocess()
 {
   Timer t;
@@ -1038,14 +1155,14 @@ void PreprocessingData::preprocess()
   total_time += t.GetElapsedTime();
   std::cout << std::endl;
 
-  /*// Find geometric containers
+  // Find geometric containers
   std::cout << "Finding geometric containers" << std::endl;
   t.StartTimer();
-  _find_geometric_containers(corner_and_direction_to_neighbouring_relevant_corners);
+  _find_geometric_containers(corner_to_bounds, corner_and_direction_to_neighbouring_relevant_corners);
   t.EndTimer();
   std::cout << "Geometric containers computed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
-  std::cout << std::endl;*/
+  std::cout << std::endl;
  
   std::cout << "Preprocessing complete" << std::endl;
   

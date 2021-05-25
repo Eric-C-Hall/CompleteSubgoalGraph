@@ -42,6 +42,8 @@ inline bool within_45_degrees_anticlockwise_from_point(xyLoc a, xyLoc b, Directi
 
 inline exact_distance exact_distance_of_direction(Direction dir);
 
+inline char direction_to_char(const Direction dir);
+
 // --------------------------------------------------------
 
 inline std::vector<Direction> get_cardinal_directions()
@@ -239,6 +241,31 @@ inline exact_distance exact_distance_of_direction(Direction dir)
     return exact_distance(0,1);
   default:
     throw std::runtime_error("invalid direction");
+  }
+}
+
+inline char direction_to_char(const Direction dir)
+{
+  switch (dir)
+  {
+  case Dir_N:
+    return 'v';
+  case Dir_S:
+    return '^';
+  case Dir_E:
+    return '>';
+  case Dir_W:
+    return '<';
+  case Dir_NE:
+    return 'L';
+  case Dir_SE:
+    return '/';
+  case Dir_SW:
+    return '\\';
+  case Dir_NW:
+    return 'S';
+  default:
+    return '?';
   }
 }
 

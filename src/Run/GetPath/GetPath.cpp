@@ -14,10 +14,15 @@ bool GetPath(const PreprocessingData &preprocessing_data, xyLoc s, xyLoc g, std:
 
 bool PreprocessingData::get_path(map_position start, map_position goal, std::vector<xyLoc> &path) const
 {
+  // TODO: we have now converted goal and start from xyLoc to map_position and back again. This is not ideal.
+  // On the other hand, the time taken is probably insignificant.
+  xyLoc start_loc = graph.loc(start);
+  xyLoc goal_loc = graph.loc(goal);
+
   // Try some octile path
-  path.push_back(graph.loc(start));
-  _compute_octile_path<true>(graph.loc(start), graph.loc(goal), path);
-  if (path.back() == graph.loc(goal))
+  path.push_back(start_loc);
+  _compute_octile_path<true>(start_loc, goal_loc, path);
+  if (path.back() == goal_loc)
   {
     return true;
   }
@@ -29,11 +34,34 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
 
   //std::cout << _point_to_nearby_corner_indices_with_next[start].size() << " " << _point_to_nearby_corner_indices_with_next[goal].size() << " " << _point_to_nearby_corner_indices_with_next[start].size() * _point_to_nearby_corner_indices_with_next[goal].size() << std::endl;
 
-  // Test going through each pair of nearby indices
-  for (corner_index i : _point_to_nearby_corner_indices_with_next[start])
+  // Find goal corner indices for which the start is in the correct bounding box
+  std::vector<corner_index> goal_test_corner_indices;
+  const auto &goal_nearby_corner_indices = _point_to_nearby_corner_indices_with_next[goal];
+  for (unsigned int i = 0; i < goal_nearby_corner_indices.size(); i++)
   {
+    const std::pair<xyLoc, xyLoc> bounds = _point_and_corner_to_bounds[goal][i];
+    
+    if (bounds.first.x <= start_loc.x && bounds.first.y <= start_loc.y && bounds.second.x >= start_loc.x && bounds.second.y >= start_loc.y)
+    {
+      goal_test_corner_indices.push_back(goal_nearby_corner_indices[i]);
+    }
+  }
+
+  // Test going through each pair of nearby indices
+  const auto &start_test_corner_indices = _point_to_nearby_corner_indices_with_next[start];
+  for (unsigned int index = 0; index < start_test_corner_indices.size(); index++)
+  {
+    // Check if goal is in the correct bounding box for this corner index
+    const std::pair<xyLoc, xyLoc> bounds = _point_and_corner_to_bounds[start][index];
+    if (bounds.first.x > start_loc.x || bounds.first.y > start_loc.y || bounds.second.x < start_loc.x || bounds.second.y < start_loc.y)
+    {
+      continue;
+    }
+
+    const int i = start_test_corner_indices[index];
+
     exact_distance i_dist = graph.octile_distance(start, _corners[i]);
-    for (corner_index j : _point_to_nearby_corner_indices_with_next[goal])
+    for (corner_index j : goal_test_corner_indices)
     {
       exact_distance j_dist = graph.octile_distance(goal, _corners[j]);
       exact_distance current_dist = i_dist + _pair_of_corner_indices_to_dist[i][j] + j_dist;
