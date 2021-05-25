@@ -934,6 +934,20 @@ void PreprocessingData::_find_corners_with_relevant_next_corners(std::vector<std
   std::cout << "Num corners found with relevant next corners: " << num_with << std::endl;
 }
 
+void PreprocessingData::_compute_safe_reachable_bounds(std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds) const
+{
+  // initialize corner_to_bounds
+  corner_to_bounds.resize(_corners.size());
+
+  // loop through corners to find bounds
+  for (corner_index c = 0; c < _corners.size(); c++)
+  {
+    auto safe_reachable = graph.get_safe_reachable_in_all_directions(_corners[c]);
+    auto bounds = graph.get_bounds_of_points(safe_reachable);
+    corner_to_bounds[c] = bounds;
+  }
+}
+
 void PreprocessingData::preprocess()
 {
   Timer t;
@@ -1014,15 +1028,15 @@ void PreprocessingData::preprocess()
   total_time += t.GetElapsedTime();
   std::cout << std::endl;*/
 
-  /*// Get corner_index, incoming direction to safe-reachable bounds
-  std::vector<std::vector<std::vector<map_position>>> corner_and_direction_to_bounds;
-  std::cout << "Computing safe-reachable bounds for corner and direction" << std::endl;
+  // Get corner_index, incoming direction to safe-reachable bounds
+  std::vector<std::pair<xyLoc, xyLoc>> corner_to_bounds;
+  std::cout << "Computing safe-reachable bounds for corner" << std::endl;
   t.StartTimer();
-  _compute_safe_reachable_bounds();
+  _compute_safe_reachable_bounds(corner_to_bounds);
   t.EndTimer();
   std::cout << "Safe-reachable bounds computed in " << t.GetElapsedTime() << std::endl;
   total_time += t.GetElapsedTime();
-  std::cout << std::endl;*/
+  std::cout << std::endl;
 
   /*// Find geometric containers
   std::cout << "Finding geometric containers" << std::endl;

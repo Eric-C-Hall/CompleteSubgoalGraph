@@ -74,7 +74,17 @@ class Graph {
 
   void get_safe_reachable_in_directions(std::vector<map_position> &output, const map_position origin, const Direction straight_direction, const Direction diagonal_direction, const int num_step_bound = INT_MAX) const;
   std::vector<map_position> get_safe_reachable_in_all_directions(const map_position origin) const;
+
+  std::pair<xyLoc, xyLoc> get_bounds_of_points(const std::vector<map_position> &v) const;
+  inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const xyLoc a, const xyLoc b) const;
 };
+
+inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const xyLoc a, const xyLoc b) const
+{
+  const xyLoc lower_bound = xyLoc(std::min(a.x, b.x), std::min(a.y, b.y));
+  const xyLoc upper_bound = xyLoc(std::max(a.x, b.x), std::max(a.y, b.y));
+  return std::pair<xyLoc, xyLoc>(lower_bound, upper_bound);
+}
 
 inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph);
 

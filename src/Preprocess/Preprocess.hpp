@@ -49,6 +49,8 @@ class PreprocessingData {
 
   void _push_corners_in_corner_graph();
 
+  void _compute_safe_reachable_bounds(std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds) const;
+
   void _save(std::ostream & stream) const;
   void _load(std::istream &stream);
 

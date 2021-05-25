@@ -18,7 +18,11 @@ enum Direction {
   Dir_MAX = Dir_NW,
 };
 
+inline int num_directions() {return Dir_MAX + 1;}
+
 inline std::vector<Direction> get_cardinal_directions();
+inline std::vector<Direction> get_directions();
+inline std::vector<Direction> get_diagonal_directions();
 inline bool is_cardinal_direction(const Direction dir);
 
 inline Direction get_45_degrees_clockwise(Direction dir);
@@ -48,6 +52,11 @@ inline std::vector<Direction> get_cardinal_directions()
 inline std::vector<Direction> get_directions()
 {
   return std::vector<Direction>{Dir_N, Dir_NE, Dir_E, Dir_SE, Dir_S, Dir_SW, Dir_W, Dir_NW};
+};
+
+inline std::vector<Direction> get_diagonal_directions()
+{
+  return std::vector<Direction>{Dir_NE, Dir_SE, Dir_SW, Dir_NW};
 };
 
 inline bool is_cardinal_direction(const Direction dir)

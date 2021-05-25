@@ -217,4 +217,26 @@ std::vector<map_position> Graph::get_safe_reachable_in_all_directions(const map_
   return return_value;
 }
 
+std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const std::vector<map_position> &v) const
+{
+  assert(v.size() > 0);
+  xyLoc lower_bound =  loc(v.front());
+  xyLoc upper_bound = lower_bound;
+  for (map_position p : v)
+  {
+    xyLoc l = loc(p);
+    if (l.x < lower_bound.x)
+      lower_bound.x = l.x;
+    else if (l.x > upper_bound.x)
+      upper_bound.x = l.x;
+
+    if (l.y < lower_bound.y)
+      lower_bound.y = l.y;
+    else if (l.y > upper_bound.y)
+      upper_bound.y = l.y;
+  }
+
+  return std::pair<xyLoc, xyLoc>(lower_bound, upper_bound);
+}
+
 // eof
