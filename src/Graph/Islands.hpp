@@ -13,6 +13,7 @@ class Islands {
   public:
   Islands(const Graph &input_graph);
   inline int get_island_index(map_position p) const {return island_index[p];}
+  inline int get_island_index(xyLoc loc) const {return get_island_index(graph.pos(loc));}
 };
 
 #endif
