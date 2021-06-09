@@ -79,6 +79,8 @@ class Graph {
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const xyLoc a, const xyLoc b) const;
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const std::pair<xyLoc, xyLoc> bounds, const xyLoc c) const;
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const std::pair<xyLoc, xyLoc> a, const std::pair<xyLoc, xyLoc> b) const;
+
+  inline bool is_point_in_bounds(const xyLoc l, const std::pair<xyLoc, xyLoc> bounds) const;
 };
 
 inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const xyLoc a, const xyLoc b) const
@@ -116,6 +118,11 @@ inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const std::pair<xyLoc
   xyLoc new_lower_bound = xyLoc(std::min(a.first.x, b.first.x), std::min(a.first.y, b.first.y));
   xyLoc new_upper_bound = xyLoc(std::max(a.second.x, b.second.x), std::max(a.second.y, b.second.y));
   return std::pair<xyLoc, xyLoc>(new_lower_bound, new_upper_bound);
+}
+
+inline bool Graph::is_point_in_bounds(const xyLoc l, const std::pair<xyLoc, xyLoc> bounds) const
+{
+  return l.x >= bounds.first.x && l.y >= bounds.first.y && l.x <= bounds.second.x && l.y <= bounds.second.y;
 }
 
 inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph);

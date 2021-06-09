@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <map>
+#include <iostream>
 
 // Min, Max, Mean, Median, Mode, First Quartile, Third Quartile
 std::tuple<unsigned int, unsigned int, float, unsigned int, unsigned int, unsigned int, unsigned int> get_stats(std::vector<unsigned int> vec)
@@ -52,4 +53,15 @@ std::tuple<unsigned int, unsigned int, float, unsigned int, unsigned int, unsign
                     unsigned int, unsigned int, unsigned int,
                     unsigned int>(min, max, mean, median, mode, qt1, qt3);
   
+}
+
+void print_stats(std::tuple<unsigned int, unsigned int, float, unsigned int, unsigned int, unsigned int, unsigned int> stats)
+{
+  std::cout << "Min:    " << std::get<0>(stats) << std::endl;
+  std::cout << "Qt1:    " << std::get<5>(stats) << std::endl;
+  std::cout << "Median: " << std::get<3>(stats) << std::endl;
+  std::cout << "Qt2:    " << std::get<6>(stats) << std::endl;
+  std::cout << "Max:    " << std::get<1>(stats) << std::endl;
+  std::cout << "Mean:   " << std::get<2>(stats) << std::endl;
+  std::cout << "Mode:   " << std::get<4>(stats) << std::endl;
 }

@@ -562,13 +562,10 @@ void PreprocessingData::_output_debug_stats() const
   
   std::cout << std::endl;
   std::cout << "The following stats only include non-obstacles" << std::endl;
-  std::cout << "Min num nearby " << std::get<0>(stats) << std::endl;
-  std::cout << "Qt1 num nearby " << std::get<5>(stats) << std::endl;
-  std::cout << "Median num nearby " << std::get<3>(stats) << std::endl;
-  std::cout << "Qt2 num nearby " << std::get<6>(stats) << std::endl;
-  std::cout << "Max num nearby " << std::get<1>(stats) << std::endl;
-  std::cout << "Mean num nearby " << std::get<2>(stats) << std::endl;
-  std::cout << "Mode num nearby " << std::get<4>(stats) << std::endl;
+  std::cout << std::endl;
+  std::cout << "Num nearby:" << std::endl;
+  print_stats(stats);
+
 
   std::vector<unsigned int> num_nearby_with_next_corner;
   num_nearby_with_next_corner.reserve(graph.num_positions()); 
@@ -578,20 +575,14 @@ void PreprocessingData::_output_debug_stats() const
       num_nearby_with_next_corner.push_back(_point_to_nearby_corner_indices_with_next[p].size());
   }
 
-  // TODO: This is a modified copy of the above. Abstract the above out, and combine it with the warning below, and
-  // replace this and the above with calls to the abstracted version.
   auto stats_with_next_corner = get_stats(num_nearby_with_next_corner);
   
   std::cout << std::endl;
-  std::cout << "Min num nearby with next corner " << std::get<0>(stats_with_next_corner) << std::endl;
-  std::cout << "Qt1 num nearby with next corner " << std::get<5>(stats_with_next_corner) << std::endl;
-  std::cout << "Median num nearby with next corner " << std::get<3>(stats_with_next_corner) << std::endl;
-  std::cout << "Qt2 num nearby with next corner " << std::get<6>(stats_with_next_corner) << std::endl;
-  std::cout << "Max num nearby with next corner " << std::get<1>(stats_with_next_corner) << std::endl;
-  std::cout << "Mean num nearby with next corner " << std::get<2>(stats_with_next_corner) << std::endl;
-  std::cout << "Mode num nearby with next corner " << std::get<4>(stats_with_next_corner) << std::endl;
+  std::cout << "Num nearby with next corner:" << std::endl;
+  print_stats(stats);
 
   // Warn user about positions without nearby corners
+  // TODO: I don't think it is actually true that there shouldn't be non-obstacle positions without nearby corners. In some very simple graphs, like an empty square, it is possible.
   if (std::get<0>(stats) == 0)
   {
     std::cout << "-------------------------------------------------------------------------" << std::endl;

@@ -42,7 +42,7 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
     const MidDirection middirection = get_middirection_between_points(goal_loc, graph.loc(_corners[i]));
     const std::pair<xyLoc, xyLoc> bounds = _corner_and_middirection_to_bounds[i][middirection];
     
-    if (bounds.first.x <= start_loc.x && bounds.first.y <= start_loc.y && bounds.second.x >= start_loc.x && bounds.second.y >= start_loc.y)
+    if (graph.is_point_in_bounds(start_loc, bounds))
     {
       goal_test_corner_indices.push_back(i);
     }
@@ -56,7 +56,7 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
     // Check if goal is in the correct bounding box for this corner index
     const MidDirection middirection = get_middirection_between_points(start_loc, graph.loc(ci));
     const std::pair<xyLoc, xyLoc> bounds = _corner_and_middirection_to_bounds[i][middirection];
-    if (bounds.first.x > start_loc.x || bounds.first.y > start_loc.y || bounds.second.x < start_loc.x || bounds.second.y < start_loc.y)
+    if (!graph.is_point_in_bounds(goal_loc, bounds))
     {
       continue;
     }
