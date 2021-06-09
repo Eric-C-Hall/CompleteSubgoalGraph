@@ -119,7 +119,9 @@ inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const std::pair<xyLoc
 }
 
 inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph);
+inline map_position move_in_middirection(const MidDirection middirection, const map_position pos, const Graph &graph);
 
+// TODO: I think this should just return a map_position, rather than modifying the input map_position
 inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph)
 {
   switch (dir) {
@@ -150,6 +152,31 @@ inline void moving_direction(unsigned int dir, map_position & pos, const Graph &
     break;
   default:
     break;
+  }
+}
+
+inline map_position move_in_middirection(const MidDirection middirection, const map_position pos, const Graph &graph)
+{
+  switch (middirection)
+  {
+    case Dir_NNW:
+      return graph.up(graph.up(graph.left(pos)));
+    case Dir_NNE:
+      return graph.up(graph.up(graph.right(pos)));
+    case Dir_ENE:
+      return graph.right(graph.right(graph.up(pos)));
+    case Dir_ESE:
+      return graph.right(graph.right(graph.down(pos)));
+    case Dir_SSE:
+      return graph.down(graph.down(graph.right(pos)));
+    case Dir_SSW:
+      return graph.down(graph.down(graph.left(pos)));
+    case Dir_WSW:
+      return graph.left(graph.left(graph.down(pos)));
+    case Dir_WNW:
+      return graph.left(graph.left(graph.up(pos)));
+    default:
+      return pos;
   }
 }
 

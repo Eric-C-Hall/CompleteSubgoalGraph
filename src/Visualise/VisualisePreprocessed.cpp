@@ -111,18 +111,24 @@ bool is_useful_nearby_corner_for_direction_copy(const map_position pos, const ma
 // If performance becomes an issue, maybe these could all be stored in a vector from map_position to path/cursor
 // Then it would only take constant time to check if is cursor or on path
 // It's not worth doing this unless performance is actually an issue, though
-void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next, const bool show_islands, const Islands &islands, const bool show_bounds, const unsigned int which_nearby_corner)
+void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next, const bool show_islands, const Islands &islands, const bool show_bounds, const MidDirection middirection, const unsigned int which_nearby_corner)
 {
   map_position pos = graph.pos(x,y);
 
   // Highlight bounds
 
-  if (show_bounds && cursors.size() > 0 && which_nearby_corner < preprocessing_data.get_num_nearby_corners_with_next(cursors[0]))
+  if (show_bounds && cursors.size() > 0)
   {
-    const std::pair<xyLoc, xyLoc> bounds = preprocessing_data.get_bounds(cursors[0],which_nearby_corner);
-    if (x >= bounds.first.x && y >= bounds.first.y && x <= bounds.second.x && y <= bounds.second.y)
+    for (corner_index i = 0; i < preprocessing_data.get_corners().size(); i++)
     {
-      std::cout << "\e[45m";
+      if (preprocessing_data.get_corners()[i] == cursors[0])
+      {
+        const std::pair<xyLoc, xyLoc> bounds = preprocessing_data.get_bounds(i,middirection);
+        if (x >= bounds.first.x && y >= bounds.first.y && x <= bounds.second.x && y <= bounds.second.y)
+        {
+          std::cout << "\e[45m";
+        }
+      }
     }
   }
 
@@ -168,6 +174,29 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
     }
   }
 
+  // Highlight chosen nearby corner
+  if (cursors.size() > 0)
+  {
+    for (unsigned int i = 0; i < preprocessing_data.get_num_nearby_corners_with_next(cursors[0]); i++)
+    {
+      if (pos == preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], i))
+      {
+        if (i == which_nearby_corner)
+          std::cout << "\e[46m";
+      }
+    }
+  }
+
+  // Highlight middirection
+  if (show_bounds && cursors.size() > 0)
+  {
+    // Highlight middirection
+    if (pos == move_in_middirection(middirection, cursors[0], graph))
+      std::cout << "\e[47m";
+  }
+
+
+  // Instead of using if, else if, etc, we should use ifs and keep track of has_printed to ensure don't print twice
   if (graph.is_obstacle(pos))
   {
     std::cout << "@";
@@ -181,73 +210,41 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
   {
     std::cout << int_to_drawn_char(islands.get_island_index(pos));
   }
-  else
+  else if (show_bounds && cursors.size() > 0)
   {
-    // ------------------------------------------------------
-    // This is far too clunky
-    if (show_bounds && cursors.size() > 0 && which_nearby_corner < preprocessing_data.get_num_nearby_corners_with_next(cursors[0]))
+    bool has_printed = false;
+    for (unsigned int i = 0; i < preprocessing_data.get_num_nearby_corners_with_next(cursors[0]); i++)
     {
-      bool has_printed = false;
-      for (unsigned int i = 0; i < preprocessing_data.get_num_nearby_corners_with_next(cursors[0]); i++)
+      if (pos == preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], i))
       {
-        if (pos == preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], i))
+        // Print the direction in which the corner under the cursor is relevant for the corner at pos
+        for (Direction dir : get_directions())
         {
-          // Highlight chosen nearby corner
-          if (i == which_nearby_corner)
-            std::cout << "\e[46m";
-
-          // Get current corner index
-          unsigned int curr_corner_index = 0;
-          for (;curr_corner_index < preprocessing_data.get_corners().size(); curr_corner_index++)
+          if (is_useful_nearby_corner_for_direction_copy(pos, cursors[0], graph, dir))
           {
-            if (pos == preprocessing_data.get_corners()[curr_corner_index])
-            {
-              break;
-            }
-          }
-
-          if (curr_corner_index == preprocessing_data.get_corners().size())
-          {
-            std::cout << "*";
+            std::cout << direction_to_char(dir);
             assert(!has_printed);
             has_printed = true;
             break;
           }
-          else
-          {
-            // Print the direction in which the corner under the cursor is relevant for the corner at pos
-            for (Direction dir : get_directions())
-            {
-              if (is_useful_nearby_corner_for_direction_copy(pos, cursors[0], graph, dir))
-              {
-                std::cout << direction_to_char(dir);
-                assert(!has_printed);
-                has_printed = true;
-                break;
-              }
-            }
-            if (!has_printed)
-            {
-              std::cout << "+";
-              assert(!has_printed);
-              has_printed = true;
-            }
-          }
-          break;
         }
-      }
-      if (!has_printed)
-      {
-        std::cout << "-";
-        assert(!has_printed);
-        has_printed = true;
+        if (!has_printed)
+        {
+          std::cout << "+";
+          has_printed = true;
+        }
+        break;
       }
     }
-    else
+    if (!has_printed)
     {
       std::cout << "-";
+      has_printed = true;
     }
-    // ------------------------------------------------------
+  }
+  else
+  {
+    std::cout << "-";
   }
 
   // Remove formatting
@@ -307,7 +304,7 @@ void print_topbar(const unsigned int width, const unsigned int max_y)
 }
 
 
-void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next, const bool show_islands, const bool show_bounds, const unsigned int which_nearby_corner)
+void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next, const bool show_islands, const bool show_bounds, const MidDirection middirection, const unsigned int which_nearby_corner)
 {
   // TODO: Maybe don't compute this every time, on the other hand maybe it's not important to be efficient
   const Islands islands(graph);
@@ -320,7 +317,7 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
     print_sidebar(y, graph.get_height() - 1);
     for (unsigned int x = 0; x < graph.get_width(); x++)
     {
-      print_point(x,y,preprocessing_data,graph,cursors,path,show_nearby,show_num_nearby,show_nearby_with_next, show_islands, islands, show_bounds, which_nearby_corner);
+      print_point(x,y,preprocessing_data,graph,cursors,path,show_nearby,show_num_nearby,show_nearby_with_next, show_islands, islands, show_bounds, middirection, which_nearby_corner);
     }
     std::cout << "\n";
   }
@@ -388,8 +385,9 @@ void Visualise(const PreprocessingData &preprocessing_data)
   bool show_bounds = false;
 
   unsigned int which_nearby_corner = 100000;
+  MidDirection middirection = Dir_NNE;
 
-  print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_nearby_with_next, show_islands, show_bounds, which_nearby_corner);
+  print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_nearby_with_next, show_islands, show_bounds, middirection, which_nearby_corner);
   VisualiseRequestInput(input);
 
   while (input != "quit")
@@ -433,9 +431,11 @@ void Visualise(const PreprocessingData &preprocessing_data)
     }
     else if (input == "bounds")
     {
-      unsigned int old_which_nearby_corner = which_nearby_corner;
-      std::cin >> which_nearby_corner;
-      if (old_which_nearby_corner != which_nearby_corner)
+      MidDirection old_middirection = middirection;
+      unsigned int temp;
+      std::cin >> temp;
+      middirection = (MidDirection)temp;
+      if (!show_bounds || old_middirection != middirection)
       {
         show_bounds = true;
       }
@@ -444,13 +444,19 @@ void Visualise(const PreprocessingData &preprocessing_data)
         show_bounds = false;
       }
     }
-    else if (input == "gonearbycorner")
+    else if (input == "whichnearbycorner")
+    {
+      std::cin >> which_nearby_corner;
+    }
+    else if (input == "gonearbycorner" && cursors.size() > 0)
     {
       map_position go_pos = preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], which_nearby_corner);
+      middirection = get_middirection_between_points(graph.loc(cursors[0]), graph.loc(go_pos));
       set_cursor_to_pos(cursors, graph, 0, go_pos);
     }
 
-    print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_nearby_with_next, show_islands, show_bounds, which_nearby_corner);
+
+    print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_nearby_with_next, show_islands, show_bounds, middirection, which_nearby_corner);
 
     if (input == "help")
     {
@@ -464,8 +470,9 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "corner n m: move the nth cursor to select the mth corner" << std::endl;
       std::cout << "numnearby: show number of nearby corners" << std::endl;
       std::cout << "islands: show islands" << std::endl;
-      std::cout << "bounds i: show bounds. Uses i to determine which neighbouring corner to use" << std::endl;
-      std::cout << "gonearbycorner: sets cursor 0 to the nearby corner for the currently shown bounds" << std::endl;
+      std::cout << "bounds i: show bounds. Uses i to determine which middirection to use" << std::endl;
+      std::cout << "gonearbycorner: sets cursor 0 to the selected nearby corner" << std::endl;
+      std::cout << "whichnearbycorner i: highlight the ith nearby corner" << std::endl;
       std::cout << std::endl;
     }
 

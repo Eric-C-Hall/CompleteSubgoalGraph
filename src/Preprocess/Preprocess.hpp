@@ -29,7 +29,7 @@ class PreprocessingData {
   // Given a point, and a nearby corner with next, give me some bounds within
   // which all optimal destinations fall, when passing through these points.
   // first is the lower x and y bound, while second is the upper x and y bound
-  std::vector<std::vector<std::pair<xyLoc, xyLoc>>> _point_and_corner_to_bounds;
+  std::vector<std::vector<std::pair<xyLoc, xyLoc>>> _corner_and_middirection_to_bounds;
 
 
   void _add_if_corner(map_position p);
@@ -50,7 +50,7 @@ class PreprocessingData {
   void _push_corners_in_corner_graph();
 
   void _compute_safe_reachable_bounds(std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds) const;
-  void _find_geometric_container(map_position p, unsigned int i, std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds, const std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners);
+  void _find_geometric_container(corner_index i, MidDirection middirection, std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds, const std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners);
   void _find_geometric_containers(std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds, const std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners);
 
   void _save(std::ostream & stream) const;
@@ -80,7 +80,7 @@ class PreprocessingData {
   std::vector<map_position> get_nearby_corners_with_next(map_position p) const;
 
   inline const std::vector<map_position> & get_corners() const {return _corners;}
-  inline const std::pair<xyLoc, xyLoc> & get_bounds(map_position p, int i) const {return _point_and_corner_to_bounds[p][i];}
+  inline const std::pair<xyLoc, xyLoc> & get_bounds(const corner_index i, const MidDirection middirection) const {return _corner_and_middirection_to_bounds[i][middirection];}
   inline const unsigned int get_num_nearby_corners_with_next(map_position p) const {return _point_to_nearby_corner_indices_with_next[p].size();}
   inline const map_position get_ith_nearby_corner_with_next(map_position p, int i) const {return _corners[_point_to_nearby_corner_indices_with_next[p][i]];}
 };

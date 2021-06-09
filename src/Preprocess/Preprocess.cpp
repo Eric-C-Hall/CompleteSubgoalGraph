@@ -348,15 +348,16 @@ void PreprocessingData::_save(std::ostream & stream) const
 
   stream << "\n";
 
-  // Save _point_and_corner_to_bounds
-  for (map_position p = 0; p < graph.num_positions(); p++)
+  // Save _corner_and_middirection_to_bounds
+  for (corner_index i = 0; i < _corners.size(); i++)
   {
-    for (corner_index i = 0; i < _point_to_nearby_corner_indices_with_next[p].size(); i++)
+    for (MidDirection middirection : get_middirections())
     {
-      stream << _point_and_corner_to_bounds[p][i].first.x << " ";
-      stream << _point_and_corner_to_bounds[p][i].first.y << " ";
-      stream << _point_and_corner_to_bounds[p][i].second.x << " ";
-      stream << _point_and_corner_to_bounds[p][i].second.y << " ";
+      const auto &bounds = _corner_and_middirection_to_bounds[i][middirection];
+      stream << bounds.first.x << " ";
+      stream << bounds.first.y << " ";
+      stream << bounds.second.x << " ";
+      stream << bounds.second.y << " ";
     }
     stream << "\n";
   }
@@ -383,7 +384,7 @@ void PreprocessingData::_load(std::istream &stream)
   _point_to_nearby_corner_indices_with_next.clear();
   _pair_of_corner_indices_to_dist.clear();
   _pair_of_corner_indices_to_first_corner.clear();
-  _point_and_corner_to_bounds.clear();
+  _corner_and_middirection_to_bounds.clear();
 
   unsigned int num_corners;
   stream >> num_corners;
@@ -445,21 +446,20 @@ void PreprocessingData::_load(std::istream &stream)
     }
   }
 
-  // Load _point_and_corner_to_bounds
-  _point_and_corner_to_bounds.resize(graph.num_positions());
-  for (map_position p = 0; p < graph.num_positions(); p++)
+  // Load _corner_and_middirection_to_bounds
+  _corner_and_middirection_to_bounds.resize(_corners.size());
+  for (corner_index i = 0; i < _corners.size(); i++)
   {
-    const int nearby_corners_size = _point_to_nearby_corner_indices_with_next[p].size();
-    _point_and_corner_to_bounds[p].resize(nearby_corners_size);
+    _corner_and_middirection_to_bounds[i].resize(num_middirections());
   }
 
-  for (map_position p = 0; p < graph.num_positions(); p++)
+  for (corner_index i = 0; i <_corners.size(); i++)
   {
-    for (corner_index i = 0; i < _point_to_nearby_corner_indices_with_next[p].size(); i++)
+    for (MidDirection middirection : get_middirections())
     {
       std::pair<xyLoc, xyLoc> bounds;
       stream >> bounds.first.x >> bounds.first.y >> bounds.second.x >> bounds.second.y;
-      _point_and_corner_to_bounds[p][i] = bounds;
+      _corner_and_middirection_to_bounds[i][middirection] = bounds;
     }
   }
 }
@@ -982,19 +982,29 @@ void PreprocessingData::_compute_safe_reachable_bounds(std::vector<std::pair<xyL
   }
 }
 
-void PreprocessingData::_find_geometric_container(map_position p, unsigned int i, std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds, const std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners)
+void PreprocessingData::_find_geometric_container(corner_index i, MidDirection middirection, std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds, const std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners)
 {
-  corner_index c = _point_to_nearby_corner_indices_with_next[p][i];
+  map_position ci = _corners[i];
 
   std::pair<xyLoc, xyLoc> bounds;
-  bounds.first = graph.loc(_corners[c]);
+  bounds.first = graph.loc(ci);
   bounds.second = bounds.first;
 
   std::vector<bool> visited_corners(_corners.size(), false);
   std::vector<corner_index> unvisited_corners;
   std::vector<map_position> previous_positions;
-  unvisited_corners.push_back(c);
-  previous_positions.push_back(p);
+
+  // Note: moving in the middirection may not stay within the bounds of the
+  // collared graph, but this is only a problem if it leaves the graph
+  // completely, not when it wraps around, because if it wraps around the
+  // middirection is never going to be used when entering the corner anyway
+  map_position p = move_in_middirection(get_opposite_middirection(middirection), ci, graph);
+  if (p < graph.num_positions())
+  {
+    unvisited_corners.push_back(i);
+    previous_positions.push_back(p);
+  }
+
   assert(unvisited_corners.size() == previous_positions.size());
 
   while (!unvisited_corners.empty())
@@ -1038,30 +1048,30 @@ void PreprocessingData::_find_geometric_container(map_position p, unsigned int i
     assert(unvisited_corners.size() == previous_positions.size());
   }
 
-  _point_and_corner_to_bounds[p][i] = bounds;
+  _corner_and_middirection_to_bounds[i][middirection] = bounds;
 }
 
 void PreprocessingData::_find_geometric_containers(std::vector<std::pair<xyLoc, xyLoc>> &corner_to_bounds, const std::vector<std::vector<std::vector<corner_index>>> &corner_and_direction_to_neighbouring_relevant_corners)
 {
-  _point_and_corner_to_bounds.resize(graph.num_positions());
-  for (map_position p = 0; p < graph.num_positions(); p++)
+  _corner_and_middirection_to_bounds.resize(_corners.size());
+  for (corner_index i = 0; i < _corners.size(); i++)
   {
-    const int nearby_corners_size = _point_to_nearby_corner_indices_with_next[p].size();
-    _point_and_corner_to_bounds[p].resize(nearby_corners_size);
+    _corner_and_middirection_to_bounds[i].resize(num_middirections());
   }
 
-  map_position p;
-  for (p = 0; p < graph.num_positions(); p++)
+  corner_index i;
+  for (i = 0; i < _corners.size(); i++)
   {
-    if (p % 10000 == 0)
-      std::cout << p << (p != graph.num_positions() ? ", " : "") << std::flush;
-    for (unsigned int i = 0; i < _point_to_nearby_corner_indices_with_next[p].size(); i++)
+    if (i % 1000 == 0)
+      std::cout << i << (i != graph.num_positions() ? ", " : "") << std::flush;
+
+    for (MidDirection middirection : get_middirections())
     {
-      _find_geometric_container(p, i, corner_to_bounds, corner_and_direction_to_neighbouring_relevant_corners);
+      _find_geometric_container(i, middirection, corner_to_bounds, corner_and_direction_to_neighbouring_relevant_corners);
     }
   }
-  if ((p - 1) % 10000 != 0)
-    std::cout << p - 1;
+  if ((i - 1) % 1000 != 0)
+    std::cout << i - 1;
   std::cout << std::endl;
 }
 

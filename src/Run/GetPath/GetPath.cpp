@@ -37,30 +37,32 @@ bool PreprocessingData::get_path(map_position start, map_position goal, std::vec
   // Find goal corner indices for which the start is in the correct bounding box
   std::vector<corner_index> goal_test_corner_indices;
   const auto &goal_nearby_corner_indices = _point_to_nearby_corner_indices_with_next[goal];
-  for (unsigned int i = 0; i < goal_nearby_corner_indices.size(); i++)
+  for (const corner_index i : goal_nearby_corner_indices)
   {
-    const std::pair<xyLoc, xyLoc> bounds = _point_and_corner_to_bounds[goal][i];
+    const MidDirection middirection = get_middirection_between_points(goal_loc, graph.loc(_corners[i]));
+    const std::pair<xyLoc, xyLoc> bounds = _corner_and_middirection_to_bounds[i][middirection];
     
     if (bounds.first.x <= start_loc.x && bounds.first.y <= start_loc.y && bounds.second.x >= start_loc.x && bounds.second.y >= start_loc.y)
     {
-      goal_test_corner_indices.push_back(goal_nearby_corner_indices[i]);
+      goal_test_corner_indices.push_back(i);
     }
   }
 
-  // Test going through each pair of nearby indices
-  const auto &start_test_corner_indices = _point_to_nearby_corner_indices_with_next[start];
-  for (unsigned int index = 0; index < start_test_corner_indices.size(); index++)
+  // Test going through each pair of nearby indices with relevant next corners
+  for (corner_index i : _point_to_nearby_corner_indices_with_next[start])
   {
+    map_position ci = _corners[i];
+
     // Check if goal is in the correct bounding box for this corner index
-    const std::pair<xyLoc, xyLoc> bounds = _point_and_corner_to_bounds[start][index];
+    const MidDirection middirection = get_middirection_between_points(start_loc, graph.loc(ci));
+    const std::pair<xyLoc, xyLoc> bounds = _corner_and_middirection_to_bounds[i][middirection];
     if (bounds.first.x > start_loc.x || bounds.first.y > start_loc.y || bounds.second.x < start_loc.x || bounds.second.y < start_loc.y)
     {
       continue;
     }
 
-    const int i = start_test_corner_indices[index];
-
-    exact_distance i_dist = graph.octile_distance(start, _corners[i]);
+    // Try each choice of goal index given this start index, compare to best distance so far
+    exact_distance i_dist = graph.octile_distance(start, ci);
     for (corner_index j : goal_test_corner_indices)
     {
       exact_distance j_dist = graph.octile_distance(goal, _corners[j]);

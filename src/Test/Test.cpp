@@ -10,6 +10,9 @@
 
 void Test(const PreprocessingData &preprocessing_data)
 {
+  const static bool ONLY_TEST_NEARBY_POINTS = false;
+  const static exact_distance NEARBY_TEST_DISTANCE = 10 * STRAIGHT_EXACT_DISTANCE;
+
   const static bool TEST_SPECIFIC_POINTS = false;
   const static int TEST_SPECIFIC_POINTS_A_X = 86;//(113, 331). Target: (252, 211)
   const static int TEST_SPECIFIC_POINTS_A_Y = 262;
@@ -48,19 +51,29 @@ void Test(const PreprocessingData &preprocessing_data)
         y1 = TEST_SPECIFIC_POINTS_A_Y;
       }
 
+      if (ONLY_TEST_NEARBY_POINTS)
+      {
+        std::cout << "WARNING: ONLY TESTING NEARBY POINTS" << std::endl;
+      }
+
       // Use SimpleDijkstra to find the distance of this point from all others.
       delete[] dijkstra_dists;
       dijkstra_dists = new exact_distance[width * height];
       SimpleDijkstraExactDistance::run_dijkstra(graph.pos(x1,y1), dijkstra_dists, graph);
     }
 
+    exact_distance dist;
     //randomly choose x2 and y2
     do
     {
       x2 = width_distr(gen);
       y2 = height_distr(gen);
+      dist = graph.octile_distance(graph.pos(xyLoc(x1,y1)), graph.pos(xyLoc(x2, y2)));
     }
-    while (graph.is_obstacle(graph.pos(x2, y2)) || dijkstra_dists[graph.pos(x2, y2)] == MAX_EXACT_DISTANCE);
+    while (graph.is_obstacle(graph.pos(x2, y2)) // Don't choose obstacles
+           || dijkstra_dists[graph.pos(x2, y2)] == MAX_EXACT_DISTANCE // Don't choose points in different islands
+           || (ONLY_TEST_NEARBY_POINTS && dist > NEARBY_TEST_DISTANCE) // Don't choose points that are too far away (since debugging is easier when the chosen points are near each other, it has a simpler path)
+          );
 
     if (TEST_SPECIFIC_POINTS)
     {
@@ -83,7 +96,7 @@ void Test(const PreprocessingData &preprocessing_data)
     // Validate path
     if (!ValidatePath(graph, path))
     {
-      print_graph(preprocessing_data, graph, std::vector<map_position>(), path, false, false, false, false, false, 0);
+      print_graph(preprocessing_data, graph, std::vector<map_position>(), path, false, false, false, false, false, Dir_NNE, 0);
       throw std::runtime_error("Failed to validate path returned from main. Source: ("  + std::to_string(x1) + ", " + std::to_string(y1) + "). Target: (" + std::to_string(x2) + ", " + std::to_string(y2) + ").");
     }
 
@@ -106,7 +119,7 @@ void Test(const PreprocessingData &preprocessing_data)
     exact_distance simple_path_length = dijkstra_dists[graph.pos(x2, y2)];
     if (path_length != simple_path_length)
     {
-      print_graph(preprocessing_data, graph, std::vector<map_position>(), path, false, false, false, false, false, 0);
+      print_graph(preprocessing_data, graph, std::vector<map_position>(), path, false, false, false, false, false, Dir_NNE, 0);
       throw std::runtime_error("Test failed from (" + std::to_string(x1) + ", " + std::to_string(y1) + ") to (" + std::to_string(x2) + ", " + std::to_string(y2) + "). Simple had " + std::to_string(simple_path_length.num_straight) + " straight, " + std::to_string(simple_path_length.num_diagonal) + " diagonal. Main had " + std::to_string(path_length.num_straight) + " straight, " + std::to_string(path_length.num_diagonal) + " diagonal.");
     }
   }

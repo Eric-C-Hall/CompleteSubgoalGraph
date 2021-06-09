@@ -18,16 +18,32 @@ enum Direction {
   Dir_MAX = Dir_NW,
 };
 
-inline int num_directions() {return Dir_MAX + 1;}
+enum MidDirection {
+  Dir_NNE = 0,
+  Dir_ENE = 1,
+  Dir_ESE = 2,
+  Dir_SSE = 3,
+  Dir_SSW = 4,
+  Dir_WSW = 5,
+  Dir_WNW = 6,
+  Dir_NNW = 7,
+  Dir_MIDMAX = Dir_NNW,
+  Dir_MIDMIN = Dir_NNE
+};
+
+inline int num_directions() {return Dir_MAX - Dir_MIN + 1;}
+inline unsigned int num_middirections() {return Dir_MIDMAX - Dir_MIDMIN + 1;}
 
 inline std::vector<Direction> get_cardinal_directions();
 inline std::vector<Direction> get_directions();
 inline std::vector<Direction> get_diagonal_directions();
+inline std::vector<MidDirection> get_middirections();
 inline bool is_cardinal_direction(const Direction dir);
 
 inline Direction get_45_degrees_clockwise(Direction dir);
 inline Direction get_45_degrees_anticlockwise(Direction dir);
 inline Direction get_opposite_direction(Direction dir);
+inline MidDirection get_opposite_middirection(MidDirection middirecion);
 template <int n>
 inline Direction get_n_steps_clockwise(Direction dir);
 template <int n>
@@ -35,6 +51,7 @@ inline Direction get_n_steps_anticlockwise(Direction dir);
 
 inline Direction get_direction_between_points(xyLoc source, xyLoc target);
 inline Direction get_alt_direction_between_points(xyLoc source, xyLoc target);
+inline MidDirection get_middirection_between_points(xyLoc source, xyLoc target);
 
 inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir);
 inline bool within_45_degrees_clockwise_from_point(xyLoc a, xyLoc b, Direction dir);
@@ -61,6 +78,11 @@ inline std::vector<Direction> get_diagonal_directions()
   return std::vector<Direction>{Dir_NE, Dir_SE, Dir_SW, Dir_NW};
 };
 
+inline std::vector<MidDirection> get_middirections()
+{
+  return std::vector<MidDirection>{Dir_NNE, Dir_ENE, Dir_ESE, Dir_SSE, Dir_SSW, Dir_WSW, Dir_WNW, Dir_NNW};
+};
+
 inline bool is_cardinal_direction(const Direction dir)
 {
   return dir == (Direction)(2 * (dir >> 1));
@@ -79,6 +101,11 @@ inline Direction get_45_degrees_anticlockwise(Direction dir)
 inline Direction get_opposite_direction(Direction dir)
 {
   return (Direction)(dir >= 4 ?  dir - 4 : dir + 4);
+}
+
+inline MidDirection get_opposite_middirection(MidDirection middirecion)
+{
+  return (MidDirection)(middirecion >= 4 ?  middirecion - 4 : middirecion + 4);
 }
 
 template <int n>
@@ -170,6 +197,35 @@ inline Direction get_alt_direction_between_points(xyLoc source, xyLoc target)
       return Dir_SE;
     else // delta.y < -delta.x
       return Dir_S;
+}
+
+inline MidDirection get_middirection_between_points(xyLoc source, xyLoc target)
+{
+  assert(source != target);
+  xyLoc delta = target - source;
+
+  if (delta.x > 0)
+    if (delta.y > 0)
+      if (delta.y > delta.x)
+        return Dir_NNE;
+      else // delta.y <= delta.x
+        return Dir_ENE;
+    else // delta.y <= 0
+      if (delta.y > -delta.x)
+        return Dir_ESE;
+      else // delta.y <= -delta.x
+        return Dir_SSE; 
+  else // delta.x <= 0
+    if (delta.y > 0)
+      if (delta.y > -delta.x)
+        return Dir_NNW;
+      else // delta.y <= -delta.x
+        return Dir_WNW;
+    else // delta.y <= 0
+      if (delta.y > delta.x)
+        return Dir_WSW;
+      else // delta.y <= delta.x
+        return Dir_SSW;
 }
 
 // Is the direction to travel towards b from a strictly between the directions dir and dir + 45 degrees clockwise? 
