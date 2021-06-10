@@ -111,7 +111,7 @@ bool is_useful_nearby_corner_for_direction_copy(const map_position pos, const ma
 // If performance becomes an issue, maybe these could all be stored in a vector from map_position to path/cursor
 // Then it would only take constant time to check if is cursor or on path
 // It's not worth doing this unless performance is actually an issue, though
-void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next, const bool show_islands, const Islands &islands, const bool show_bounds, const MidDirection middirection, const unsigned int which_nearby_corner)
+void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_nearby_with_next, const bool show_islands, const Islands &islands, const bool show_bounds, const MidDirection middirection, const unsigned int which_nearby_corner, const std::pair<xyLoc, xyLoc> bounds)
 {
   map_position pos = graph.pos(x,y);
 
@@ -119,16 +119,9 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
 
   if (show_bounds && cursors.size() > 0)
   {
-    for (corner_index i = 0; i < preprocessing_data.get_corners().size(); i++)
+    if (x >= bounds.first.x && y >= bounds.first.y && x <= bounds.second.x && y <= bounds.second.y)
     {
-      if (preprocessing_data.get_corners()[i] == cursors[0])
-      {
-        const std::pair<xyLoc, xyLoc> bounds = preprocessing_data.get_bounds(i,middirection);
-        if (x >= bounds.first.x && y >= bounds.first.y && x <= bounds.second.x && y <= bounds.second.y)
-        {
-          std::cout << "\e[45m";
-        }
-      }
+      std::cout << "\e[45m";
     }
   }
 
@@ -309,6 +302,19 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
   // TODO: Maybe don't compute this every time, on the other hand maybe it's not important to be efficient
   const Islands islands(graph);
 
+  // Compute bounds for currently selected corner and middirection
+  std::pair<xyLoc, xyLoc> bounds;
+  if (show_bounds && cursors.size() > 0)
+  {
+    for (corner_index i = 0; i < preprocessing_data.get_corners().size(); i++)
+    {
+      if (preprocessing_data.get_corners()[i] == cursors[0])
+      {
+        bounds = preprocessing_data.get_bounds(i,middirection);
+      }
+    }
+  }
+
   // Print the graph
   print_topbar(graph.get_width(), graph.get_height() - 1);
 
@@ -317,7 +323,7 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
     print_sidebar(y, graph.get_height() - 1);
     for (unsigned int x = 0; x < graph.get_width(); x++)
     {
-      print_point(x,y,preprocessing_data,graph,cursors,path,show_nearby,show_num_nearby,show_nearby_with_next, show_islands, islands, show_bounds, middirection, which_nearby_corner);
+      print_point(x,y,preprocessing_data,graph,cursors,path,show_nearby,show_num_nearby,show_nearby_with_next, show_islands, islands, show_bounds, middirection, which_nearby_corner, bounds);
     }
     std::cout << "\n";
   }
