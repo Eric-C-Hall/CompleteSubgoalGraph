@@ -1015,6 +1015,7 @@ void PreprocessingData::_find_geometric_container(corner_index i, MidDirection m
   std::vector<bool> visited_corners(_corners.size(), false);
   std::vector<corner_index> unvisited_corners;
   std::vector<map_position> previous_positions;
+  std::vector<exact_distance> distances;
 
   // Note: moving in the middirection may not stay within the bounds of the
   // collared graph, but this is only a problem if it leaves the graph
@@ -1025,9 +1026,11 @@ void PreprocessingData::_find_geometric_container(corner_index i, MidDirection m
   {
     unvisited_corners.push_back(i);
     previous_positions.push_back(p);
+    distances.push_back(ZERO_EXACT_DISTANCE);
   }
 
   assert(unvisited_corners.size() == previous_positions.size());
+  assert(unvisited_corners.size() == distances.size());
 
   while (!unvisited_corners.empty())
   {
@@ -1038,7 +1041,18 @@ void PreprocessingData::_find_geometric_container(corner_index i, MidDirection m
 
     map_position previous_position = previous_positions.back();
     previous_positions.pop_back();
+
+    exact_distance curr_distance = distances.back();
+    distances.pop_back();
+
     assert(unvisited_corners.size() == previous_positions.size());
+    assert(unvisited_corners.size() == distances.size());
+
+    // Check if corner has been reached optimally from the initial corner
+    if (curr_distance != _pair_of_corner_indices_to_dist[i][curr_corner_index])
+    {
+      continue;
+    }
 
     // Check if corner already visited
     if (visited_corners[curr_corner_index])
@@ -1054,20 +1068,24 @@ void PreprocessingData::_find_geometric_container(corner_index i, MidDirection m
     const Direction dir = get_direction_between_points(graph.loc(previous_position), graph.loc(curr_corner));
     const auto &new_corners = corner_and_direction_to_neighbouring_relevant_corners[curr_corner_index][dir];
     unvisited_corners.insert(unvisited_corners.end(), new_corners.begin(), new_corners.end());
-    for (const auto & _ [[maybe_unused]] : new_corners)
+    for (const corner_index &new_corner_index : new_corners)
     {
       previous_positions.insert(previous_positions.end(), _corners[curr_corner_index]);
+      distances.insert(distances.end(), curr_distance + graph.octile_distance(_corners[curr_corner_index], _corners[new_corner_index]));
     }
     assert(unvisited_corners.size() == previous_positions.size());
+    assert(unvisited_corners.size() == distances.size());
 
     const Direction alt_dir = get_alt_direction_between_points(graph.loc(previous_position), graph.loc(curr_corner));
     const auto &new_corners_alt = corner_and_direction_to_neighbouring_relevant_corners[curr_corner_index][alt_dir];
     unvisited_corners.insert(unvisited_corners.end(), new_corners_alt.begin(), new_corners_alt.end());
-    for (const auto & _ [[maybe_unused]] : new_corners_alt)
+    for (const corner_index &new_corner_index : new_corners_alt)
     {
       previous_positions.insert(previous_positions.end(), _corners[curr_corner_index]);
+      distances.insert(distances.end(), curr_distance + graph.octile_distance(_corners[curr_corner_index], _corners[new_corner_index]));
     }
     assert(unvisited_corners.size() == previous_positions.size());
+    assert(unvisited_corners.size() == distances.size());
   }
 
   _corner_and_middirection_to_bounds[i][middirection] = bounds;
