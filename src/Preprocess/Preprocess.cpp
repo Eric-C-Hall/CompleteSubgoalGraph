@@ -311,29 +311,41 @@ void PreprocessingData::_save(std::ostream & stream) const
   }
   stream << "\n\n";
 
+  int num_corners = _corners.size();
+  std::cout << num_corners << " corners saved" << std::endl;
+
   // Save _point_to_nearby_corner_indices
+  int num_nearby_corner_indices = 0;
   for (map_position p = 0; p < graph.num_positions(); p++)
   {
     for (unsigned int corner : _point_to_nearby_corner_indices[p])
     {
       stream << corner << " ";
+      num_nearby_corner_indices++;
     }
     stream << _corners.size() << "\n";
   }
-
   stream << "\n";
 
-  // Save _point_to_nearby_corner_indices_without_relevant_next_corner
+  std::cout << num_nearby_corner_indices << " nearby corner indices saved" << std::endl;
+  int num_seperators = graph.num_positions();
+  std::cout << num_seperators << " seperators used" << std::endl;
+
+  // Save _point_to_nearby_corner_indices_with_next
+  int num_nearby_corner_indices_with_next = 0;
   for (map_position p = 0; p < graph.num_positions(); p++)
   {
     for (unsigned int corner : _point_to_nearby_corner_indices_with_next[p])
     {
       stream << corner << " ";
+      num_nearby_corner_indices_with_next++;
     }
     stream << _corners.size() << "\n";
   }
-
   stream << "\n";
+
+  std::cout << num_nearby_corner_indices_with_next << " nearby corner indices with next saved" << std::endl;
+  std::cout << graph.num_positions() << " seperators used" << std::endl;
 
   // Save _pair_of_corner_indices_to_first_corner and _pair_of_corner_indices_to_dist
   for (corner_index i = 0; i < _corners.size(); i++)
@@ -347,8 +359,10 @@ void PreprocessingData::_save(std::ostream & stream) const
     }
     stream << "\n";
   }
-
   stream << "\n";
+
+  int num_exact_distances_and_first_corners = _corners.size() * _corners.size();
+  std::cout << num_exact_distances_and_first_corners << " exact distances and first corners saved" << std::endl;
 
   // Save _corner_and_middirection_to_bounds
   for (corner_index i = 0; i < _corners.size(); i++)
@@ -363,6 +377,23 @@ void PreprocessingData::_save(std::ostream & stream) const
     }
     stream << "\n";
   }
+
+  int num_bounds = _corners.size() * get_middirections().size();
+  std::cout << num_bounds << " bounds saved" << std::endl;
+  int num_important = num_corners + num_nearby_corner_indices + num_nearby_corner_indices_with_next + 3*num_exact_distances_and_first_corners + 4*num_bounds;
+  int num_total = num_important + 2*num_seperators;
+  std::cout << "Total: " << num_total << std::endl;
+  std::cout << "Important: " << num_important << std::endl;
+  std::cout << std::endl;
+
+  std::cout << "Percentages of important data saved: " << std::endl;
+  std::cout << "Corners:          " << 100 * (double)num_corners / (double) num_important << std::endl;
+  std::cout << "Nearby:           " << 100 * (double)num_nearby_corner_indices / (double) num_important << std::endl;
+  std::cout << "Nearby with next: " << 100 * (double)num_nearby_corner_indices_with_next / (double) num_important << std::endl;
+  std::cout << "Exact distances:  " << 100 * 2 * (double)num_exact_distances_and_first_corners / (double) num_important << std::endl;
+  std::cout << "First corners:    " << 100 * (double)num_exact_distances_and_first_corners / (double) num_important << std::endl;
+  std::cout << "Bounds:           " << 100 * 4 * (double)num_bounds / (double) num_important << std::endl;
+
 }
 
 void PreprocessingData::save(const std::string &filename) const
