@@ -73,6 +73,7 @@ class PreprocessingData {
   void save(const std::string &filename) const;
   void load(const std::string &filename);
 
+  bool get_path(map_position start, map_position goal, std::vector<xyLoc> &path) const;
   const Graph &get_graph() const {return graph;}
 
   std::vector<map_position> get_nearby_corners(map_position p) const;
@@ -82,22 +83,6 @@ class PreprocessingData {
   inline const std::pair<xyLoc, xyLoc> & get_bounds(const corner_index i, const MidDirection middirection) const {return _corner_and_middirection_to_bounds[i][middirection];}
   inline const unsigned int get_num_nearby_corners_with_next(map_position p) const {return _point_to_nearby_corner_indices_with_next[p].size();}
   inline const map_position get_ith_nearby_corner_with_next(map_position p, int i) const {return _corners[_point_to_nearby_corner_indices_with_next[p][i]];}
-
-  // -----------------------------------------------------------------------------------
-  // These functions are implemented in GetPath.cpp/GetPath.hpp
-  private:
-  // Do only certain parts of the computation of a path. This allows for timing the individual parts of the computation of a path.
-  template<bool try_octile, bool test_double, bool test_single, bool compute_path>
-  bool get_path_partial_computation(xyLoc start_loc, xyLoc goal_loc, std::vector<xyLoc> &path) const;
-  
-  bool try_octile_path(xyLoc start_loc, xyLoc goal_loc, std::vector<xyLoc> &path) const;
-  void test_double_paths(xyLoc start_loc, xyLoc goal_loc, map_position start, map_position goal, exact_distance &shortest_distance, corner_index &best_start_index, corner_index &best_end_index) const;
-  void test_single_paths(map_position start, map_position goal, exact_distance &shortest_distance, corner_index &best_start_index, corner_index &best_end_index) const;
-  void compute_best_path_found(xyLoc start_loc, xyLoc goal_loc, corner_index best_start_index, corner_index best_end_index, std::vector<xyLoc> &path) const;
-
-  public:
-  inline bool get_path(xyLoc start_loc, xyLoc goal_loc, std::vector<xyLoc> &path) const;
-  // -----------------------------------------------------------------------------------
 };
 
 // Doesn't add start to path, but does add end.
