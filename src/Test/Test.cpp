@@ -134,7 +134,7 @@ void Test(const PreprocessingData &preprocessing_data)
       // Validate path
       if (!ValidatePath(graph, path))
       {
-        print_graph(preprocessing_data, graph, std::vector<map_position>(), path, false, false, false, false, false, Dir_NNE, 0);
+        print_graph(preprocessing_data, graph, std::vector<map_position>(), path, false, false, false, false, false, false, Dir_NNE, 0);
         throw std::runtime_error("Failed to validate path returned from main. Source: ("  + std::to_string(loc1.x) + ", " + std::to_string(loc1.y) + "). Target: (" + std::to_string(loc2.x) + ", " + std::to_string(loc2.y) + ").");
       }
 
@@ -157,7 +157,7 @@ void Test(const PreprocessingData &preprocessing_data)
       exact_distance simple_path_length = dijkstra_dists[graph.pos(loc2)];
       if (path_length != simple_path_length)
       {
-        print_graph(preprocessing_data, graph, std::vector<map_position>(), path, false, false, false, false, false, Dir_NNE, 0);
+        print_graph(preprocessing_data, graph, std::vector<map_position>(), path, false, false, false, false, false, false, Dir_NNE, 0);
         throw std::runtime_error("Test failed from (" + std::to_string(loc1.x) + ", " + std::to_string(loc1.y) + ") to (" + std::to_string(loc2.x) + ", " + std::to_string(loc2.y) + "). Simple had " + std::to_string(simple_path_length.num_straight) + " straight, " + std::to_string(simple_path_length.num_diagonal) + " diagonal. Main had " + std::to_string(path_length.num_straight) + " straight, " + std::to_string(path_length.num_diagonal) + " diagonal.");
       }
     }
