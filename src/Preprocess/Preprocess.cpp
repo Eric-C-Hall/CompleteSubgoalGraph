@@ -14,6 +14,8 @@
 #include "../Utility/Timer.h"
 #include "../Utility/Stats.hpp"
 
+#include "../Test/Test.hpp"
+
 PreprocessingData::PreprocessingData(const Graph &input_graph) : graph(input_graph)
 {
 }
@@ -550,6 +552,7 @@ void PreprocessingData::_output_debug_stats() const
   std::cout << "Num squares: " << graph.get_width() * graph.get_height() << std::endl;
   std::cout << "Non-obstacles: " << num_non_obstacles << std::endl;
 
+  // Count number of nearby corners
   std::vector<unsigned int> num_nearby;
   num_nearby.reserve(graph.num_positions()); 
   for (map_position p = 0; p < graph.num_positions(); p++)
@@ -566,7 +569,7 @@ void PreprocessingData::_output_debug_stats() const
   std::cout << "Num nearby:" << std::endl;
   print_stats(stats);
 
-
+  // Count number of nearby corners with next corner
   std::vector<unsigned int> num_nearby_with_next_corner;
   num_nearby_with_next_corner.reserve(graph.num_positions()); 
   for (map_position p = 0; p < graph.num_positions(); p++)
@@ -580,6 +583,34 @@ void PreprocessingData::_output_debug_stats() const
   std::cout << std::endl;
   std::cout << "Num nearby with next corner:" << std::endl;
   print_stats(stats_with_next_corner);
+
+  // Count number of nearby with next corner with appropriate bounds
+  const unsigned int NUM_RANDOM_PAIRS = graph.num_positions() * 10;
+  std::vector<unsigned int> num_nearby_with_appropriate_bounds;
+  num_nearby_with_appropriate_bounds.reserve(NUM_RANDOM_PAIRS);
+  std::cout << std::endl;
+  std::cout << "The following considers " << NUM_RANDOM_PAIRS << " randomly chosen pairs of points" << std::endl;
+  TestPointGenerator test_point_generator(graph);
+  auto pairs_of_points = test_point_generator.get_random_pairs_of_points(NUM_RANDOM_PAIRS);
+  for (auto pair : pairs_of_points)
+  {
+    unsigned int curr_num_nearby_with_appropriate_bounds = 0;
+    for (const corner_index i : _point_to_nearby_corner_indices_with_next[graph.pos(pair.first)])
+    {
+      const MidDirection middirection = get_middirection_between_points(pair.first, graph.loc(_corners[i]));
+      const std::pair<xyLoc, xyLoc> bounds = _corner_and_middirection_to_bounds[i][middirection];
+      
+      if (graph.is_point_in_bounds(pair.second, bounds))
+      {
+        curr_num_nearby_with_appropriate_bounds++;
+      }
+    }
+    num_nearby_with_appropriate_bounds.push_back(curr_num_nearby_with_appropriate_bounds);
+  }
+  auto stats_with_appropriate_bounds = get_stats(num_nearby_with_appropriate_bounds);
+
+  std::cout << "Num nearby with next corner with appropriate bounds:" << std::endl;
+  print_stats(stats_with_appropriate_bounds);
 
   // Warn user about positions without nearby corners
   // TODO: I don't think it is actually true that there shouldn't be non-obstacle positions without nearby corners. In some very simple graphs, like an empty square, it is possible.

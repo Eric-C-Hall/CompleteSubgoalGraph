@@ -52,7 +52,7 @@ void TestPointGenerator::print_warnings() const
   }
 }
 
-std::pair<xyLoc,std::vector<xyLoc>> TestPointGenerator::get_random_test_points(int num_points)
+std::pair<xyLoc,std::vector<xyLoc>> TestPointGenerator::get_random_point_and_points(int num_points)
 {
   print_warnings();
 
@@ -75,6 +75,22 @@ std::pair<xyLoc,std::vector<xyLoc>> TestPointGenerator::get_random_test_points(i
   return std::pair<xyLoc,std::vector<xyLoc>>(loc1, other_locs);
 }
 
+std::vector<std::pair<xyLoc, xyLoc>> TestPointGenerator::get_random_pairs_of_points(int num_points)
+{
+  // TODO: doesn't currently test specific points even if TEST_SPECIFIC_POINTS is enabled.
+  print_warnings();
+
+  std::vector<std::pair<xyLoc, xyLoc>> return_value;
+  for (int i = 0; i < num_points; i++)
+  {
+    std::pair<xyLoc, xyLoc> curr_pair;
+    curr_pair.first = get_random_first_point();
+    curr_pair.second = get_random_other_point(curr_pair.first);
+    return_value.push_back(curr_pair);
+  }
+  return return_value;
+}
+
 void Test(const PreprocessingData &preprocessing_data)
 {
   const Graph &graph = preprocessing_data.get_graph();
@@ -93,7 +109,7 @@ void Test(const PreprocessingData &preprocessing_data)
       std::cout << "Finding paths from " << i <<"th randomly chosen point to " << NUM_TESTS_PER_ITERATION << " others" << std::endl;
     }
 
-    auto test_points = test_point_generator.get_random_test_points(NUM_TESTS_PER_ITERATION);
+    auto test_points = test_point_generator.get_random_point_and_points(NUM_TESTS_PER_ITERATION);
     xyLoc loc1 = test_points.first;
 
     // Use SimpleDijkstra to find the distance of this point from all others.
