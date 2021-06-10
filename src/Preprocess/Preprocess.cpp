@@ -579,7 +579,7 @@ void PreprocessingData::_output_debug_stats() const
   
   std::cout << std::endl;
   std::cout << "Num nearby with next corner:" << std::endl;
-  print_stats(stats);
+  print_stats(stats_with_next_corner);
 
   // Warn user about positions without nearby corners
   // TODO: I don't think it is actually true that there shouldn't be non-obstacle positions without nearby corners. In some very simple graphs, like an empty square, it is possible.
