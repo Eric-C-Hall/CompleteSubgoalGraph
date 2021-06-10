@@ -21,16 +21,12 @@ xyLoc GetRandomValidLocation(std::mt19937 &gen,
   return returnLoc;
 }
 
-void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
+void get_test_locs(std::vector<xyLoc> &testLocs, const unsigned int num_tests, const Graph &graph, const Islands &islands)
 {
-  const Graph &graph = preprocessing_data.get_graph();
   const unsigned int width = graph.get_width();
   const unsigned int height = graph.get_height();
 
-  const Islands islands(graph);
-
-  // A vector of pairs of locations, to calculate the distance from one to the other.
-  std::vector<xyLoc> testLocs;
+  testLocs.clear();
   testLocs.reserve(2 * num_tests);
 
   // RNG stuff
@@ -52,6 +48,16 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     testLocs.push_back(sourceLoc);
     testLocs.push_back(destLoc);
   }
+}
+
+void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
+{
+  const Graph &graph = preprocessing_data.get_graph();
+  const Islands islands(graph);
+
+  // A vector of pairs of locations, to calculate the distance from one to the other.
+  std::vector<xyLoc> testLocs;
+  get_test_locs(testLocs, num_tests, graph, islands);
 
   // Setup for timed portion
   auto testLocIter = testLocs.begin();
@@ -78,14 +84,99 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
   // Timed code ends
   // ---------------
 
+  get_test_locs(testLocs, num_tests, graph, islands);
+  testLocIter = testLocs.begin();
+  Timer octile_t;
+  // ---------------
+  // Timed code starts
 
+  octile_t.StartTimer();
+
+  while (testLocIter != testLocs.end())
+  {
+    xyLoc sourceLoc = *testLocIter;
+    testLocIter++;
+    xyLoc destLoc = *testLocIter;
+    testLocIter++;
+    
+    preprocessing_data.get_path_octile_step_only(graph.pos(sourceLoc), graph.pos(destLoc), path);
+  }
+
+  octile_t.EndTimer();
+
+  // Timed code ends
+  // ---------------
+
+  get_test_locs(testLocs, num_tests, graph, islands);
+  testLocIter = testLocs.begin();
+  Timer double_t;
+  // ---------------
+  // Timed code starts
+
+  double_t.StartTimer();
+
+  while (testLocIter != testLocs.end())
+  {
+    xyLoc sourceLoc = *testLocIter;
+    testLocIter++;
+    xyLoc destLoc = *testLocIter;
+    testLocIter++;
+    
+    preprocessing_data.get_path_up_to_double_step(graph.pos(sourceLoc), graph.pos(destLoc), path);
+  }
+
+  double_t.EndTimer();
+
+  // Timed code ends
+  // ---------------
+
+  get_test_locs(testLocs, num_tests, graph, islands);
+  testLocIter = testLocs.begin();
+  Timer single_t;
+  // ---------------
+  // Timed code starts
+
+  single_t.StartTimer();
+
+  while (testLocIter != testLocs.end())
+  {
+    xyLoc sourceLoc = *testLocIter;
+    testLocIter++;
+    xyLoc destLoc = *testLocIter;
+    testLocIter++;
+    
+    preprocessing_data.get_path_up_to_single_step(graph.pos(sourceLoc), graph.pos(destLoc), path);
+  }
+
+  single_t.EndTimer();
+
+  // Timed code ends
+  // ---------------
 
   // Output time
 
+  double time_per_test = t.GetElapsedTime() / num_tests;
   std::cout << "Total time: " << t.GetElapsedTime() << "\n";
   std::cout << "Num tests: " << num_tests << "\n";
-  std::cout << "Time per test: " << t.GetElapsedTime() / num_tests << "\n";
+  std::cout << "Time per test: " << time_per_test << "\n";
+  std::cout << std::endl;
 
+  double time_per_octile_step = octile_t.GetElapsedTime() / num_tests;
+  double time_per_double_step = (double_t.GetElapsedTime() / num_tests) - (octile_t.GetElapsedTime() / num_tests);
+  double time_per_single_step = (single_t.GetElapsedTime() / num_tests) - (double_t.GetElapsedTime() / num_tests);
+  double time_per_compute_step = (t.GetElapsedTime() / num_tests) - (single_t.GetElapsedTime() / num_tests);
+  std::cout << "Time per step:" << "\n";
+  std::cout << "Octile  step: " << time_per_octile_step << "\n";
+  std::cout << "Double  step: " << time_per_double_step << "\n";
+  std::cout << "Single  step: " << time_per_single_step << "\n";
+  std::cout << "Compute step: " << time_per_compute_step << "\n";
+  std::cout << std::endl;
+
+  std::cout << "Percentage of time per step:" << "\n";
+  std::cout << "Octile  step: " << 100 * time_per_octile_step / time_per_test << "\n";
+  std::cout << "Double  step: " << 100 * time_per_double_step / time_per_test << "\n";
+  std::cout << "Single  step: " << 100 * time_per_single_step / time_per_test << "\n";
+  std::cout << "Compute step: " << 100 * time_per_compute_step / time_per_test << "\n";
   std::cout << std::flush;
 
 }
