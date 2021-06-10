@@ -4,8 +4,21 @@
 
 #include <cassert>
 
-bool PreprocessingData::try_octile_path(xyLoc start_loc, xyLoc goal_loc, std::vector<xyLoc> &path) const
+bool GetPath(const PreprocessingData &preprocessing_data, xyLoc s, xyLoc g, std::vector<xyLoc> &path)
 {
+  map_position start = preprocessing_data.get_graph().pos(s.x, s.y);
+  map_position goal = preprocessing_data.get_graph().pos(g.x, g.y);
+
+  return preprocessing_data.get_path(start, goal, path);
+}
+
+bool PreprocessingData::get_path(map_position start, map_position goal, std::vector<xyLoc> &path) const
+{
+  // TODO: we have now converted goal and start from xyLoc to map_position and back again. This is not ideal.
+  // On the other hand, the time taken is probably insignificant.
+  xyLoc start_loc = graph.loc(start);
+  xyLoc goal_loc = graph.loc(goal);
+
   // Try some octile path
   path.push_back(start_loc);
   _compute_octile_path<true>(start_loc, goal_loc, path);
@@ -14,11 +27,13 @@ bool PreprocessingData::try_octile_path(xyLoc start_loc, xyLoc goal_loc, std::ve
     return true;
   }
   path.clear();
-  return false;
-}
 
-void PreprocessingData::test_double_paths(xyLoc start_loc, xyLoc goal_loc, map_position start, map_position goal, exact_distance &shortest_distance, corner_index &best_start_index, corner_index &best_end_index) const
-{
+  exact_distance shortest_distance = MAX_EXACT_DISTANCE;
+  corner_index best_start_index = _corners.size();
+  corner_index best_end_index = _corners.size();
+
+  //std::cout << _point_to_nearby_corner_indices_with_next[start].size() << " " << _point_to_nearby_corner_indices_with_next[goal].size() << " " << _point_to_nearby_corner_indices_with_next[start].size() * _point_to_nearby_corner_indices_with_next[goal].size() << std::endl;
+
   // Find goal corner indices for which the start is in the correct bounding box
   std::vector<corner_index> goal_test_corner_indices;
   const auto &goal_nearby_corner_indices = _point_to_nearby_corner_indices_with_next[goal];
@@ -60,10 +75,7 @@ void PreprocessingData::test_double_paths(xyLoc start_loc, xyLoc goal_loc, map_p
       }
     }
   }
-}
 
-void PreprocessingData::test_single_paths(map_position start, map_position goal, exact_distance &shortest_distance, corner_index &best_start_index, corner_index &best_end_index) const
-{
   // Test going through single nearby index possibly with no relevant next corner
   const auto &start_nearby = _point_to_nearby_corner_indices[start];
   const auto &goal_nearby = _point_to_nearby_corner_indices[goal];
@@ -104,12 +116,9 @@ void PreprocessingData::test_single_paths(map_position start, map_position goal,
       }
     }
   }
-}
 
-void PreprocessingData::compute_best_path_found(xyLoc start_loc, xyLoc goal_loc, corner_index best_start_index, corner_index best_end_index, std::vector<xyLoc> &path) const
-{
   // Compute best path found
-  xyLoc a = start_loc;
+  xyLoc a = graph.loc(start);
   path.push_back(a);
   
   corner_index start_index = best_start_index;
@@ -131,7 +140,9 @@ void PreprocessingData::compute_best_path_found(xyLoc start_loc, xyLoc goal_loc,
     b = graph.loc(_corners[start_index]);
     _compute_octile_path<false>(a, b, path);
   }
-  _compute_octile_path<false>(b, goal_loc, path);
+  _compute_octile_path<false>(b, graph.loc(goal), path);
+
+  return true;
 }
 
 // eof
