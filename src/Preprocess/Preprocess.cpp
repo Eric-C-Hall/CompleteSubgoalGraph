@@ -420,7 +420,7 @@ void PreprocessingData::save(const std::string &filename) const
   Timer t;
   t.StartTimer();
   std::cout << "Saving preprocessed data" << std::endl;
-  std::ofstream file(filename, std::ifstream::out);
+  std::ofstream file(filename, std::ifstream::out | std::ifstream::binary);
   if (file.fail())
   {
     std::cerr << "Attempt to save \"" << filename << "\"" << std::endl;
@@ -523,7 +523,7 @@ void PreprocessingData::load(const std::string &filename)
   Timer t;
   t.StartTimer();
   std::cout << "Loading preprocessed data" << std::endl;
-  std::ifstream file(filename, std::ifstream::in);
+  std::ifstream file(filename, std::ifstream::in  | std::ifstream::binary);
   if (file.fail())
   {
     std::cerr << "Attempt to open \"" << filename << "\"" << std::endl;
