@@ -308,22 +308,24 @@ void save_unsigned_int_as_binary(std::ostream & stream, unsigned int i)
   stream.write(i_loc, sizeof (unsigned int));
 }
 
+unsigned int load_unsigned_int_as_binary(std::istream &stream)
+{
+  unsigned int return_value;
+  stream.read((char *)(&return_value), sizeof (unsigned int));
+  return return_value;
+}
+
 void PreprocessingData::_save(std::ostream & stream) const
 {
-  //save_unsigned_int_as_binary(stream, _corners.size());
-  //unsigned int output = _corners.size();
-  //char * output_loc = (char *)&output;
-  //stream.write(output_loc, sizeof output);
-  stream << _corners.size() << "\n";
+  save_unsigned_int_as_binary(stream, _corners.size());
 
   // Save corners
   int num_corners = 0;
   for (unsigned int corner : _corners)
   {
-    stream << corner << " ";
+    save_unsigned_int_as_binary(stream, corner);
     num_corners++;
   }
-  stream << "\n\n";
 
   std::cout << num_corners << " corners saved" << std::endl;
 
@@ -333,12 +335,11 @@ void PreprocessingData::_save(std::ostream & stream) const
   {
     for (unsigned int corner : _point_to_nearby_corner_indices[p])
     {
-      stream << corner << " ";
+      save_unsigned_int_as_binary(stream,corner);
       num_nearby_corner_indices++;
     }
-    stream << _corners.size() << "\n";
+    save_unsigned_int_as_binary(stream, _corners.size());
   }
-  stream << "\n";
 
   std::cout << num_nearby_corner_indices << " nearby corner indices saved" << std::endl;
   int num_seperators = graph.num_positions();
@@ -350,12 +351,11 @@ void PreprocessingData::_save(std::ostream & stream) const
   {
     for (unsigned int corner : _point_to_nearby_corner_indices_with_next[p])
     {
-      stream << corner << " ";
+      save_unsigned_int_as_binary(stream, corner);
       num_nearby_corner_indices_with_next++;
     }
-    stream << _corners.size() << "\n";
+    save_unsigned_int_as_binary(stream, _corners.size());
   }
-  stream << "\n";
 
   std::cout << num_nearby_corner_indices_with_next << " nearby corner indices with next saved" << std::endl;
   std::cout << graph.num_positions() << " seperators used" << std::endl;
@@ -368,18 +368,17 @@ void PreprocessingData::_save(std::ostream & stream) const
     for (corner_index j = 0; j <= i; j++)
     {
       exact_distance d = _pair_of_corner_indices_to_dist[i][j];
-      stream << d.num_straight << " " << d.num_diagonal << " ";
+      save_unsigned_int_as_binary(stream, d.num_straight);
+      save_unsigned_int_as_binary(stream, d.num_diagonal);
       num_exact_distances++;
     }
     for (corner_index j = 0; j < _corners.size(); j++)
     {
       assert(_pair_of_corner_indices_to_first_corner[i][j] != j);
-      stream << _pair_of_corner_indices_to_first_corner[i][j] << " ";
+      save_unsigned_int_as_binary(stream, _pair_of_corner_indices_to_first_corner[i][j]);
       num_first_corners++;
     }
-    stream << "\n";
   }
-  stream << "\n";
 
   std::cout << num_exact_distances << " exact distances saved" << std::endl;
   std::cout << num_first_corners << " first corners saved" << std::endl;
@@ -391,13 +390,12 @@ void PreprocessingData::_save(std::ostream & stream) const
     for (MidDirection middirection : get_middirections())
     {
       const auto &bounds = _corner_and_middirection_to_bounds[i][middirection];
-      stream << bounds.first.x << " ";
-      stream << bounds.first.y << " ";
-      stream << bounds.second.x << " ";
-      stream << bounds.second.y << " ";
+      save_unsigned_int_as_binary(stream, bounds.first.x);
+      save_unsigned_int_as_binary(stream, bounds.first.y);
+      save_unsigned_int_as_binary(stream, bounds.second.x);
+      save_unsigned_int_as_binary(stream, bounds.second.y);
       num_bounds++;
     }
-    stream << "\n";
   }
 
   std::cout << num_bounds << " bounds saved" << std::endl;
@@ -443,15 +441,13 @@ void PreprocessingData::_load(std::istream &stream)
   _pair_of_corner_indices_to_first_corner.clear();
   _corner_and_middirection_to_bounds.clear();
 
-  unsigned int num_corners;
-  stream >> num_corners;
+  unsigned int num_corners = load_unsigned_int_as_binary(stream);
 
   // Load corners
   _corners.reserve(num_corners);
   for (unsigned int i = 0; i < num_corners; i++)
   {
-    map_position corner_pos;
-    stream >> corner_pos;
+    map_position corner_pos = load_unsigned_int_as_binary(stream);
     _corners.push_back(corner_pos);
   }
 
@@ -459,12 +455,11 @@ void PreprocessingData::_load(std::istream &stream)
   _point_to_nearby_corner_indices.resize(graph.num_positions());
   for (map_position p = 0; p < graph.num_positions(); p++)
   {
-    map_position corner_index;
-    stream >> corner_index;
+    map_position corner_index = load_unsigned_int_as_binary(stream);
     while (corner_index != num_corners)
     {
       _point_to_nearby_corner_indices[p].push_back(corner_index);
-      stream >> corner_index;
+      corner_index = load_unsigned_int_as_binary(stream);
     }
   }
 
@@ -472,12 +467,11 @@ void PreprocessingData::_load(std::istream &stream)
   _point_to_nearby_corner_indices_with_next.resize(graph.num_positions());
   for (map_position p = 0; p < graph.num_positions(); p++)
   {
-    map_position corner_index;
-    stream >> corner_index;
+    map_position corner_index = load_unsigned_int_as_binary(stream);
     while (corner_index != num_corners)
     {
       _point_to_nearby_corner_indices_with_next[p].push_back(corner_index);
-      stream >> corner_index;
+      corner_index = load_unsigned_int_as_binary(stream);
     }
   }
 
@@ -490,16 +484,14 @@ void PreprocessingData::_load(std::istream &stream)
     _pair_of_corner_indices_to_first_corner[i].reserve(_corners.size());
     for (corner_index j = 0; j <= i; j++)
     {
-      int num_straight;
-      int num_diagonal;
-      stream >> num_straight >> num_diagonal;
+      int num_straight = load_unsigned_int_as_binary(stream);
+      int num_diagonal = load_unsigned_int_as_binary(stream);
       exact_distance d(num_straight, num_diagonal);
       _pair_of_corner_indices_to_dist[i].push_back(d);
     }
     for (corner_index j = 0; j < _corners.size(); j++)
     {
-      corner_index first_corner;
-      stream >> first_corner;
+      corner_index first_corner = load_unsigned_int_as_binary(stream);
       assert(first_corner != j);
       _pair_of_corner_indices_to_first_corner[i].push_back(first_corner);
     }
@@ -517,7 +509,10 @@ void PreprocessingData::_load(std::istream &stream)
     for (MidDirection middirection : get_middirections())
     {
       std::pair<xyLoc, xyLoc> bounds;
-      stream >> bounds.first.x >> bounds.first.y >> bounds.second.x >> bounds.second.y;
+      bounds.first.x = load_unsigned_int_as_binary(stream);
+      bounds.first.y = load_unsigned_int_as_binary(stream);
+      bounds.second.x = load_unsigned_int_as_binary(stream);
+      bounds.second.y = load_unsigned_int_as_binary(stream);
       _corner_and_middirection_to_bounds[i][middirection] = bounds;
     }
   }
