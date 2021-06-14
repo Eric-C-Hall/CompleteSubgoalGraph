@@ -73,7 +73,7 @@ bool PreprocessingData::get_path_partial_computation(map_position start, map_pos
       for (corner_index j : goal_test_corner_indices)
       {
         exact_distance j_dist = graph.octile_distance(goal, _corners[j]);
-        exact_distance current_dist = i_dist + _pair_of_corner_indices_to_dist[i][j] + j_dist;
+        exact_distance current_dist = i_dist + get_exact_distance_between_corner_indices(i,j) + j_dist;
         if (current_dist < shortest_distance)
         {
           shortest_distance = current_dist;

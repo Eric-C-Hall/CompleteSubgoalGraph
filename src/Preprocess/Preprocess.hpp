@@ -22,6 +22,7 @@ class PreprocessingData {
   // relevent to some corner when entered from the direction of the origin point
   std::vector<std::vector<corner_index>> _point_to_nearby_corner_indices_with_next;
 
+  // _pair_of_corner_indices_to_dist[i][j] only stored for j <= i
   std::vector<std::vector<exact_distance>> _pair_of_corner_indices_to_dist;
   // _pair_of_corner_indices_to_first_corner[i][j] is first corner from j to i
   std::vector<std::vector<corner_index>> _pair_of_corner_indices_to_first_corner;
@@ -65,6 +66,8 @@ class PreprocessingData {
   void _compute_octile_path(xyLoc start, xyLoc end, std::vector<xyLoc> &path) const;
 
   bool _try_direct_path(map_position start, map_position goal) const;
+
+  inline exact_distance get_exact_distance_between_corner_indices(corner_index i, corner_index j) const {return (j <= i ? _pair_of_corner_indices_to_dist[i][j] : _pair_of_corner_indices_to_dist[j][i]);}
 
   public:
   PreprocessingData(const Graph &graph);

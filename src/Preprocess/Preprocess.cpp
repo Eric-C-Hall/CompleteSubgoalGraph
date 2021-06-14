@@ -162,6 +162,8 @@ void PreprocessingData::_find_optimal_distances_from_corner(corner_index i)
       }
     }
   }
+
+  corner_index_to_distance.resize(i);
 }
 
 void PreprocessingData::_find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j)
@@ -178,7 +180,7 @@ void PreprocessingData::_find_optimal_first_corners_from_corner_to_corner(corner
   // and it's not just that for example the algorithm failed to find a path
   // due to a bug. I think we should probably have a component id for each
   // connected component, which would make it quick to check this.
-  if (_pair_of_corner_indices_to_dist[i][j] == MAX_EXACT_DISTANCE)
+  if (get_exact_distance_between_corner_indices(i,j) == MAX_EXACT_DISTANCE)
   {
     return;
   }
@@ -186,9 +188,9 @@ void PreprocessingData::_find_optimal_first_corners_from_corner_to_corner(corner
   for (corner_index first_index : _point_to_nearby_corner_indices[_corners[i]])
   {
     assert(first_index != i);
-    const exact_distance i_to_first_dist = _pair_of_corner_indices_to_dist[i][first_index];
-    const exact_distance first_to_j_dist = _pair_of_corner_indices_to_dist[first_index][j];
-    const exact_distance i_to_j_dist = _pair_of_corner_indices_to_dist[i][j];
+    const exact_distance i_to_first_dist = get_exact_distance_between_corner_indices(i,first_index);
+    const exact_distance first_to_j_dist = get_exact_distance_between_corner_indices(first_index,j);
+    const exact_distance i_to_j_dist = get_exact_distance_between_corner_indices(i,j);
 
     assert(i_to_first_dist + first_to_j_dist >= i_to_j_dist);
     if (i_to_first_dist + first_to_j_dist == i_to_j_dist)
@@ -262,7 +264,7 @@ void PreprocessingData::_push_corners_in_corner_graph()
     for (corner_index source_index = 0; source_index < _corners.size(); source_index++)
     {
       const map_position source = _corners[source_index];
-      if (source_index == target_index || _pair_of_corner_indices_to_dist[target_index][source_index] == MAX_EXACT_DISTANCE)
+      if (source_index == target_index || get_exact_distance_between_corner_indices(target_index,source_index) == MAX_EXACT_DISTANCE)
       {
         continue;
       }
@@ -305,13 +307,14 @@ void PreprocessingData::_save(std::ostream & stream) const
   stream << _corners.size() << "\n";
 
   // Save corners
+  int num_corners = 0;
   for (unsigned int corner : _corners)
   {
     stream << corner << " ";
+    num_corners++;
   }
   stream << "\n\n";
 
-  int num_corners = _corners.size();
   std::cout << num_corners << " corners saved" << std::endl;
 
   // Save _point_to_nearby_corner_indices
@@ -347,24 +350,32 @@ void PreprocessingData::_save(std::ostream & stream) const
   std::cout << num_nearby_corner_indices_with_next << " nearby corner indices with next saved" << std::endl;
   std::cout << graph.num_positions() << " seperators used" << std::endl;
 
+  int num_exact_distances = 0;
+  int num_first_corners = 0;
   // Save _pair_of_corner_indices_to_first_corner and _pair_of_corner_indices_to_dist
   for (corner_index i = 0; i < _corners.size(); i++)
   {
-    for (corner_index j = 0; j < _corners.size(); j++)
+    for (corner_index j = 0; j <= i; j++)
     {
       exact_distance d = _pair_of_corner_indices_to_dist[i][j];
       stream << d.num_straight << " " << d.num_diagonal << " ";
+      num_exact_distances++;
+    }
+    for (corner_index j = 0; j < _corners.size(); j++)
+    {
       assert(_pair_of_corner_indices_to_first_corner[i][j] != j);
       stream << _pair_of_corner_indices_to_first_corner[i][j] << " ";
+      num_first_corners++;
     }
     stream << "\n";
   }
   stream << "\n";
 
-  int num_exact_distances_and_first_corners = _corners.size() * _corners.size();
-  std::cout << num_exact_distances_and_first_corners << " exact distances and first corners saved" << std::endl;
+  std::cout << num_exact_distances << " exact distances saved" << std::endl;
+  std::cout << num_first_corners << " first corners saved" << std::endl;
 
   // Save _corner_and_middirection_to_bounds
+  int num_bounds = 0;
   for (corner_index i = 0; i < _corners.size(); i++)
   {
     for (MidDirection middirection : get_middirections())
@@ -374,13 +385,13 @@ void PreprocessingData::_save(std::ostream & stream) const
       stream << bounds.first.y << " ";
       stream << bounds.second.x << " ";
       stream << bounds.second.y << " ";
+      num_bounds++;
     }
     stream << "\n";
   }
 
-  int num_bounds = _corners.size() * get_middirections().size();
   std::cout << num_bounds << " bounds saved" << std::endl;
-  int num_important = num_corners + num_nearby_corner_indices + num_nearby_corner_indices_with_next + 3*num_exact_distances_and_first_corners + 4*num_bounds;
+  int num_important = num_corners + num_nearby_corner_indices + num_nearby_corner_indices_with_next + 2 * num_exact_distances + num_first_corners + 4*num_bounds;
   int num_total = num_important + 2*num_seperators;
   std::cout << "Total: " << num_total << std::endl;
   std::cout << "Important: " << num_important << std::endl;
@@ -390,8 +401,8 @@ void PreprocessingData::_save(std::ostream & stream) const
   std::cout << "Corners:          " << 100 * (double)num_corners / (double) num_important << std::endl;
   std::cout << "Nearby:           " << 100 * (double)num_nearby_corner_indices / (double) num_important << std::endl;
   std::cout << "Nearby with next: " << 100 * (double)num_nearby_corner_indices_with_next / (double) num_important << std::endl;
-  std::cout << "Exact distances:  " << 100 * 2 * (double)num_exact_distances_and_first_corners / (double) num_important << std::endl;
-  std::cout << "First corners:    " << 100 * (double)num_exact_distances_and_first_corners / (double) num_important << std::endl;
+  std::cout << "Exact distances:  " << 100 * 2 * (double)num_exact_distances / (double) num_important << std::endl;
+  std::cout << "First corners:    " << 100 * (double)num_first_corners / (double) num_important << std::endl;
   std::cout << "Bounds:           " << 100 * 4 * (double)num_bounds / (double) num_important << std::endl;
 
 }
@@ -462,16 +473,18 @@ void PreprocessingData::_load(std::istream &stream)
   _pair_of_corner_indices_to_first_corner.resize(_corners.size());
   for (corner_index i = 0; i < _corners.size(); i++)
   {
-    _pair_of_corner_indices_to_dist[i].reserve(_corners.size());
+    _pair_of_corner_indices_to_dist[i].reserve(i+1);
     _pair_of_corner_indices_to_first_corner[i].reserve(_corners.size());
-    for (corner_index j = 0; j < _corners.size(); j++)
+    for (corner_index j = 0; j <= i; j++)
     {
       int num_straight;
       int num_diagonal;
       stream >> num_straight >> num_diagonal;
       exact_distance d(num_straight, num_diagonal);
       _pair_of_corner_indices_to_dist[i].push_back(d);
-
+    }
+    for (corner_index j = 0; j < _corners.size(); j++)
+    {
       corner_index first_corner;
       stream >> first_corner;
       assert(first_corner != j);
@@ -931,7 +944,7 @@ void PreprocessingData::_remove_indirect_nearby_corners()
           continue;
         const corner_index other_corner_index = nearby_corner_indices[other_nearby_corner];
         const map_position other_corner = _corners[other_corner_index];
-        if (graph.octile_distance(p, nearby_corner) == graph.octile_distance(p, other_corner) + _pair_of_corner_indices_to_dist[nearby_corner_index][other_corner_index])
+        if (graph.octile_distance(p, nearby_corner) == graph.octile_distance(p, other_corner) + get_exact_distance_between_corner_indices(nearby_corner_index,other_corner_index))
         {
           is_indirect = true;
           break;
@@ -1080,7 +1093,7 @@ void PreprocessingData::_find_geometric_container(corner_index i, MidDirection m
     assert(unvisited_corners.size() == distances.size());
 
     // Check if corner has been reached optimally from the initial corner
-    if (curr_distance != _pair_of_corner_indices_to_dist[i][curr_corner_index])
+    if (curr_distance != get_exact_distance_between_corner_indices(i,curr_corner_index))
     {
       continue;
     }
