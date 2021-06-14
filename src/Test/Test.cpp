@@ -27,6 +27,7 @@ xyLoc TestPointGenerator::get_random_other_point(xyLoc first_point)
   exact_distance dist;
   do
   {
+    // TODO: use island bounds to customize width/height of these distributions
     return_value.x = width_distr(gen);
     return_value.y = height_distr(gen);
     dist = graph.octile_distance(graph.pos(first_point), graph.pos(return_value));
@@ -91,21 +92,17 @@ std::vector<std::pair<xyLoc, xyLoc>> TestPointGenerator::get_random_pairs_of_poi
   return return_value;
 }
 
-/*std::vector<xyLoc> TestPointGenerator::get_random_other_points(xyLoc first_point, int num_points)
+std::vector<xyLoc> TestPointGenerator::get_random_other_points(xyLoc first_point, int num_points)
 {
   print_warnings();
 
-  std::vector<std::pair<xyLoc, xyLoc>> return_value;
-  for (map_position p = 0; p < graph.num_positions(); p++)
+  std::vector<xyLoc> return_value;
+  for (int i = 0; i < num_points; i++)
   {
-    if ()
-    std::pair<xyLoc, xyLoc> curr_pair;
-    curr_pair.first = get_random_first_point();
-    curr_pair.second = get_random_other_point(curr_pair.first);
-    return_value.push_back(curr_pair);
+    return_value.push_back(get_random_other_point(first_point));
   }
   return return_value;
-}*/
+}
 
 void Test(const PreprocessingData &preprocessing_data)
 {

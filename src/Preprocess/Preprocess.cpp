@@ -647,30 +647,35 @@ void PreprocessingData::_output_debug_stats() const
   print_stats(stats_with_next_corner);
 
   // Count number of nearby with next corner with appropriate bounds
-  const unsigned int NUM_RANDOM_PAIRS = graph.num_positions() * 10;
+  unsigned int num_pairs_tested = 0;
   std::vector<unsigned int> num_nearby_with_appropriate_bounds;
-  num_nearby_with_appropriate_bounds.reserve(NUM_RANDOM_PAIRS);
-  std::cout << std::endl;
-  std::cout << "The following considers " << NUM_RANDOM_PAIRS << " randomly chosen pairs of points" << std::endl;
   TestPointGenerator test_point_generator(graph);
-  auto pairs_of_points = test_point_generator.get_random_pairs_of_points(NUM_RANDOM_PAIRS);
-  for (auto pair : pairs_of_points)
+  for (map_position p = 0; p < graph.num_positions(); p++)
   {
-    unsigned int curr_num_nearby_with_appropriate_bounds = 0;
-    for (const corner_index i : _point_to_nearby_corner_indices_with_next[graph.pos(pair.first)])
+    if (graph.is_obstacle(p))
+      continue;
+
+    for (xyLoc other_loc : test_point_generator.get_random_other_points(graph.loc(p),10))
     {
-      const MidDirection middirection = get_middirection_between_points(pair.first, graph.loc(_corners[i]));
-      const std::pair<xyLoc, xyLoc> bounds = _corner_and_middirection_to_bounds[i][middirection];
-      
-      if (graph.is_point_in_bounds(pair.second, bounds))
+      num_pairs_tested++;
+      unsigned int curr_num_nearby_with_appropriate_bounds = 0;
+      for (const corner_index i : _point_to_nearby_corner_indices_with_next[p])
       {
-        curr_num_nearby_with_appropriate_bounds++;
+        const MidDirection middirection = get_middirection_between_points(graph.loc(p), graph.loc(_corners[i]));
+        const std::pair<xyLoc, xyLoc> bounds = _corner_and_middirection_to_bounds[i][middirection];
+        
+        if (graph.is_point_in_bounds(other_loc, bounds))
+        {
+          curr_num_nearby_with_appropriate_bounds++;
+        }
       }
+      num_nearby_with_appropriate_bounds.push_back(curr_num_nearby_with_appropriate_bounds);
     }
-    num_nearby_with_appropriate_bounds.push_back(curr_num_nearby_with_appropriate_bounds);
   }
   auto stats_with_appropriate_bounds = get_stats(num_nearby_with_appropriate_bounds);
 
+  std::cout << "The following considers " << num_pairs_tested << " randomly chosen pairs of points" << std::endl;
+  std::cout << std::endl;
   std::cout << "Num nearby with next corner with appropriate bounds:" << std::endl;
   print_stats(stats_with_appropriate_bounds);
 

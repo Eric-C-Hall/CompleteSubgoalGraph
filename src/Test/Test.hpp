@@ -35,7 +35,7 @@ class TestPointGenerator
   TestPointGenerator(const Graph &input_graph) : graph(input_graph), islands(input_graph), gen(rd()), width_distr(0, input_graph.get_width()-1), height_distr(0, input_graph.get_height()-1) {}
   std::pair<xyLoc,std::vector<xyLoc>> get_random_point_and_points(int num_points);
   std::vector<std::pair<xyLoc, xyLoc>> get_random_pairs_of_points(int num_points);
-  //std::vector<xyLoc> get_random_other_points(xyLoc first_point, int num_points);
+  std::vector<xyLoc> get_random_other_points(xyLoc first_point, int num_points);
 
 };
 
