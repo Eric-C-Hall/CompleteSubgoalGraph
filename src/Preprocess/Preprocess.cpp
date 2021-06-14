@@ -409,6 +409,8 @@ void PreprocessingData::_save(std::ostream & stream) const
 
 void PreprocessingData::save(const std::string &filename) const
 {
+  Timer t;
+  t.StartTimer();
   std::cout << "Saving preprocessed data" << std::endl;
   std::ofstream file(filename, std::ifstream::out);
   if (file.fail())
@@ -418,7 +420,8 @@ void PreprocessingData::save(const std::string &filename) const
   }
   _save(file);
   file.close();
-  std::cout << "Saving complete" << std::endl;
+  t.EndTimer();
+  std::cout << "Saving complete in " << t.GetElapsedTime() << " seconds" << std::endl;
 }
 
 void PreprocessingData::_load(std::istream &stream)
@@ -512,6 +515,9 @@ void PreprocessingData::_load(std::istream &stream)
 
 void PreprocessingData::load(const std::string &filename)
 {
+  Timer t;
+  t.StartTimer();
+  std::cout << "Loading preprocessed data" << std::endl;
   std::ifstream file(filename, std::ifstream::in);
   if (file.fail())
   {
@@ -519,6 +525,8 @@ void PreprocessingData::load(const std::string &filename)
     throw std::runtime_error("Error opening preprocessed data file.");
   }
   _load(file);
+  t.EndTimer();
+  std::cout << "Loading complete in " << t.GetElapsedTime() << " seconds" << std::endl;
 }
 
 void PreprocessingData::_output_warnings() const
