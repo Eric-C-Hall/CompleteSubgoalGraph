@@ -1,7 +1,11 @@
 #include "Islands.hpp"
 
-void create_island_from_point(map_position p, int curr_island_index, std::vector<int> &island_index, const Graph &graph)
+void Islands::create_island_from_point(map_position p, int curr_island_index)
 {
+  std::pair<xyLoc, xyLoc> bounds;
+  bounds.first = graph.loc(p);
+  bounds.second = graph.loc(p);
+
   std::vector<map_position> neighbours;
   neighbours.push_back(p);
   while (neighbours.size() > 0)
@@ -11,12 +15,15 @@ void create_island_from_point(map_position p, int curr_island_index, std::vector
     if (island_index[neighbour] == -2)
     {
       island_index[neighbour] = curr_island_index;
+      bounds = graph.get_bounds_of_points(bounds, graph.loc(neighbour));
       for (const auto adj_loc_and_dist : graph.adjacent_locations_and_dists(neighbour))
       {
         neighbours.push_back(adj_loc_and_dist.first);
       }
     }
   }
+
+  island_bounds.push_back(bounds);
 }
 
 Islands::Islands(const Graph &input_graph) : graph(input_graph)
@@ -38,7 +45,7 @@ Islands::Islands(const Graph &input_graph) : graph(input_graph)
       if (island_index[p] == -2)
       {
         found_island=true;
-        create_island_from_point(p, curr_island_index, island_index, graph);
+        create_island_from_point(p, curr_island_index);
         curr_island_index++;
       }
     }

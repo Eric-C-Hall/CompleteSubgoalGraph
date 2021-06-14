@@ -111,17 +111,25 @@ bool is_useful_nearby_corner_for_direction_copy(const map_position pos, const ma
 // If performance becomes an issue, maybe these could all be stored in a vector from map_position to path/cursor
 // Then it would only take constant time to check if is cursor or on path
 // It's not worth doing this unless performance is actually an issue, though
-void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_num_nearby_with_next, const bool show_nearby_with_next, const bool show_islands, const Islands &islands, const bool show_bounds, const MidDirection middirection, const unsigned int which_nearby_corner, const std::pair<xyLoc, xyLoc> bounds)
+void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &args, const Islands &islands, const std::pair<xyLoc, xyLoc> bounds)
 {
   map_position pos = graph.pos(x,y);
 
   // Highlight bounds
 
-  if (show_bounds && cursors.size() > 0)
+  if (args.show_bounds && cursors.size() > 0)
   {
-    if (x >= bounds.first.x && y >= bounds.first.y && x <= bounds.second.x && y <= bounds.second.y)
+    if (graph.is_point_in_bounds(xyLoc(x,y), bounds))
     {
       std::cout << "\e[45m";
+    }
+  }
+
+  if (0 <= args.selected_island && args.selected_island < islands.get_num_islands())
+  {
+    if (graph.is_point_in_bounds(xyLoc(x,y), islands.get_island_bounds(args.selected_island)))
+    {
+      std::cout << "\e[41m";
     }
   }
 
@@ -144,7 +152,7 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
   }
 
   // Highlight nearby
-  if (show_nearby && cursors.size() > 0)
+  if (args.show_nearby && cursors.size() > 0)
   {
     for (map_position c : preprocessing_data.get_nearby_corners(cursors[0]))
     {
@@ -156,7 +164,7 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
   }
 
   // Highlight nearby with next
-  if (show_nearby_with_next && cursors.size() > 0)
+  if (args.show_nearby_with_next && cursors.size() > 0)
   {
     for (map_position c : preprocessing_data.get_nearby_corners_with_next(cursors[0]))
     {
@@ -174,17 +182,17 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
     {
       if (pos == preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], i))
       {
-        if (i == which_nearby_corner)
+        if (i == args.which_nearby_corner)
           std::cout << "\e[46m";
       }
     }
   }
 
   // Highlight middirection
-  if (show_bounds && cursors.size() > 0)
+  if (args.show_bounds && cursors.size() > 0)
   {
     // Highlight middirection
-    if (pos == move_in_middirection(middirection, cursors[0], graph))
+    if (pos == move_in_middirection(args.middirection, cursors[0], graph))
       std::cout << "\e[47m";
   }
 
@@ -194,21 +202,21 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
   {
     std::cout << "@";
   }
-  else if (show_num_nearby)
+  else if (args.show_num_nearby)
   {
     const int num_nearby = preprocessing_data.get_nearby_corners(pos).size();
     std::cout << int_to_drawn_char(num_nearby);
   }
-  else if (show_num_nearby_with_next)
+  else if (args.show_num_nearby_with_next)
   {
     const int num_nearby_with_next = preprocessing_data.get_nearby_corners_with_next(pos).size();
     std::cout << int_to_drawn_char(num_nearby_with_next);
   }
-  else if (show_islands)
+  else if (args.show_islands)
   {
     std::cout << int_to_drawn_char(islands.get_island_index(pos));
   }
-  else if (show_bounds && cursors.size() > 0)
+  else if (args.show_bounds && cursors.size() > 0)
   {
     bool has_printed = false;
     for (unsigned int i = 0; i < preprocessing_data.get_num_nearby_corners_with_next(cursors[0]); i++)
@@ -302,20 +310,20 @@ void print_topbar(const unsigned int width, const unsigned int max_y)
 }
 
 
-void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const bool show_nearby, const bool show_num_nearby, const bool show_num_nearby_with_next, const bool show_nearby_with_next, const bool show_islands, const bool show_bounds, const MidDirection middirection, const unsigned int which_nearby_corner)
+void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &args)
 {
   // TODO: Maybe don't compute this every time, on the other hand maybe it's not important to be efficient
   const Islands islands(graph);
 
   // Compute bounds for currently selected corner and middirection
   std::pair<xyLoc, xyLoc> bounds;
-  if (show_bounds && cursors.size() > 0)
+  if (args.show_bounds && cursors.size() > 0)
   {
     for (corner_index i = 0; i < preprocessing_data.get_corners().size(); i++)
     {
       if (preprocessing_data.get_corners()[i] == cursors[0])
       {
-        bounds = preprocessing_data.get_bounds(i,middirection);
+        bounds = preprocessing_data.get_bounds(i,args.middirection);
       }
     }
   }
@@ -328,7 +336,7 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
     print_sidebar(y, graph.get_height() - 1);
     for (unsigned int x = 0; x < graph.get_width(); x++)
     {
-      print_point(x,y,preprocessing_data,graph,cursors,path,show_nearby,show_num_nearby,show_num_nearby_with_next,show_nearby_with_next, show_islands, islands, show_bounds, middirection, which_nearby_corner, bounds);
+      print_point(x,y,preprocessing_data,graph,cursors,path,args,islands, bounds);
     }
     std::cout << "\n";
   }
@@ -387,19 +395,18 @@ void Visualise(const PreprocessingData &preprocessing_data)
   std::string input = "";
   std::vector<map_position> cursors;
   std::vector<xyLoc> path;
-  // TODO: These sorts of things are common: we should abstract them into a class that does the work for us, so that whenever we add another of these we can add them quickly
-  // We should make a class that encapsulates all input to the print_graph function, and use that to input to the print_graph function. Much easier to extend
-  bool show_nearby = false;
-  bool show_num_nearby = false;
-  bool show_nearby_with_next = false;
-  bool show_num_nearby_with_next = false;
-  bool show_islands = false;
-  bool show_bounds = false;
 
-  unsigned int which_nearby_corner = 100000;
-  MidDirection middirection = Dir_NNE;
+  PrintGraphArguments args;
+  args.show_nearby               = false;
+  args.show_num_nearby           = false;
+  args.show_nearby_with_next     = false;
+  args.show_num_nearby_with_next = false;
+  args.show_islands              = false;
+  args.show_bounds               = false;
+  args.middirection              = Dir_NNE;
+  args.which_nearby_corner       = 100000;
 
-  print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_num_nearby_with_next, show_nearby_with_next, show_islands, show_bounds, middirection, which_nearby_corner);
+  print_graph(preprocessing_data, graph, cursors, path, args);
   VisualiseRequestInput(input);
 
   while (input != "quit")
@@ -421,23 +428,27 @@ void Visualise(const PreprocessingData &preprocessing_data)
     }
     else if (input == "nearby")
     {
-      show_nearby = !show_nearby;
+      args.show_nearby = !args.show_nearby;
     }
     else if (input == "numnearby")
     {
-      show_num_nearby = !show_num_nearby;
+      args.show_num_nearby = !args.show_num_nearby;
     }
     else if (input == "numnearbywithnext")
     {
-      show_num_nearby_with_next = !show_num_nearby_with_next;
+      args.show_num_nearby_with_next = !args.show_num_nearby_with_next;
     }
     else if (input == "nearbywithnext")
     {
-      show_nearby_with_next = !show_nearby_with_next;
+      args.show_nearby_with_next = !args.show_nearby_with_next;
     }
     else if (input == "islands")
     {
-      show_islands = !show_islands;
+      args.show_islands = !args.show_islands;
+    }
+    else if (input == "island")
+    {
+      std::cin >> args.selected_island;
     }
     else if (input == "swap")
     {
@@ -447,32 +458,31 @@ void Visualise(const PreprocessingData &preprocessing_data)
     }
     else if (input == "bounds")
     {
-      MidDirection old_middirection = middirection;
+      MidDirection old_middirection = args.middirection;
       unsigned int temp;
       std::cin >> temp;
-      middirection = (MidDirection)temp;
-      if (!show_bounds || old_middirection != middirection)
+      args.middirection = (MidDirection)temp;
+      if (!args.show_bounds || old_middirection != args.middirection)
       {
-        show_bounds = true;
+        args.show_bounds = true;
       }
       else
       {
-        show_bounds = false;
+        args.show_bounds = false;
       }
     }
     else if (input == "whichnearbycorner")
     {
-      std::cin >> which_nearby_corner;
+      std::cin >> args.which_nearby_corner;
     }
     else if (input == "gonearbycorner" && cursors.size() > 0)
     {
-      map_position go_pos = preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], which_nearby_corner);
-      middirection = get_middirection_between_points(graph.loc(cursors[0]), graph.loc(go_pos));
+      map_position go_pos = preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], args.which_nearby_corner);
+      args.middirection = get_middirection_between_points(graph.loc(cursors[0]), graph.loc(go_pos));
       set_cursor_to_pos(cursors, graph, 0, go_pos);
     }
 
-
-    print_graph(preprocessing_data, graph, cursors, path, show_nearby, show_num_nearby, show_num_nearby_with_next, show_nearby_with_next, show_islands, show_bounds, middirection, which_nearby_corner);
+    print_graph(preprocessing_data, graph, cursors, path, args);
 
     if (input == "help")
     {
@@ -486,6 +496,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "corner n m: move the nth cursor to select the mth corner" << std::endl;
       std::cout << "numnearby: show number of nearby corners" << std::endl;
       std::cout << "numnearbywithnext: show number of nearby corners with next" << std::endl;
+      std::cout << "island i: select the ith island" << std::endl;
       std::cout << "islands: show islands" << std::endl;
       std::cout << "bounds i: show bounds. Uses i to determine which middirection to use" << std::endl;
       std::cout << "gonearbycorner: sets cursor 0 to the selected nearby corner" << std::endl;

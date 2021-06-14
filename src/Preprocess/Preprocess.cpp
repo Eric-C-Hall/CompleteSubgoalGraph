@@ -302,8 +302,18 @@ void PreprocessingData::_push_corners_in_corner_graph()
   std::cout << num_unpushed << " unpushed" << std::endl;
 }
 
+void save_unsigned_int_as_binary(std::ostream & stream, unsigned int i)
+{
+  char * i_loc = (char *)&i;
+  stream.write(i_loc, sizeof (unsigned int));
+}
+
 void PreprocessingData::_save(std::ostream & stream) const
 {
+  //save_unsigned_int_as_binary(stream, _corners.size());
+  //unsigned int output = _corners.size();
+  //char * output_loc = (char *)&output;
+  //stream.write(output_loc, sizeof output);
   stream << _corners.size() << "\n";
 
   // Save corners
