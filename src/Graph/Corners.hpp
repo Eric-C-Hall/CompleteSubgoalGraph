@@ -1,6 +1,6 @@
 #ifndef CORNERGRAPH_PROJECT__CORNERS_HPP
 #define CORNERGRAPH_PROJECT__CORNERS_HPP
 
-typedef unsigned int corner_index;
+typedef uint16_t corner_index;
 
 #endif

@@ -308,10 +308,23 @@ void save_unsigned_int_as_binary(std::ostream & stream, unsigned int i)
   stream.write(i_loc, sizeof (unsigned int));
 }
 
+void save_uint16_t_as_binary(std::ostream & stream, uint16_t i)
+{
+  char * i_loc = (char *)&i;
+  stream.write(i_loc, sizeof (uint16_t));
+}
+
 unsigned int load_unsigned_int_as_binary(std::istream &stream)
 {
   unsigned int return_value;
   stream.read((char *)(&return_value), sizeof (unsigned int));
+  return return_value;
+}
+
+int16_t load_uint16_t_as_binary(std::istream &stream)
+{
+  uint16_t return_value;
+  stream.read((char *)(&return_value), sizeof (uint16_t));
   return return_value;
 }
 
@@ -342,8 +355,6 @@ void PreprocessingData::_save(std::ostream & stream) const
   }
 
   std::cout << num_nearby_corner_indices << " nearby corner indices saved" << std::endl;
-  int num_seperators = graph.num_positions();
-  std::cout << num_seperators << " seperators used" << std::endl;
 
   // Save _point_to_nearby_corner_indices_with_next
   int num_nearby_corner_indices_with_next = 0;
@@ -358,7 +369,6 @@ void PreprocessingData::_save(std::ostream & stream) const
   }
 
   std::cout << num_nearby_corner_indices_with_next << " nearby corner indices with next saved" << std::endl;
-  std::cout << graph.num_positions() << " seperators used" << std::endl;
 
   int num_exact_distances = 0;
   int num_first_corners = 0;
@@ -368,14 +378,14 @@ void PreprocessingData::_save(std::ostream & stream) const
     for (corner_index j = 0; j <= i; j++)
     {
       exact_distance d = _pair_of_corner_indices_to_dist[i][j];
-      save_unsigned_int_as_binary(stream, d.num_straight);
-      save_unsigned_int_as_binary(stream, d.num_diagonal);
+      save_uint16_t_as_binary(stream, d.num_straight);
+      save_uint16_t_as_binary(stream, d.num_diagonal);
       num_exact_distances++;
     }
     for (corner_index j = 0; j < _corners.size(); j++)
     {
       assert(_pair_of_corner_indices_to_first_corner[i][j] != j);
-      save_unsigned_int_as_binary(stream, _pair_of_corner_indices_to_first_corner[i][j]);
+      save_uint16_t_as_binary(stream, _pair_of_corner_indices_to_first_corner[i][j]);
       num_first_corners++;
     }
   }
@@ -399,19 +409,28 @@ void PreprocessingData::_save(std::ostream & stream) const
   }
 
   std::cout << num_bounds << " bounds saved" << std::endl;
-  int num_important = num_corners + num_nearby_corner_indices + num_nearby_corner_indices_with_next + 2 * num_exact_distances + num_first_corners + 4*num_bounds;
-  int num_total = num_important + 2*num_seperators;
-  std::cout << "Total: " << num_total << std::endl;
-  std::cout << "Important: " << num_important << std::endl;
+
+  int num_pieces_of_data = num_corners + num_nearby_corner_indices + num_nearby_corner_indices_with_next + 2 * num_exact_distances + num_first_corners + 4*num_bounds;
+  int num_int32_sized_data = num_corners + num_nearby_corner_indices + num_nearby_corner_indices_with_next + num_exact_distances + ((num_first_corners + 1) / 2) + 4*num_bounds;
+  std::cout << "Num pieces of data: " << num_pieces_of_data << std::endl;
+  std::cout << "Amount of data (each unit worth 32 bits): " << num_int32_sized_data << std::endl;
   std::cout << std::endl;
 
-  std::cout << "Percentages of important data saved: " << std::endl;
-  std::cout << "Corners:          " << 100 * (double)num_corners / (double) num_important << std::endl;
-  std::cout << "Nearby:           " << 100 * (double)num_nearby_corner_indices / (double) num_important << std::endl;
-  std::cout << "Nearby with next: " << 100 * (double)num_nearby_corner_indices_with_next / (double) num_important << std::endl;
-  std::cout << "Exact distances:  " << 100 * 2 * (double)num_exact_distances / (double) num_important << std::endl;
-  std::cout << "First corners:    " << 100 * (double)num_first_corners / (double) num_important << std::endl;
-  std::cout << "Bounds:           " << 100 * 4 * (double)num_bounds / (double) num_important << std::endl;
+  std::cout << "Percentages of number of pieces of data saved: " << std::endl;
+  std::cout << "Corners:          " << 100 * (double)num_corners / (double) num_pieces_of_data << std::endl;
+  std::cout << "Nearby:           " << 100 * (double)num_nearby_corner_indices / (double) num_pieces_of_data << std::endl;
+  std::cout << "Nearby with next: " << 100 * (double)num_nearby_corner_indices_with_next / (double) num_pieces_of_data << std::endl;
+  std::cout << "Exact distances:  " << 100 * 2 * (double)num_exact_distances / (double) num_pieces_of_data << std::endl;
+  std::cout << "First corners:    " << 100 * (double)num_first_corners / (double) num_pieces_of_data << std::endl;
+  std::cout << "Bounds:           " << 100 * 4 * (double)num_bounds / (double) num_pieces_of_data << std::endl;
+
+  std::cout << "Percentages of amount of data saved: " << std::endl;
+  std::cout << "Corners:          " << 100 * (double)num_corners / (double) num_int32_sized_data << std::endl;
+  std::cout << "Nearby:           " << 100 * (double)num_nearby_corner_indices / (double) num_int32_sized_data << std::endl;
+  std::cout << "Nearby with next: " << 100 * (double)num_nearby_corner_indices_with_next / (double) num_int32_sized_data << std::endl;
+  std::cout << "Exact distances:  " << 100 * (double)num_exact_distances / (double) num_int32_sized_data << std::endl;
+  std::cout << "First corners:    " << 100 * (double)num_first_corners / 2 / (double) num_int32_sized_data << std::endl;
+  std::cout << "Bounds:           " << 100 * 4 * (double)num_bounds / (double) num_int32_sized_data << std::endl;
 
 }
 
@@ -484,14 +503,14 @@ void PreprocessingData::_load(std::istream &stream)
     _pair_of_corner_indices_to_first_corner[i].reserve(_corners.size());
     for (corner_index j = 0; j <= i; j++)
     {
-      int num_straight = load_unsigned_int_as_binary(stream);
-      int num_diagonal = load_unsigned_int_as_binary(stream);
+      int num_straight = load_uint16_t_as_binary(stream);
+      int num_diagonal = load_uint16_t_as_binary(stream);
       exact_distance d(num_straight, num_diagonal);
       _pair_of_corner_indices_to_dist[i].push_back(d);
     }
     for (corner_index j = 0; j < _corners.size(); j++)
     {
-      corner_index first_corner = load_unsigned_int_as_binary(stream);
+      corner_index first_corner = load_uint16_t_as_binary(stream);
       assert(first_corner != j);
       _pair_of_corner_indices_to_first_corner[i].push_back(first_corner);
     }
@@ -523,7 +542,7 @@ void PreprocessingData::load(const std::string &filename)
   Timer t;
   t.StartTimer();
   std::cout << "Loading preprocessed data" << std::endl;
-  std::ifstream file(filename, std::ifstream::in  | std::ifstream::binary);
+  std::ifstream file(filename, std::ifstream::in | std::ifstream::binary);
   if (file.fail())
   {
     std::cerr << "Attempt to open \"" << filename << "\"" << std::endl;
