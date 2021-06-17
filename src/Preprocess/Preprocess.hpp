@@ -7,8 +7,7 @@
 #include "../Graph/Graph.hpp"
 #include "../Graph/XYLoc.hpp"
 #include "../Graph/Directions.hpp"
-
-typedef unsigned int corner_index;
+#include "../Graph/Corners.hpp"
 
 void PreprocessMap(const Graph &graph);
 

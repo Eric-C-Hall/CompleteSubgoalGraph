@@ -40,26 +40,13 @@ class Graph {
   inline unsigned int y(map_position p) const {return p / get_width();}
   inline unsigned int x(map_position p) const {return p % get_width();}
   // TODO: maybe this can be done without converting to xyLoc? Maybe not though
-  inline exact_distance octile_distance(map_position a, map_position b) const
-  {
-    unsigned int x_a = x(a);
-    unsigned int x_b = x(b);
-    unsigned int y_a = y(a);
-    unsigned int y_b = y(b);
-
-    unsigned int abs_x_diff = (x_a > x_b ? x_a - x_b : x_b - x_a);
-    unsigned int abs_y_diff = (y_a > y_b ? y_a - y_b : y_b - y_a);
-
-    int num_diagonal = std::min(abs_x_diff, abs_y_diff);
-    int num_straight = std::max(abs_x_diff, abs_y_diff) - num_diagonal;
-    return exact_distance(num_straight, num_diagonal);
-  }
+  inline exact_distance octile_distance(map_position a, map_position b) const;
 
   inline map_position up(map_position p) const {return p + get_width();}
   inline map_position down(map_position p) const {return p - get_width();}
   inline map_position left(map_position p) const {return p - 1;}
   inline map_position right(map_position p) const {return p + 1;}
-  
+  inline map_position step_in_direction(map_position p, Direction dir) const;
   inline map_position translate_x(map_position p, int num) const {return p + num;}
   inline map_position translate_y(map_position p, int num) const {return p + num * get_width();}
 
@@ -128,6 +115,12 @@ inline bool Graph::is_point_in_bounds(const xyLoc l, const std::pair<xyLoc, xyLo
 inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph);
 inline map_position move_in_middirection(const MidDirection middirection, const map_position pos, const Graph &graph);
 
+inline map_position Graph::step_in_direction(map_position p, Direction dir) const
+{
+  moving_direction(dir, p, *this);
+  return p;
+}
+
 // TODO: I think this should just return a map_position, rather than modifying the input map_position
 inline void moving_direction(unsigned int dir, map_position & pos, const Graph &graph)
 {
@@ -185,6 +178,21 @@ inline map_position move_in_middirection(const MidDirection middirection, const 
     default:
       return pos;
   }
+}
+
+inline exact_distance Graph::octile_distance(map_position a, map_position b) const
+{
+  unsigned int x_a = x(a);
+  unsigned int x_b = x(b);
+  unsigned int y_a = y(a);
+  unsigned int y_b = y(b);
+
+  unsigned int abs_x_diff = (x_a > x_b ? x_a - x_b : x_b - x_a);
+  unsigned int abs_y_diff = (y_a > y_b ? y_a - y_b : y_b - y_a);
+
+  int num_diagonal = std::min(abs_x_diff, abs_y_diff);
+  int num_straight = std::max(abs_x_diff, abs_y_diff) - num_diagonal;
+  return exact_distance(num_straight, num_diagonal);
 }
 
 #endif

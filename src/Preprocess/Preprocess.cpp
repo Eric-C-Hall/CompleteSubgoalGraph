@@ -10,6 +10,7 @@
 
 #include "../Graph/ExactDistance.hpp"
 #include "../Graph/Directions.hpp"
+#include "../Graph/SmoothedGraph.hpp"
 
 #include "../Utility/Timer.h"
 #include "../Utility/Stats.hpp"
@@ -1198,6 +1199,9 @@ void PreprocessingData::_find_geometric_containers(std::vector<std::pair<xyLoc, 
 
 void PreprocessingData::preprocess()
 {
+  SmoothedGraph smoothed_graph(graph);
+  smoothed_graph.gui();
+
   Timer t;
   double total_time = 0;
 
