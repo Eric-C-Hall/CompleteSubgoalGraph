@@ -457,7 +457,7 @@ void SmoothedGraph::gui()
     {
       bool b;
       std::cin >> b;
-      smoothen_diagonal(args.selected_corner, b);
+      smoothen_diagonal(_corners[args.selected_corner], b);
     }
     else if (input == "pos")
     {
@@ -538,39 +538,30 @@ unsigned int SmoothedGraph::create_obstacles_along_diagonal(map_position first, 
 {
   unsigned int num_diagonal = 0;
 
-std::cout << "here1" << std::endl;
   // First obstacle might already be obstacle, and we should not end immediately if it is
   if (!_obstacles[first])
     add_obstacle(first);
 
-std::cout << "here2" << std::endl;
   map_position curr = first;
   while (true)
   {
-  std::cout << "here3" << std::endl;
     // Step once in dir1, add obstacle
     curr = graph.step_in_direction(first, dir1);
-      std::cout << "here3.1" << std::endl;
-  std::cout << first << " " << curr << " " << graph.loc(first) << " " << graph.loc(curr) << " " << graph.get_width() << " " << graph.get_height() << std::endl;
     if (_obstacles[curr])
       break;
-std::cout << "here3.2" << std::endl;
     add_obstacle(curr);
     
-    std::cout << "here4" << std::endl;
     // Check if obstacle is further in dir1 
     map_position check_pos = graph.step_in_direction(curr, dir1);
     if (_obstacles[check_pos])
       break;
       
-    std::cout << "here5" << std::endl;
     // Step once in dir2, add obstacle.
     curr = graph.step_in_direction(curr, dir2);
     if (_obstacles[curr])
       break;
     add_obstacle(curr);
     
-    std::cout << "here6" << std::endl;
     // Keep track of number of diagonal steps taken
     num_diagonal++;    
   }
