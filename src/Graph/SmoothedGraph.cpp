@@ -199,7 +199,7 @@ void SmoothedGraph::auto_smoothen_straight()
    
     // Step 3: Confirm/Revert
 
-    if (smoothen_straight_acceptable())
+    if (smoothen_acceptable())
     {
       confirm_add_obstacles();
     }
@@ -359,7 +359,7 @@ void SmoothedGraph::find_newly_removable_corners()
   }
 }
 
-bool SmoothedGraph::smoothen_straight_acceptable() const
+bool SmoothedGraph::smoothen_acceptable() const
 {
   if (removable_corners.size() == 0)
   {
@@ -453,6 +453,10 @@ void SmoothedGraph::gui()
     {
       auto_smoothen_straight();
     }
+    else if (input == "autosmoothendiagonal")
+    {
+      auto_smoothen_diagonal();
+    }
     else if (input == "smoothendiagonal")
     {
       bool b;
@@ -492,6 +496,47 @@ void SmoothedGraph::gui()
 
     GUIRequestInput(input);
   }
+}
+
+void SmoothedGraph::auto_smoothen_diagonal()
+{
+  Timer t;
+  t.StartTimer();
+
+  auto corner_copy = _corners;
+  int i = 0;
+  std::cout << "Smoothening diagonal" << std::endl;
+  for (map_position c : corner_copy)
+  {
+    if (i % 100 == 0)
+      std::cout << (i == 0 ? "" : ", ") << i << std::flush;
+    i++;
+
+    for (bool b : {true, false})
+    {
+      // Step 1: Add obstacles
+      smoothen_diagonal(c, b);
+
+      // Step 2: Check effect of adding obstacles on corners
+      find_newly_removable_corners();
+      
+      // Step 3: Confirm/Revert
+
+      if (smoothen_acceptable())
+      {
+        confirm_add_obstacles();
+      }
+      else
+      {
+        undo_add_obstacles();
+      }
+    }
+  }
+  std::cout << std::endl;
+
+  t.EndTimer();
+  std::cout << "Smoothening diagonal took " << t.GetElapsedTime() << std::endl;
+  return;
 }
 
 // -------------

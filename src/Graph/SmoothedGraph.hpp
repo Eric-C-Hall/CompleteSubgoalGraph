@@ -57,7 +57,7 @@ class SmoothedGraph
   // Note: we don't take into account the possibility of corners needing to be added,
   // because this will never occur in the current algorithm
   void find_newly_removable_corners();
-  bool smoothen_straight_acceptable() const;
+  bool smoothen_acceptable() const;
   // Step 3: Confirm/Revert
   void undo_add_obstacles();
   void confirm_add_obstacles();
