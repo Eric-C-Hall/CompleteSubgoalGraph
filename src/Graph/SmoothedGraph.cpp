@@ -80,12 +80,14 @@ void SmoothedGraph::_compute_corners()
   _pos_to_corner_index.resize(graph.num_positions());
 
   _corners.clear();
-  for (unsigned int x=1 ; x<graph.get_width()-1 ; x++)
+  for (unsigned int x=0 ; x<graph.get_width() ; x++)
   {
-    for (unsigned int y=1 ; y<graph.get_height()-1 ; y++)
+    for (unsigned int y=0 ; y<graph.get_height() ; y++)
     {
       map_position p = graph.pos(x,y);
-      _add_if_corner(p);
+      if (x != 0 && y != 0 && x != graph.get_width() - 1 && y != graph.get_height() - 1)
+        _add_if_corner(p);
+
       if (_corners.size() > 0 && _corners.back() == p)
       {
         _pos_to_corner_index[p] = _corners.size() - 1;
@@ -120,6 +122,18 @@ void SmoothedGraph::print(const SmoothedGraphPrintArgs &args) const
     for (unsigned int x = 0; x < graph.get_width(); x++)
     {
       map_position p = graph.pos(x,y);
+      
+      // Highlights
+      if (p == args.selected_position)
+      {
+        std::cout << "\e[42m";
+      }
+      if (_pos_to_corner_index[p] == args.selected_corner)
+      {
+        std::cout << "\e[7m";
+      }
+      
+      // Print the character
       if (_obstacles[p])
       {
         if (!graph.is_obstacle(p))
@@ -133,11 +147,6 @@ void SmoothedGraph::print(const SmoothedGraphPrintArgs &args) const
       }
       else
       {
-        if (_pos_to_corner_index[p] == args.selected_corner)
-        {
-          std::cout << "\e[7m";
-        }
-
         if (_pos_to_corner_index[p] != MAX_POSSIBLE_CORNER_INDEX)
         {
           std::cout << "!";
@@ -450,6 +459,17 @@ void SmoothedGraph::gui()
       std::cin >> b;
       smoothen_diagonal(args.selected_corner, b);
     }
+    else if (input == "pos")
+    {
+      std::cin >> args.selected_position;
+    }
+    else if (input == "loc")
+    {
+      unsigned int x;
+      unsigned int y;
+      std::cin >> x >> y;
+      args.selected_position = graph.pos(xyLoc(x,y));
+    }
     else if (input == "undo")
     {
       undo_add_obstacles();
@@ -464,6 +484,8 @@ void SmoothedGraph::gui()
       std::cout << "smoothenstraight: smoothen the selected corner" << std::endl;
       std::cout << "autosmoothenstraight: smoothen appropriate corners automatically" << std::endl;
       std::cout << "smoothendiagonal b: smoothen the selected corner diagonal with bool b" << std::endl;
+      std::cout << "pos p: select the position p" << std::endl;
+      std::cout << "loc x y: select the position corresponding to the location (x,y)" << std::endl;
       std::cout << "undo: undo smoothenstraight" << std::endl;
       std::cout << std::endl;
     }
@@ -532,6 +554,7 @@ std::cout << "here2" << std::endl;
   std::cout << first << " " << curr << " " << graph.loc(first) << " " << graph.loc(curr) << " " << graph.get_width() << " " << graph.get_height() << std::endl;
     if (_obstacles[curr])
       break;
+std::cout << "here3.2" << std::endl;
     add_obstacle(curr);
     
     std::cout << "here4" << std::endl;

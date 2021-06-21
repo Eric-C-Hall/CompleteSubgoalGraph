@@ -7,6 +7,7 @@
 struct SmoothedGraphPrintArgs
 {
   corner_index selected_corner = 0;
+  map_position selected_position = -1;
 };
 
 class SmoothedGraph
