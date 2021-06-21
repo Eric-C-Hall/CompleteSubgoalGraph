@@ -204,52 +204,9 @@ void SmoothedGraph::auto_smoothen_straight()
   t.EndTimer();
   std::cout << "Smoothening straight took " << t.GetElapsedTime() << std::endl;
   return;
-
-  // -------------------
-  // Old version:
-  // -------------------
-
-  std::cout << "Smoothening straight: ";
-  bool smoothen_successful = true;
-  while (smoothen_successful)
-  {
-    std::cout << "|" << std::flush;
-    smoothen_successful = false;
-
-    // Order corners randomly
-    std::vector<corner_index> random_corner_order(_corners.size());
-    std::iota(random_corner_order.begin(), random_corner_order.end(), 0);
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::shuffle(random_corner_order.begin(), random_corner_order.end(), gen);
-
-    // Try smoothing corners in this random order. If reasonable, accept and continue
-    for (corner_index i : random_corner_order)
-    {
-      // Step 1: Add obstacles
-      smoothen_straight(_corners[i]);
-
-      // Step 2: Check effect of adding obstacles on corners
-      find_newly_removable_corners();
-
-      // Step 3: Confirm/Revert
-
-      if (smoothen_straight_acceptable())
-      {
-        confirm_add_obstacles();
-        smoothen_successful = true;
-        break;
-      }
-      else
-      {
-        undo_add_obstacles();
-      }
-    }
-  }
-  std::cout << std::endl;
 }
 
-void SmoothedGraph::smoothen_straight(const map_position c)
+Direction SmoothedGraph::find_wall_direction(const map_position c) const
 {
   // Find direction of wall
   Direction wall_direction = Dir_NE;
@@ -262,6 +219,12 @@ void SmoothedGraph::smoothen_straight(const map_position c)
     }
   }
   assert(wall_direction != Dir_NE);
+  return wall_direction;
+}
+
+void SmoothedGraph::smoothen_straight(const map_position c)
+{
+  Direction wall_direction = find_wall_direction(c);
 
   // Find wall
   map_position wall = graph.step_in_direction(c, wall_direction);
@@ -272,7 +235,6 @@ void SmoothedGraph::smoothen_straight(const map_position c)
   Direction anticlockwise_direction = get_n_steps_anticlockwise<2>(wall_direction);
 
   // Find sideways new obstacles
-  std::vector<map_position> sideways_obstacles;
   unsigned int clockwise_steps = create_obstacles_in_direction(wall, c, clockwise_direction);
   unsigned int anticlockwise_steps = create_obstacles_in_direction(wall, c, anticlockwise_direction);
   // TODO: I think 1 should be added to clockwise and anticlockwise steps to deal with situations in which only a diagonal is blocked off, rather than a straight?
@@ -482,6 +444,12 @@ void SmoothedGraph::gui()
     {
       auto_smoothen_straight();
     }
+    else if (input == "smoothendiagonal")
+    {
+      bool b;
+      std::cin >> b;
+      smoothen_diagonal(args.selected_corner, b);
+    }
     else if (input == "undo")
     {
       undo_add_obstacles();
@@ -495,10 +463,94 @@ void SmoothedGraph::gui()
       std::cout << "corner n: select nth corner" << std::endl;
       std::cout << "smoothenstraight: smoothen the selected corner" << std::endl;
       std::cout << "autosmoothenstraight: smoothen appropriate corners automatically" << std::endl;
+      std::cout << "smoothendiagonal b: smoothen the selected corner diagonal with bool b" << std::endl;
       std::cout << "undo: undo smoothenstraight" << std::endl;
       std::cout << std::endl;
     }
 
     GUIRequestInput(input);
   }
+}
+
+// -------------
+// Smoothen diagonal
+//
+// # denotes obstacle
+// - denotes free space
+// X denotes corner
+// O denotes new obstacle.
+// ? denotes place to check if an obstacle or not
+// F dentoes flood-fill location
+//
+// If either ? or O is an obstacle, then we may have closed off an area, so we should stop.
+// Exception: the very first O can be an obstacle.
+//
+// -----FOO?
+// ------FOO?
+// -------FOOX
+// --------FO#
+// ---------F------
+
+void SmoothedGraph::smoothen_diagonal(const map_position c, const bool use_clockwise_diagonal)
+{
+  // Find direction of wall
+  Direction wall_direction = find_wall_direction(c);
+
+  // Find step directions
+  Direction dir1 = get_opposite_direction(wall_direction);
+  Direction dir2 = (use_clockwise_diagonal ? get_n_steps_clockwise<2>(wall_direction) : get_n_steps_anticlockwise<2>(wall_direction));
+  Direction diagonal = (use_clockwise_diagonal ? get_n_steps_clockwise<3>(wall_direction) : get_n_steps_anticlockwise<3>(wall_direction));
+  
+  // Find first obstacle and first floodfill position
+  map_position first_add_obstacle = graph.step_in_direction(graph.step_in_direction(c, wall_direction), dir2);
+  map_position first_floodfill_position = graph.step_in_direction(first_add_obstacle, wall_direction);
+  
+  // Create diagonal wall
+  unsigned int steps = 2 + create_obstacles_along_diagonal(first_add_obstacle, dir1, dir2);
+  
+  // Flood fill behind wall
+  flood_fill_obstacles_in_direction(first_floodfill_position, diagonal, steps);
+}
+
+unsigned int SmoothedGraph::create_obstacles_along_diagonal(map_position first, Direction dir1, Direction dir2)
+{
+  unsigned int num_diagonal = 0;
+
+std::cout << "here1" << std::endl;
+  // First obstacle might already be obstacle, and we should not end immediately if it is
+  if (!_obstacles[first])
+    add_obstacle(first);
+
+std::cout << "here2" << std::endl;
+  map_position curr = first;
+  while (true)
+  {
+  std::cout << "here3" << std::endl;
+    // Step once in dir1, add obstacle
+    curr = graph.step_in_direction(first, dir1);
+      std::cout << "here3.1" << std::endl;
+  std::cout << first << " " << curr << " " << graph.loc(first) << " " << graph.loc(curr) << " " << graph.get_width() << " " << graph.get_height() << std::endl;
+    if (_obstacles[curr])
+      break;
+    add_obstacle(curr);
+    
+    std::cout << "here4" << std::endl;
+    // Check if obstacle is further in dir1 
+    map_position check_pos = graph.step_in_direction(curr, dir1);
+    if (_obstacles[check_pos])
+      break;
+      
+    std::cout << "here5" << std::endl;
+    // Step once in dir2, add obstacle.
+    curr = graph.step_in_direction(curr, dir2);
+    if (_obstacles[curr])
+      break;
+    add_obstacle(curr);
+    
+    std::cout << "here6" << std::endl;
+    // Keep track of number of diagonal steps taken
+    num_diagonal++;    
+  }
+  
+  return num_diagonal;
 }

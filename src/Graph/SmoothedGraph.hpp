@@ -40,10 +40,12 @@ class SmoothedGraph
 
   void print(const SmoothedGraphPrintArgs &args) const;
 
+  // ------------------------------------------------------
   // Automatically smoothen the graph in 3 steps:
   void auto_smoothen_straight();
   // Step 1: Add obstacles
   void smoothen_straight(const map_position c);
+  Direction find_wall_direction(const map_position c) const;
   unsigned int create_obstacles_in_direction(map_position wall, map_position corner, Direction dir);
   void flood_fill_obstacles_in_direction(map_position origin, Direction dir, unsigned int dist);
   void flood_fill_obstacles(map_position origin);
@@ -59,6 +61,16 @@ class SmoothedGraph
   void undo_add_obstacles();
   void confirm_add_obstacles();
   void remove_obstacles(const std::vector<map_position> &remove_obstacles);
+  // ------------------------------------------------------
+
+
+
+  // ------------------------------------------------------
+  // Smoothen diagonal
+  void auto_smoothen_diagonal();
+  void smoothen_diagonal(const map_position c, const bool use_clockwise_diagonal);
+  unsigned int create_obstacles_along_diagonal(map_position first, Direction dir1, Direction dir2);
+  // ------------------------------------------------------
 
   public:
   SmoothedGraph(const Graph &input_graph);
