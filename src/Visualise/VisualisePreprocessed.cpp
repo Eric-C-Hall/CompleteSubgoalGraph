@@ -15,17 +15,25 @@ void VisualiseRequestInput(std::string &input)
 
 char int_to_drawn_char(int i)
 {
-  if (i <= 9)
+  if (i < -1)
+  {
+    return '<';
+  }
+  if (i == -1)
+  {
+    return '-';
+  }
+  else if (i <= 9)
   {
     return '0' + i;
   }
-  else if (i <= 9 + 26)
+  else if (i <= 10 + 25)
   {
-    return 'a' + i - 9;
+    return 'a' + i - 10;
   }
-  else if (i <= 9 + 26 + 26)
+  else if (i <= 10 + 26 + 25)
   {
-    return 'A' + i - (9 + 26);
+    return 'A' + i - (10 + 26);
   }
   else
   {

@@ -68,6 +68,8 @@ class Graph {
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const std::pair<xyLoc, xyLoc> a, const std::pair<xyLoc, xyLoc> b) const;
 
   inline bool is_point_in_bounds(const xyLoc l, const std::pair<xyLoc, xyLoc> bounds) const;
+
+  inline bool adjacent(map_position a, map_position b) const;
 };
 
 inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const xyLoc a, const xyLoc b) const
@@ -193,6 +195,13 @@ inline exact_distance Graph::octile_distance(map_position a, map_position b) con
   int num_diagonal = std::min(abs_x_diff, abs_y_diff);
   int num_straight = std::max(abs_x_diff, abs_y_diff) - num_diagonal;
   return exact_distance(num_straight, num_diagonal);
+}
+
+inline bool Graph::adjacent(map_position a, map_position b) const
+{
+  xyLoc loc_a = loc(a);
+  xyLoc loc_b = loc(b);
+  return std::abs(loc_a.x - loc_b.x) <= 1 && std::abs(loc_a.y - loc_b.y <= 1);
 }
 
 #endif

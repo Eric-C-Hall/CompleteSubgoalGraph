@@ -1,6 +1,7 @@
 #include "SmoothedGraph.hpp"
 #include "Directions.hpp"
 #include "../Utility/Timer.h"
+#include "../Visualise/VisualisePreprocessed.hpp"
 
 #include <random>
 #include <algorithm>
@@ -124,17 +125,21 @@ void SmoothedGraph::print(const SmoothedGraphPrintArgs &args) const
       map_position p = graph.pos(x,y);
       
       // Highlights
-      if (p == args.selected_position)
-      {
-        std::cout << "\e[42m";
-      }
       if (_pos_to_corner_index[p] == args.selected_corner)
       {
         std::cout << "\e[7m";
       }
+      if (p == args.selected_position)
+      {
+        std::cout << "\e[42m";
+      }
       
       // Print the character
-      if (_obstacles[p])
+      if (args.show_pos_to_corner_index)
+      {
+        std::cout << int_to_drawn_char(_pos_to_corner_index[p]);
+      }
+      else if (_obstacles[p])
       {
         if (!graph.is_obstacle(p))
         {
@@ -244,9 +249,8 @@ void SmoothedGraph::smoothen_straight(const map_position c)
   Direction anticlockwise_direction = get_n_steps_anticlockwise<2>(wall_direction);
 
   // Find sideways new obstacles
-  unsigned int clockwise_steps = create_obstacles_in_direction(wall, c, clockwise_direction);
-  unsigned int anticlockwise_steps = create_obstacles_in_direction(wall, c, anticlockwise_direction);
-  // TODO: I think 1 should be added to clockwise and anticlockwise steps to deal with situations in which only a diagonal is blocked off, rather than a straight?
+  unsigned int clockwise_steps = 2 + create_obstacles_in_direction(wall, c, clockwise_direction);
+  unsigned int anticlockwise_steps = 2 + create_obstacles_in_direction(wall, c, anticlockwise_direction);
 
   // Flood fill in correct direction for all new sideways obstacles
   flood_fill_obstacles_in_direction(behind_wall, clockwise_direction, clockwise_steps);
@@ -299,10 +303,13 @@ unsigned int SmoothedGraph::create_obstacles_in_direction(map_position wall, map
 
 void SmoothedGraph::flood_fill_obstacles_in_direction(map_position origin, Direction dir, unsigned int dist)
 {
+  map_position curr = origin;
   for (unsigned int i = 0; i < dist; i++)
   {
-    origin = graph.step_in_direction(origin, dir);
-    flood_fill_obstacles(origin);
+    flood_fill_obstacles(curr);
+    map_position next = graph.step_in_direction(curr, dir);
+    assert(graph.adjacent(curr, next));
+    curr = next;
   }
 }
 
@@ -331,6 +338,7 @@ void SmoothedGraph::flood_fill_obstacles(map_position origin)
 
 void SmoothedGraph::add_obstacle(map_position p)
 {
+  assert(p < graph.num_positions());
   last_added_obstacles.push_back(p);
   _obstacles[p] = true;
 }
@@ -350,6 +358,8 @@ void SmoothedGraph::find_newly_removable_corners()
     for (Direction dir : get_directions())
     {
       map_position neighbour = graph.step_in_direction(p,dir);
+      assert(p < graph.num_positions());
+      assert(neighbour < graph.num_positions());
       if (_pos_to_corner_index[neighbour] != MAX_POSSIBLE_CORNER_INDEX)
       {
         if (!_is_corner(neighbour))
@@ -384,10 +394,13 @@ void SmoothedGraph::confirm_add_obstacles()
   // Remove desired corners
   for (map_position c : removable_corners)
   {
+    assert (c < graph.num_positions());
     corner_index curr_index = _pos_to_corner_index[c];
+
     // Erase the current corner
     _corners.erase(_corners.begin() + curr_index);
     _pos_to_corner_index[c] = MAX_POSSIBLE_CORNER_INDEX;
+
     // Fix up the corner_indices that are now incorrect
     for (auto corner_iter = _corners.begin() + curr_index; corner_iter != _corners.end(); corner_iter++)
     {
@@ -474,6 +487,10 @@ void SmoothedGraph::gui()
       std::cin >> x >> y;
       args.selected_position = graph.pos(xyLoc(x,y));
     }
+    else if (input == "postocornerindex")
+    {
+      args.show_pos_to_corner_index = !args.show_pos_to_corner_index;
+    }
     else if (input == "undo")
     {
       undo_add_obstacles();
@@ -488,8 +505,10 @@ void SmoothedGraph::gui()
       std::cout << "smoothenstraight: smoothen the selected corner" << std::endl;
       std::cout << "autosmoothenstraight: smoothen appropriate corners automatically" << std::endl;
       std::cout << "smoothendiagonal b: smoothen the selected corner diagonal with bool b" << std::endl;
+      std::cout << "autosmoothendiagonal: smoothen appropriate corners automatically" << std::endl;
       std::cout << "pos p: select the position p" << std::endl;
       std::cout << "loc x y: select the position corresponding to the location (x,y)" << std::endl;
+      std::cout << "postocornerindex: print postocornerindices" << std::endl;
       std::cout << "undo: undo smoothenstraight" << std::endl;
       std::cout << std::endl;
     }
