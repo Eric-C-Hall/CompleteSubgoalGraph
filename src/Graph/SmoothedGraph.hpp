@@ -9,6 +9,7 @@ struct SmoothedGraphPrintArgs
   corner_index selected_corner = 0;
   map_position selected_position = -1;
   bool show_pos_to_corner_index = false;
+  bool print_map = true;
 };
 
 class SmoothedGraph
@@ -41,6 +42,7 @@ class SmoothedGraph
   unsigned int compute_num_free_spaces() const;
 
   void print(const SmoothedGraphPrintArgs &args) const;
+  void print_map(const SmoothedGraphPrintArgs &args) const;
 
   // ------------------------------------------------------
   // Automatically smoothen the graph in 3 steps:

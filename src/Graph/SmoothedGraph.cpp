@@ -116,7 +116,7 @@ unsigned int SmoothedGraph::compute_num_free_spaces() const
   return return_value;
 }
 
-void SmoothedGraph::print(const SmoothedGraphPrintArgs &args) const
+void SmoothedGraph::print_map(const SmoothedGraphPrintArgs &args) const
 {
   for (unsigned int y = 0; y < graph.get_height(); y++)
   {
@@ -168,8 +168,17 @@ void SmoothedGraph::print(const SmoothedGraphPrintArgs &args) const
       // Remove formatting
       std::cout << "\e[0m";
     }
-    std::cout << "\n";
+    std::cout << "\n" << std::flush;
   }
+}
+
+void SmoothedGraph::print(const SmoothedGraphPrintArgs &args) const
+{
+  if (args.print_map)
+  {
+    print_map(args);
+  }
+
   unsigned int curr_num_free_spaces = compute_num_free_spaces();
   std::cout << "Num corners:             " << _corners.size() << "\n";
   std::cout << "Num free spaces:         " << curr_num_free_spaces << "\n";
@@ -303,13 +312,14 @@ unsigned int SmoothedGraph::create_obstacles_in_direction(map_position wall, map
 
 void SmoothedGraph::flood_fill_obstacles_in_direction(map_position origin, Direction dir, unsigned int dist)
 {
-  map_position curr = origin;
+  map_position prev = origin;
+  map_position curr = prev;
   for (unsigned int i = 0; i < dist; i++)
   {
+    assert(graph.adjacent(prev, curr));
     flood_fill_obstacles(curr);
-    map_position next = graph.step_in_direction(curr, dir);
-    assert(graph.adjacent(curr, next));
-    curr = next;
+    prev = curr;
+    map_position curr = graph.step_in_direction(curr, dir);
   }
 }
 
@@ -448,7 +458,6 @@ void GUIRequestInput(std::string &input)
 void SmoothedGraph::gui()
 {
   SmoothedGraphPrintArgs args;
-  print(args);
 
   std::string input;
   GUIRequestInput(input);
@@ -491,6 +500,10 @@ void SmoothedGraph::gui()
     {
       args.show_pos_to_corner_index = !args.show_pos_to_corner_index;
     }
+    else if (input == "printmap")
+    {
+      args.print_map = !args.print_map;
+    }
     else if (input == "undo")
     {
       undo_add_obstacles();
@@ -509,6 +522,7 @@ void SmoothedGraph::gui()
       std::cout << "pos p: select the position p" << std::endl;
       std::cout << "loc x y: select the position corresponding to the location (x,y)" << std::endl;
       std::cout << "postocornerindex: print postocornerindices" << std::endl;
+      std::cout << "printmap: toggle printing of the map" << std::endl;
       std::cout << "undo: undo smoothenstraight" << std::endl;
       std::cout << std::endl;
     }

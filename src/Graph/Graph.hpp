@@ -201,7 +201,7 @@ inline bool Graph::adjacent(map_position a, map_position b) const
 {
   xyLoc loc_a = loc(a);
   xyLoc loc_b = loc(b);
-  return std::abs(loc_a.x - loc_b.x) <= 1 && std::abs(loc_a.y - loc_b.y <= 1);
+  return std::abs(loc_a.x - loc_b.x) <= 1 && std::abs(loc_a.y - loc_b.y) <= 1;
 }
 
 #endif
