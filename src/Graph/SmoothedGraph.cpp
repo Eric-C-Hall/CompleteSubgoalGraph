@@ -319,7 +319,7 @@ void SmoothedGraph::flood_fill_obstacles_in_direction(map_position origin, Direc
     assert(graph.adjacent(prev, curr));
     flood_fill_obstacles(curr);
     prev = curr;
-    map_position curr = graph.step_in_direction(curr, dir);
+    curr = graph.step_in_direction(curr, dir);
   }
 }
 
