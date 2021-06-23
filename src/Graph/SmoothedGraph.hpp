@@ -28,6 +28,7 @@ class SmoothedGraph
   // so as to 
   std::vector<map_position> last_added_obstacles;
   std::set<map_position> removable_corners;
+  std::set<map_position> addable_corners;
 
   std::vector<map_position> _corners;
   std::vector<corner_index> _pos_to_corner_index;

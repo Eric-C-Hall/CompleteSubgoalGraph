@@ -375,18 +375,23 @@ void SmoothedGraph::find_newly_removable_corners()
         if (!_is_corner(neighbour))
           removable_corners.insert(neighbour);
       }
+      else
+      {
+        if (_is_corner(neighbour))
+          addable_corners.insert(neighbour);
+      }
     }
   }
 }
 
 bool SmoothedGraph::smoothen_acceptable() const
 {
-  if (removable_corners.size() == 0)
+  if (removable_corners.size() <= addable_corners.size())
   {
     return false;
   }
 
-  unsigned int ratio = last_added_obstacles.size() / removable_corners.size();
+  unsigned int ratio = last_added_obstacles.size() / (removable_corners.size() - addable_corners.size());
 
   return ratio < 10;
 }
@@ -396,6 +401,7 @@ void SmoothedGraph::undo_add_obstacles()
   remove_obstacles(last_added_obstacles);
   last_added_obstacles.clear();
   removable_corners.clear();
+  addable_corners.clear();
 }
 
 void SmoothedGraph::confirm_add_obstacles()
@@ -418,6 +424,14 @@ void SmoothedGraph::confirm_add_obstacles()
     }
   }
   removable_corners.clear();
+
+  // Add desired corners
+  for (map_position c : addable_corners)
+  {
+    assert (c < graph.num_positions());
+    _pos_to_corner_index[c] = _corners.size();
+    _corners.push_back(c);
+  }
 }
 
 void SmoothedGraph::remove_obstacles(const std::vector<map_position> &removed_obstacles)
