@@ -217,4 +217,38 @@ std::vector<map_position> Graph::get_safe_reachable_in_all_directions(const map_
   return return_value;
 }
 
+void Graph::debug_cut_sides(int xlowercut, int xuppercut, int ylowercut, int yuppercut)
+{
+  std::cout << "-----------------------------------------------------------" << std::endl;
+  std::cout << "WARNING: For the purposes of debug, the sides are being cut" << std::endl;
+  std::cout << "-----------------------------------------------------------" << std::endl;
+
+  unsigned int old_width = get_width();
+  unsigned int old_height = get_height();
+
+  unsigned int new_width = get_width();
+  new_width -= xlowercut;
+  new_width -= xuppercut; 
+
+  unsigned int new_height = get_height();
+  new_height -= ylowercut;
+  new_height -= yuppercut;
+
+  std::vector<bool> new_obstacles;
+  new_obstacles.reserve(new_width * new_height);
+
+  for (unsigned int y = ylowercut; y < old_height - yuppercut; y++)
+  {
+    for (unsigned int x = xlowercut; x < old_width - xuppercut; x++)
+    {
+      new_obstacles.push_back(is_obstacle(pos(x,y)));
+    }
+  }
+  _obstacles.swap(new_obstacles);
+
+  _width = new_width;
+  _height = new_height;
+  add_collar();
+}
+
 // eof

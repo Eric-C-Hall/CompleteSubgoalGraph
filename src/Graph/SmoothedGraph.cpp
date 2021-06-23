@@ -179,6 +179,10 @@ void SmoothedGraph::print(const SmoothedGraphPrintArgs &args) const
     print_map(args);
   }
 
+  std::cout << "Width: " << graph.get_width() << std::endl;
+  std::cout << "Height: " << graph.get_height() << std::endl;
+  std::cout << std::endl;
+
   unsigned int curr_num_free_spaces = compute_num_free_spaces();
   std::cout << "Num corners:             " << _corners.size() << "\n";
   std::cout << "Num free spaces:         " << curr_num_free_spaces << "\n";
@@ -485,11 +489,11 @@ void SmoothedGraph::gui()
     {
       smoothen_straight(args.selected_corner);
     }
-    else if (input == "autosmoothenstraight")
+    else if (input == "autosmoothenstraight" || input == "s")
     {
       auto_smoothen_straight();
     }
-    else if (input == "autosmoothendiagonal")
+    else if (input == "autosmoothendiagonal" || input == "d")
     {
       auto_smoothen_diagonal();
     }
@@ -514,7 +518,7 @@ void SmoothedGraph::gui()
     {
       args.show_pos_to_corner_index = !args.show_pos_to_corner_index;
     }
-    else if (input == "printmap")
+    else if (input == "printmap" || input == "printgraph" || input == "showmap" || input == "showgraph")
     {
       args.print_map = !args.print_map;
     }
@@ -530,13 +534,13 @@ void SmoothedGraph::gui()
       std::cout << std::endl;
       std::cout << "corner n: select nth corner" << std::endl;
       std::cout << "smoothenstraight: smoothen the selected corner" << std::endl;
-      std::cout << "autosmoothenstraight: smoothen appropriate corners automatically" << std::endl;
+      std::cout << "autosmoothenstraight: smoothen appropriate corners automatically (alias: s)" << std::endl;
       std::cout << "smoothendiagonal b: smoothen the selected corner diagonal with bool b" << std::endl;
-      std::cout << "autosmoothendiagonal: smoothen appropriate corners automatically" << std::endl;
+      std::cout << "autosmoothendiagonal: smoothen appropriate corners automatically (alias: d)" << std::endl;
       std::cout << "pos p: select the position p" << std::endl;
       std::cout << "loc x y: select the position corresponding to the location (x,y)" << std::endl;
       std::cout << "postocornerindex: print postocornerindices" << std::endl;
-      std::cout << "printmap: toggle printing of the map" << std::endl;
+      std::cout << "printmap: toggle printing of the map (alias: printgraph, showmap, showgraph)" << std::endl;
       std::cout << "undo: undo smoothenstraight" << std::endl;
       std::cout << std::endl;
     }

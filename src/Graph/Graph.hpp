@@ -70,6 +70,8 @@ class Graph {
   inline bool is_point_in_bounds(const xyLoc l, const std::pair<xyLoc, xyLoc> bounds) const;
 
   inline bool adjacent(map_position a, map_position b) const;
+
+  void debug_cut_sides(int xmin, int xmax, int ymin, int ymax);
 };
 
 inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const xyLoc a, const xyLoc b) const

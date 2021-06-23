@@ -65,6 +65,7 @@ int main(int argc, char **argv)
 
   Graph graph;
   graph.load_map(map_filename.c_str());
+  //graph.debug_cut_sides(0,0,0,0);
 
   // Determine which operating mode we should run in
   if (operating_mode.compare("-pre") == 0)
