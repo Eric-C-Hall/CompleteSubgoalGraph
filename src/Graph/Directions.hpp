@@ -16,6 +16,7 @@ enum Direction {
   Dir_NW = 7,
   Dir_MIN = Dir_N,
   Dir_MAX = Dir_NW,
+  Dir_None = 8
 };
 
 enum MidDirection {

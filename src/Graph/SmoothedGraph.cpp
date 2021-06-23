@@ -179,6 +179,12 @@ void SmoothedGraph::print(const SmoothedGraphPrintArgs &args) const
     print_map(args);
   }
 
+  if (args.selected_position >= graph.num_positions())
+  {
+    std::cout << "Selected position outside of graph at " << graph.loc(args.selected_position) << std::endl;
+    std::cout << std::endl;
+  }
+
   std::cout << "Width: " << graph.get_width() << std::endl;
   std::cout << "Height: " << graph.get_height() << std::endl;
   std::cout << std::endl;
@@ -233,25 +239,31 @@ void SmoothedGraph::auto_smoothen_straight()
   return;
 }
 
+// It is possible for this to return Dir_None, if changes in the map mean that c is no longer a corner
 Direction SmoothedGraph::find_wall_direction(const map_position c) const
 {
   // Find direction of wall
-  Direction wall_direction = Dir_NE;
+  Direction wall_direction = Dir_None;
   for (Direction dir : get_cardinal_directions())
   {
-    if (_obstacles[graph.step_in_direction(c, dir)])
+    map_position p = graph.step_in_direction(c, dir);
+    map_position p_clock = graph.step_in_direction(p, get_n_steps_clockwise<2>(dir));
+    map_position p_anticlock = graph.step_in_direction(p, get_n_steps_anticlockwise<2>(dir));
+    if (_obstacles[p] && (!_obstacles[p_clock] || !_obstacles[p_anticlock]))
     {
       wall_direction = dir;
       break;
     }
   }
-  assert(wall_direction != Dir_NE);
   return wall_direction;
 }
 
 void SmoothedGraph::smoothen_straight(const map_position c)
 {
   Direction wall_direction = find_wall_direction(c);
+
+  if (wall_direction == Dir_None)
+    return;
 
   // Find wall
   map_position wall = graph.step_in_direction(c, wall_direction);
@@ -614,6 +626,9 @@ void SmoothedGraph::smoothen_diagonal(const map_position c, const bool use_clock
   // Find direction of wall
   Direction wall_direction = find_wall_direction(c);
 
+  if (wall_direction == Dir_None)
+    return;
+
   // Find step directions
   Direction dir1 = get_opposite_direction(wall_direction);
   Direction dir2 = (use_clockwise_diagonal ? get_n_steps_clockwise<2>(wall_direction) : get_n_steps_anticlockwise<2>(wall_direction));
@@ -622,7 +637,7 @@ void SmoothedGraph::smoothen_diagonal(const map_position c, const bool use_clock
   // Find first obstacle and first floodfill position
   map_position first_add_obstacle = graph.step_in_direction(graph.step_in_direction(c, wall_direction), dir2);
   map_position first_floodfill_position = graph.step_in_direction(first_add_obstacle, wall_direction);
-  
+
   // Create diagonal wall
   unsigned int steps = 2 + create_obstacles_along_diagonal(first_add_obstacle, dir1, dir2);
   
