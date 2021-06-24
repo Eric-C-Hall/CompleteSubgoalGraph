@@ -226,10 +226,12 @@ void Graph::debug_cut_sides(int xlowercut, int xuppercut, int ylowercut, int yup
   unsigned int old_width = get_width();
   unsigned int old_height = get_height();
 
+  assert ((int)get_width() > xlowercut + xuppercut);
   unsigned int new_width = get_width();
   new_width -= xlowercut;
   new_width -= xuppercut; 
 
+  assert ((int)get_height() > ylowercut + yuppercut);
   unsigned int new_height = get_height();
   new_height -= ylowercut;
   new_height -= yuppercut;

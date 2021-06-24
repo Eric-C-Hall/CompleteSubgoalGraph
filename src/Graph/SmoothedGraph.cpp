@@ -71,8 +71,12 @@ bool SmoothedGraph::_is_corner(map_position p)
 
 void SmoothedGraph::_add_if_corner(map_position p)
 {
+  assert(_pos_to_corner_index[p] == MAX_POSSIBLE_CORNER_INDEX);
   if (_is_corner(p))
+  {
     _corners.push_back(p);
+    _pos_to_corner_index[p] = _corners.size() - 1;
+  }
 }
 
 void SmoothedGraph::_compute_corners()
@@ -86,17 +90,9 @@ void SmoothedGraph::_compute_corners()
     for (unsigned int y=0 ; y<graph.get_height() ; y++)
     {
       map_position p = graph.pos(x,y);
+      _pos_to_corner_index[p] = MAX_POSSIBLE_CORNER_INDEX;
       if (x != 0 && y != 0 && x != graph.get_width() - 1 && y != graph.get_height() - 1)
         _add_if_corner(p);
-
-      if (_corners.size() > 0 && _corners.back() == p)
-      {
-        _pos_to_corner_index[p] = _corners.size() - 1;
-      }
-      else
-      {
-        _pos_to_corner_index[p] = MAX_POSSIBLE_CORNER_INDEX;
-      }
     }
   }
 }
@@ -182,6 +178,12 @@ void SmoothedGraph::print(const SmoothedGraphPrintArgs &args) const
   if (args.selected_position >= graph.num_positions())
   {
     std::cout << "Selected position outside of graph at " << graph.loc(args.selected_position) << std::endl;
+    std::cout << std::endl;
+  }
+
+  if (args.selected_corner >= _corners.size())
+  {
+    std::cout << "Selected corner outside choices of possible corners: " << args.selected_corner << "/" << _corners.size() <<  std::endl;
     std::cout << std::endl;
   }
 
@@ -389,12 +391,18 @@ void SmoothedGraph::find_newly_removable_corners()
       if (_pos_to_corner_index[neighbour] != MAX_POSSIBLE_CORNER_INDEX)
       {
         if (!_is_corner(neighbour))
+        {
           removable_corners.insert(neighbour);
+          assert(_pos_to_corner_index[neighbour] < _corners.size());
+        }
       }
       else
       {
         if (_is_corner(neighbour))
+        {
+          assert(_pos_to_corner_index[neighbour] == MAX_POSSIBLE_CORNER_INDEX);
           addable_corners.insert(neighbour);
+        }
       }
     }
   }
@@ -423,19 +431,33 @@ void SmoothedGraph::undo_add_obstacles()
 void SmoothedGraph::confirm_add_obstacles()
 {
   last_added_obstacles.clear();
+
+  if (graph.num_positions() < 10000)
+  {
+    for (map_position p = 0; p < graph.num_positions(); p++)
+    {
+      assert(_pos_to_corner_index[p] == MAX_POSSIBLE_CORNER_INDEX || p == _corners[_pos_to_corner_index[p]]);
+    }
+  }
+
   // Remove desired corners
   for (map_position c : removable_corners)
   {
     assert (c < graph.num_positions());
     corner_index curr_index = _pos_to_corner_index[c];
+    assert (curr_index != MAX_POSSIBLE_CORNER_INDEX);
+    assert (curr_index < _corners.size());
 
     // Erase the current corner
     _corners.erase(_corners.begin() + curr_index);
     _pos_to_corner_index[c] = MAX_POSSIBLE_CORNER_INDEX;
 
+
     // Fix up the corner_indices that are now incorrect
     for (auto corner_iter = _corners.begin() + curr_index; corner_iter != _corners.end(); corner_iter++)
     {
+      assert(_pos_to_corner_index[*corner_iter] != 0);
+      assert(_pos_to_corner_index[*corner_iter] != MAX_POSSIBLE_CORNER_INDEX);
       _pos_to_corner_index[*corner_iter]--;
     }
   }
@@ -445,9 +467,12 @@ void SmoothedGraph::confirm_add_obstacles()
   for (map_position c : addable_corners)
   {
     assert (c < graph.num_positions());
+    assert (_corners.size() < MAX_POSSIBLE_CORNER_INDEX);
+    assert(_pos_to_corner_index[c] == MAX_POSSIBLE_CORNER_INDEX);
     _pos_to_corner_index[c] = _corners.size();
     _corners.push_back(c);
   }
+  addable_corners.clear();
 }
 
 void SmoothedGraph::remove_obstacles(const std::vector<map_position> &removed_obstacles)
