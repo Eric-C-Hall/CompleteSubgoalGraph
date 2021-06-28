@@ -15,6 +15,8 @@ struct SmoothedGraphPrintArgs
 class SmoothedGraph
 {
   private:
+  unsigned int MAX_FLOOD_FILL_BOUNDARY_SIZE = 1000;
+
   const Graph &graph;
 
   // TODO: This should be constant, but currently cannot be initialised easily as constant
@@ -52,8 +54,8 @@ class SmoothedGraph
   void smoothen_straight(const map_position c);
   Direction find_wall_direction(const map_position c) const;
   unsigned int create_obstacles_in_direction(map_position wall, map_position corner, Direction dir);
-  void flood_fill_obstacles_in_direction(map_position origin, Direction dir, unsigned int dist);
-  void flood_fill_obstacles(map_position origin);
+  bool flood_fill_obstacles_in_direction(map_position origin, Direction dir, unsigned int dist);
+  bool flood_fill_obstacles(map_position origin);
 
   void add_obstacle(map_position p);
   void add_obstacles(const std::vector<map_position> &new_obstacles);

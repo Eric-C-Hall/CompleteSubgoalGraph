@@ -280,8 +280,19 @@ void SmoothedGraph::smoothen_straight(const map_position c)
   unsigned int anticlockwise_steps = 2 + create_obstacles_in_direction(wall, c, anticlockwise_direction);
 
   // Flood fill in correct direction for all new sideways obstacles
-  flood_fill_obstacles_in_direction(behind_wall, clockwise_direction, clockwise_steps);
-  flood_fill_obstacles_in_direction(behind_wall, anticlockwise_direction, anticlockwise_steps);
+  bool success;
+  success = flood_fill_obstacles_in_direction(behind_wall, clockwise_direction, clockwise_steps);
+  if (!success)
+  {
+    undo_add_obstacles();
+    return;
+  }
+  success = flood_fill_obstacles_in_direction(behind_wall, anticlockwise_direction, anticlockwise_steps);
+  if (!success)
+  {
+    undo_add_obstacles();
+    return;
+  }
 }
 
 // Create obstacles in a certain direction until closing it off. It can close off in two ways.
@@ -328,20 +339,25 @@ unsigned int SmoothedGraph::create_obstacles_in_direction(map_position wall, map
   return num_steps;
 }
 
-void SmoothedGraph::flood_fill_obstacles_in_direction(map_position origin, Direction dir, unsigned int dist)
+bool SmoothedGraph::flood_fill_obstacles_in_direction(map_position origin, Direction dir, unsigned int dist)
 {
   map_position prev = origin;
   map_position curr = prev;
   for (unsigned int i = 0; i < dist; i++)
   {
     assert(graph.adjacent(prev, curr));
-    flood_fill_obstacles(curr);
+    bool success = flood_fill_obstacles(curr);
+    if (!success)
+    {
+      return false;
+    }
     prev = curr;
     curr = graph.step_in_direction(curr, dir);
   }
+  return true;
 }
 
-void SmoothedGraph::flood_fill_obstacles(map_position origin)
+bool SmoothedGraph::flood_fill_obstacles(map_position origin)
 {
   std::vector<map_position> boundary;
   boundary.push_back(origin);
@@ -361,7 +377,13 @@ void SmoothedGraph::flood_fill_obstacles(map_position origin)
     {
       boundary.push_back(graph.step_in_direction(p, dir));
     }
+
+    if (boundary.size() > MAX_FLOOD_FILL_BOUNDARY_SIZE)
+    {
+      return false;
+    }
   }
+  return true;
 }
 
 void SmoothedGraph::add_obstacle(map_position p)
@@ -667,7 +689,12 @@ void SmoothedGraph::smoothen_diagonal(const map_position c, const bool use_clock
   unsigned int steps = 2 + create_obstacles_along_diagonal(first_add_obstacle, dir1, dir2);
   
   // Flood fill behind wall
-  flood_fill_obstacles_in_direction(first_floodfill_position, diagonal, steps);
+  bool success = flood_fill_obstacles_in_direction(first_floodfill_position, diagonal, steps);
+  if (!success)
+  {
+    undo_add_obstacles();
+    return;
+  }
 }
 
 unsigned int SmoothedGraph::create_obstacles_along_diagonal(map_position first, Direction dir1, Direction dir2)
