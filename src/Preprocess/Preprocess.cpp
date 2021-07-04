@@ -730,6 +730,36 @@ void PreprocessingData::_output_debug_stats() const
     std::cout << "-------------------------------------------------------------------------" << std::endl;
   }
 
+  // Count number of distances that are unnecessary
+  unsigned int num_unnecessary_distances = 0;
+  unsigned int total_num_distances = 0;
+
+  for (corner_index i = 0; i < _corners.size(); i++)
+  {
+    for (corner_index j = 0; j < i; j++)
+    {
+      total_num_distances++;
+      
+      // Check if distance unnecessary
+      bool is_unnecessary = true;
+      for (MidDirection mid : get_middirections())
+      {
+        auto bounds = _corner_and_middirection_to_bounds[i][mid];
+        if (graph.is_point_in_bounds(graph.loc(_corners[j]), bounds))
+        {
+          is_unnecessary = false;
+          break;
+        }
+      }
+      if (is_unnecessary)
+      {
+        num_unnecessary_distances++;
+      }
+    }
+  }
+
+  std::cout << "Number of unnecessary distances: " << num_unnecessary_distances << "/" << total_num_distances << std::endl;
+  std::cout << "Percentage of unnecessary distances:: " << 100 * (float)num_unnecessary_distances/total_num_distances << std::endl;
 }
 
 
