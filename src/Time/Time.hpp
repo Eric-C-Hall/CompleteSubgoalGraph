@@ -1,7 +1,7 @@
 #ifndef CORNERGRAPH_PROJECT__TIME_HPP
 #define CORNERGRAPH_PROJECT__TIME_HPP
 
-#include "../Preprocess/Preprocess.hpp"
+#include "../Preprocessing/Preprocessing.hpp"
 
 void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests);
 

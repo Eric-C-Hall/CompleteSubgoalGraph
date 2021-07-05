@@ -1,7 +1,7 @@
 #ifndef CORNERGRAPH_PROJECT__TEST_HPP
 #define CORNERGRAPH_PROJECT__TEST_HPP
 
-#include "../Preprocess/Preprocess.hpp"
+#include "../Preprocessing/Preprocessing.hpp"
 #include "../Graph/ExactDistance.hpp"
 #include "../Graph/Islands.hpp"
 

@@ -33,7 +33,6 @@ class Graph {
   void load_map(const char *fname);
 
   std::vector<std::pair<map_position, exact_distance>> adjacent_locations_and_dists(map_position p) const;  
-  bool safe_reachable(map_position a, map_position b) const;
 
   inline bool is_obstacle(map_position p) const {return _obstacles[p];}
 
@@ -58,9 +57,6 @@ class Graph {
   inline map_position pos(const unsigned int x, const unsigned int y) const {return y*get_width() + x;}
   inline map_position pos(const xyLoc &loc) const {return pos(loc.x, loc.y);}
   inline xyLoc loc(map_position p) const {return xyLoc(x(p), y(p));}
-
-  void get_safe_reachable_in_directions(std::vector<map_position> &output, const map_position origin, const Direction straight_direction, const Direction diagonal_direction, const int num_step_bound = INT_MAX) const;
-  std::vector<map_position> get_safe_reachable_in_all_directions(const map_position origin) const;
 
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const std::vector<map_position> &v) const;
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const xyLoc a, const xyLoc b) const;

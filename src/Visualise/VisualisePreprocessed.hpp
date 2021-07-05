@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "../Preprocess/Preprocess.hpp"
+#include "../Preprocessing/Preprocessing.hpp"
 
 void Visualise(const PreprocessingData &preprocessing_data);
 

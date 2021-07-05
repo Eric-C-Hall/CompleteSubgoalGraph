@@ -1,7 +1,7 @@
 CPP_DIR = src
 OBJ_DIR = obj
 MAP_DIR = maps
-CPP_DIRECTORIES = Graph Preprocess Run/GetPath Run/RunScenario Test Utility Visualise Debug Time
+CPP_DIRECTORIES = Graph Preprocessing Run/GetPath Run/RunScenario Test Utility Visualise Debug Time
 CPP_FILES = $(wildcard $(CPP_DIR)/*.cpp) $(foreach dir,$(CPP_DIRECTORIES),$(wildcard $(CPP_DIR)/$(dir)/*.cpp))
 OBJ = $(patsubst $(CPP_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(CPP_FILES))
 

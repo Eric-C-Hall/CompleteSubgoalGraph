@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../../Preprocess/Preprocess.hpp"
+#include "../../Preprocessing/Preprocessing.hpp"
 
 void RunScenario(const std::string &scen_filename, const PreprocessingData &preprocessing_data);
 

@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include "Graph/Graph.hpp"
-#include "Preprocess/Preprocess.hpp"
+#include "Preprocessing/Preprocessing.hpp"
 #include "Run/RunScenario/RunScenario.hpp"
 #include "Test/Test.hpp"
 #include "Visualise/VisualisePreprocessed.hpp"

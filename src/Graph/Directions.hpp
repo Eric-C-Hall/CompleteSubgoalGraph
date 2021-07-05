@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include "XYLoc.hpp"
+#include "ExactDistance.hpp"
 
 enum Direction {
   Dir_N  = 0,
