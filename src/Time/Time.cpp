@@ -53,6 +53,7 @@ void get_test_locs(std::vector<xyLoc> &testLocs, const unsigned int num_tests, c
 void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
 {
   const Graph &graph = preprocessing_data.get_graph();
+  const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   const Islands islands(graph);
 
   // A vector of pairs of locations, to calculate the distance from one to the other.
@@ -99,7 +100,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    preprocessing_data.get_path_octile_step_only(graph.pos(sourceLoc), graph.pos(destLoc), path);
+    Running::get_path_octile_step_only(graph.pos(sourceLoc), graph.pos(destLoc), path, graph, corner_vector);
   }
 
   octile_t.EndTimer();
@@ -122,7 +123,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    preprocessing_data.get_path_up_to_double_step(graph.pos(sourceLoc), graph.pos(destLoc), path);
+    Running::get_path_up_to_double_step(graph.pos(sourceLoc), graph.pos(destLoc), path, graph, corner_vector);
   }
 
   double_t.EndTimer();
@@ -145,7 +146,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    preprocessing_data.get_path_up_to_single_step(graph.pos(sourceLoc), graph.pos(destLoc), path);
+    Running::get_path_up_to_single_step(graph.pos(sourceLoc), graph.pos(destLoc), path, graph, corner_vector);
   }
 
   single_t.EndTimer();

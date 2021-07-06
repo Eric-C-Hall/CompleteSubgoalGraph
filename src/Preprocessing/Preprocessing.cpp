@@ -62,7 +62,7 @@ void PreprocessingData::_save(std::ostream & stream) const
 {
   corner_vector.save(stream);
   nearby_corners.save(stream, graph, corner_vector);
-  complete_corner_graph.save(stream);
+  complete_corner_graph.save(stream, graph, corner_vector);
 }
 
 void PreprocessingData::save(const std::string &filename) const
@@ -84,7 +84,7 @@ void PreprocessingData::_load(std::istream &stream)
 {
   corner_vector.load(stream);
   nearby_corners.load(stream, graph, corner_vector);
-  complete_corner_graph.load(stream);
+  complete_corner_graph.load(stream, graph, corner_vector);
 }
 
 void PreprocessingData::load(const std::string &filename)

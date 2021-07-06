@@ -159,43 +159,6 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
     }
   }
 
-  // Highlight nearby
-  if (args.show_nearby && cursors.size() > 0)
-  {
-    for (map_position c : preprocessing_data.get_nearby_corners(cursors[0]))
-    {
-      if (pos == c)
-      {
-        std::cout << "\e[43m";
-      }
-    }
-  }
-
-  // Highlight nearby with next
-  if (args.show_nearby_with_next && cursors.size() > 0)
-  {
-    for (map_position c : preprocessing_data.get_nearby_corners_with_next(cursors[0]))
-    {
-      if (pos == c)
-      {
-        std::cout << "\e[44m";
-      }
-    }
-  }
-
-  // Highlight chosen nearby corner
-  if (cursors.size() > 0)
-  {
-    for (unsigned int i = 0; i < preprocessing_data.get_num_nearby_corners_with_next(cursors[0]); i++)
-    {
-      if (pos == preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], i))
-      {
-        if (i == args.which_nearby_corner)
-          std::cout << "\e[46m";
-      }
-    }
-  }
-
   // Highlight middirection
   if (args.show_bounds && cursors.size() > 0)
   {
@@ -210,51 +173,9 @@ void print_point(int x, int y, const PreprocessingData &preprocessing_data, cons
   {
     std::cout << "@";
   }
-  else if (args.show_num_nearby)
-  {
-    const int num_nearby = preprocessing_data.get_nearby_corners(pos).size();
-    std::cout << int_to_drawn_char(num_nearby);
-  }
-  else if (args.show_num_nearby_with_next)
-  {
-    const int num_nearby_with_next = preprocessing_data.get_nearby_corners_with_next(pos).size();
-    std::cout << int_to_drawn_char(num_nearby_with_next);
-  }
   else if (args.show_islands)
   {
     std::cout << int_to_drawn_char(islands.get_island_index(pos));
-  }
-  else if (args.show_bounds && cursors.size() > 0)
-  {
-    bool has_printed = false;
-    for (unsigned int i = 0; i < preprocessing_data.get_num_nearby_corners_with_next(cursors[0]); i++)
-    {
-      if (pos == preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], i))
-      {
-        // Print the direction in which the corner under the cursor is relevant for the corner at pos
-        for (Direction dir : get_directions())
-        {
-          if (is_useful_nearby_corner_for_direction_copy(pos, cursors[0], graph, dir))
-          {
-            std::cout << direction_to_char(dir);
-            assert(!has_printed);
-            has_printed = true;
-            break;
-          }
-        }
-        if (!has_printed)
-        {
-          std::cout << "+";
-          has_printed = true;
-        }
-        break;
-      }
-    }
-    if (!has_printed)
-    {
-      std::cout << "-";
-      has_printed = true;
-    }
   }
   else
   {
@@ -323,18 +244,7 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
   // TODO: Maybe don't compute this every time, on the other hand maybe it's not important to be efficient
   const Islands islands(graph);
 
-  // Compute bounds for currently selected corner and middirection
   std::pair<xyLoc, xyLoc> bounds;
-  if (args.show_bounds && cursors.size() > 0)
-  {
-    for (corner_index i = 0; i < preprocessing_data.get_corners().size(); i++)
-    {
-      if (preprocessing_data.get_corners()[i] == cursors[0])
-      {
-        bounds = preprocessing_data.get_bounds(i,args.middirection);
-      }
-    }
-  }
 
   // Print the graph
   print_topbar(graph.get_width(), graph.get_height() - 1);
@@ -427,7 +337,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       int n, m;
       std::cin >> n >> m;
-      set_cursor_to_pos(cursors, graph, n, preprocessing_data.get_corners()[m]);
+      set_cursor_to_pos(cursors, graph, n, preprocessing_data.get_corner_vector().get_corner(m));
     }
     else if (input == "compute" && cursors.size() >= 2)
     {
@@ -482,12 +392,6 @@ void Visualise(const PreprocessingData &preprocessing_data)
     else if (input == "whichnearbycorner")
     {
       std::cin >> args.which_nearby_corner;
-    }
-    else if (input == "gonearbycorner" && cursors.size() > 0)
-    {
-      map_position go_pos = preprocessing_data.get_ith_nearby_corner_with_next(cursors[0], args.which_nearby_corner);
-      args.middirection = get_middirection_between_points(graph.loc(cursors[0]), graph.loc(go_pos));
-      set_cursor_to_pos(cursors, graph, 0, go_pos);
     }
 
     print_graph(preprocessing_data, graph, cursors, path, args);

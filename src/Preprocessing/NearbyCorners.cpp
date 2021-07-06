@@ -7,8 +7,7 @@ void NearbyCorners::find_points_near_corner(corner_index i, const Graph &graph, 
 {
   assert (!graph.is_obstacle(corner_vector.get_corner(i)));
 
-  assert (false);
-  for (map_position p : Preprocessing::get_safe_reachable_in_all_directions(corner_vector.get_corner(i)))
+  for (map_position p : Preprocessing::get_safe_reachable_in_all_directions(graph, corner_vector.get_corner(i)))
   {
     if (p != corner_vector.get_corner(i))
     {

@@ -4,12 +4,12 @@
 
 #include <deque>
 
-void CompleteCornerGraph::_find_optimal_distances_from_corner(corner_index i, const CornerVector &corner_vector)
+void CompleteCornerGraph::find_optimal_distances_from_corner(corner_index i, const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners)
 {
   std::deque<corner_index> open;
   std::vector<bool> corner_index_is_closed(corner_vector.size(), false);
 
-  std::vector<exact_distance> &corner_index_to_distance = _pair_of_corner_indices_to_dist[i];
+  std::vector<exact_distance> &corner_index_to_distance = pair_of_corner_indices_to_dist[i];
   corner_index_to_distance.resize(corner_vector.size(), MAX_EXACT_DISTANCE);
 
   open.push_back(i);
@@ -43,11 +43,11 @@ void CompleteCornerGraph::_find_optimal_distances_from_corner(corner_index i, co
   corner_index_to_distance.resize(i);
 }
 
-void CompleteCornerGraph::_find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j, const CornerVector &corner_vector)
+void CompleteCornerGraph::find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j, const CornerVector &corner_vector, const NearbyCorners &nearby_corners)
 {
   if (i == j)
   {
-    _pair_of_corner_indices_to_first_corner[i][j] = corner_vector.size();
+    pair_of_corner_indices_to_first_corner[i][j] = corner_vector.size();
     return;
   }
 
@@ -72,7 +72,7 @@ void CompleteCornerGraph::_find_optimal_first_corners_from_corner_to_corner(corn
     assert(i_to_first_dist + first_to_j_dist >= i_to_j_dist);
     if (i_to_first_dist + first_to_j_dist == i_to_j_dist)
     {
-      _pair_of_corner_indices_to_first_corner[j][i] = first_index;
+      pair_of_corner_indices_to_first_corner[j][i] = first_index;
       return;
     }
   }
@@ -80,21 +80,21 @@ void CompleteCornerGraph::_find_optimal_first_corners_from_corner_to_corner(corn
   assert(false);
 }
 
-void CompleteCornerGraph::_find_optimal_first_corners_from_corner(corner_index i, const CornerVector &corner_vector)
+void CompleteCornerGraph::find_optimal_first_corners_from_corner(corner_index i, const CornerVector &corner_vector, const NearbyCorners &nearby_corners)
 {
   for (corner_index other_index = 0; other_index < corner_vector.size(); other_index++)
   {
-    _find_optimal_first_corners_from_corner_to_corner(i, other_index);
+    find_optimal_first_corners_from_corner_to_corner(i, other_index, corner_vector, nearby_corners);
   }
 }
 
-void CompleteCornerGraph::_find_complete_corner_graph(const CornerVector &corner_vector)
+void CompleteCornerGraph::find_complete_corner_graph(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners)
 {
-  _pair_of_corner_indices_to_dist.resize(corner_vector.size());
-  _pair_of_corner_indices_to_first_corner.resize(corner_vector.size());
+  pair_of_corner_indices_to_dist.resize(corner_vector.size());
+  pair_of_corner_indices_to_first_corner.resize(corner_vector.size());
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
-    _pair_of_corner_indices_to_first_corner[i].resize(corner_vector.size(), corner_vector.size());
+    pair_of_corner_indices_to_first_corner[i].resize(corner_vector.size(), corner_vector.size());
   }
 
   corner_index i;
@@ -103,7 +103,7 @@ void CompleteCornerGraph::_find_complete_corner_graph(const CornerVector &corner
 
     if (i % 100 == 0)
       std::cout << i << (i != corner_vector.size() - 1 ? ", " : "") << std::flush;
-    _find_optimal_distances_from_corner(i);
+    find_optimal_distances_from_corner(i, graph, corner_vector, nearby_corners);
   }
   if ((i - 1) % 100 != 0)
     std::cout << i - 1;
@@ -113,7 +113,7 @@ void CompleteCornerGraph::_find_complete_corner_graph(const CornerVector &corner
   {
     if (i % 100 == 0)
       std::cout << i << (i != corner_vector.size() - 1 ? ", " : "") << std::flush;
-    _find_optimal_first_corners_from_corner(i);
+    find_optimal_first_corners_from_corner(i, corner_vector, nearby_corners);
   }
   if ((i - 1) % 100 != 0)
     std::cout << i - 1;
@@ -150,7 +150,7 @@ void CompleteCornerGraph::_find_complete_corner_graph(const CornerVector &corner
       corner_index furthest_index = source_index;
       while (furthest_index != target_index)
       {
-        const corner_index next_index = _pair_of_corner_indices_to_first_corner[target_index][furthest_index];
+        const corner_index next_index = pair_of_corner_indices_to_first_corner[target_index][furthest_index];
         const map_position next_corner = corner_vector.get_corner(next_index);
         try_path.clear();
         _compute_octile_path<true>(graph.loc(source), graph.loc(next_corner), try_path);
@@ -174,7 +174,7 @@ void CompleteCornerGraph::_find_complete_corner_graph(const CornerVector &corner
     std::cout << target_index - 1;
   std::cout << std::endl;
 
-  _pair_of_corner_indices_to_first_corner.swap(new_first_corner_map);
+  pair_of_corner_indices_to_first_corner.swap(new_first_corner_map);
   std::cout << num_pushed << " pushed" << std::endl;
   std::cout << num_unpushed << " unpushed" << std::endl;
 }*/
@@ -184,24 +184,24 @@ void CompleteCornerGraph::preprocess()
   
 }
 
-void CompleteCornerGraph::save(std::ostream &stream, const CornerVector &corner_vector) const;
+void CompleteCornerGraph::save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const
 {
   int num_exact_distances = 0;
   int num_first_corners = 0;
-  // Save _pair_of_corner_indices_to_first_corner and _pair_of_corner_indices_to_dist
+  // Save pair_of_corner_indices_to_first_corner and pair_of_corner_indices_to_dist
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
     for (corner_index j = 0; j <= i; j++)
     {
-      exact_distance d = _pair_of_corner_indices_to_dist[i][j];
+      exact_distance d = pair_of_corner_indices_to_dist[i][j];
       SaveLoad::save_uint16_t_as_binary(stream, d.num_straight);
       SaveLoad::save_uint16_t_as_binary(stream, d.num_diagonal);
       num_exact_distances++;
     }
     for (corner_index j = 0; j < corner_vector.size(); j++)
     {
-      assert(_pair_of_corner_indices_to_first_corner[i][j] != j);
-      SaveLoad::save_uint16_t_as_binary(stream, _pair_of_corner_indices_to_first_corner[i][j]);
+      assert(pair_of_corner_indices_to_first_corner[i][j] != j);
+      SaveLoad::save_uint16_t_as_binary(stream, pair_of_corner_indices_to_first_corner[i][j]);
       num_first_corners++;
     }
   }
@@ -210,27 +210,27 @@ void CompleteCornerGraph::save(std::ostream &stream, const CornerVector &corner_
   std::cout << num_first_corners << " first corners saved" << std::endl;
 }
 
-void CompleteCornerGraph::load(std::istream &stream, const CornerVector &corner_vector)
+void CompleteCornerGraph::load(std::istream &stream, const Graph &graph, const CornerVector &corner_vector)
 {
   // Load _pair_of_corner_indices_to_dist and _pair_of_corner_indices_to_first_corner
-  _pair_of_corner_indices_to_dist.resize(corner_vector.size());
-  _pair_of_corner_indices_to_first_corner.resize(corner_vector.size());
+  pair_of_corner_indices_to_dist.resize(corner_vector.size());
+  pair_of_corner_indices_to_first_corner.resize(corner_vector.size());
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
-    _pair_of_corner_indices_to_dist[i].reserve(i+1);
-    _pair_of_corner_indices_to_first_corner[i].reserve(corner_vector.size());
+    pair_of_corner_indices_to_dist[i].reserve(i+1);
+    pair_of_corner_indices_to_first_corner[i].reserve(corner_vector.size());
     for (corner_index j = 0; j <= i; j++)
     {
       int num_straight = SaveLoad::load_uint16_t_as_binary(stream);
       int num_diagonal = SaveLoad::load_uint16_t_as_binary(stream);
       exact_distance d(num_straight, num_diagonal);
-      _pair_of_corner_indices_to_dist[i].push_back(d);
+      pair_of_corner_indices_to_dist[i].push_back(d);
     }
     for (corner_index j = 0; j < corner_vector.size(); j++)
     {
       corner_index first_corner = SaveLoad::load_uint16_t_as_binary(stream);
       assert(first_corner != j);
-      _pair_of_corner_indices_to_first_corner[i].push_back(first_corner);
+      pair_of_corner_indices_to_first_corner[i].push_back(first_corner);
     }
   }
 }

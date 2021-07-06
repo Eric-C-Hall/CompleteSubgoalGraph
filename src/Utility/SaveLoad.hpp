@@ -1,6 +1,9 @@
 #ifndef CORNERGRAPH_PROJECT__SAVE_LOAD_HPP
 #define CORNERGRAPH_PROJECT__SAVE_LOAD_HPP
 
+#include <cstdint>
+#include <iostream>
+
 namespace SaveLoad
 {
   void save_unsigned_int_as_binary(std::ostream & stream, unsigned int i);
