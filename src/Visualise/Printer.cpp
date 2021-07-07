@@ -9,10 +9,13 @@ std::string Highlight::to_string()
   if (which_highlight == 0)
     return std::string("");
 
-  if (which_highlight >= 1 && which_highlight <= 7)
-    return std::string("\e[4") + std::to_string(which_highlight) + std::string("m");
+  if (which_highlight == 1)
+    return std::string("\e[7m");
 
-  if (which_highlight >= 8 && which_highlight <= 14)
+  if (which_highlight >= 2 && which_highlight <= 7)
+    return std::string("\e[4") + std::to_string(which_highlight - 1) + std::string("m");
+
+  if (which_highlight >= 8 && which_highlight <= 13)
     return std::string("\e[10") + std::to_string(which_highlight - 7) + std::string("m");
 
   return std::string("Error: invalid highlight ") + std::to_string(which_highlight);

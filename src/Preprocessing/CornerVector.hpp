@@ -22,7 +22,7 @@ class CornerVector
   void save(std::ostream &stream) const;
   void load(std::istream &stream);
 
-  map_position get_corner(int i) const {return corners[i];}
+  map_position get_corner(corner_index i) const {return corners[i];}
   size_t size() const {return corners.size();}
 
   void print(Printer &printer, const Graph &graph) const;
