@@ -53,6 +53,8 @@ void NearbyCorners::save(std::ostream &stream, const Graph &graph, const CornerV
 
 void NearbyCorners::load(std::istream &stream, const Graph &graph, const CornerVector &corner_vector)
 {
+  point_to_nearby_corner_indices.clear();
+
   // Load point_to_nearby_corner_indices
   point_to_nearby_corner_indices.resize(graph.num_positions());
   for (map_position p = 0; p < graph.num_positions(); p++)

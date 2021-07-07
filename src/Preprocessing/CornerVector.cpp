@@ -65,6 +65,8 @@ void CornerVector::save(std::ostream &stream) const
 
 void CornerVector::load(std::istream &stream)
 {
+  corners.clear();
+
   unsigned int num_corners = SaveLoad::load_unsigned_int_as_binary(stream);
 
   // Load corners
@@ -74,5 +76,10 @@ void CornerVector::load(std::istream &stream)
     map_position corner_pos = SaveLoad::load_unsigned_int_as_binary(stream);
     corners.push_back(corner_pos);
   }
+}
+
+void CornerVector::print(const Graph &graph)
+{
+  
 }
 

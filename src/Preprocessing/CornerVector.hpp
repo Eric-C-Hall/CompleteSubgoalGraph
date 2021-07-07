@@ -23,6 +23,8 @@ class CornerVector
 
   map_position get_corner(int i) const {return corners[i];}
   size_t size() const {return corners.size();}
+
+  void print(const Graph &graph);
 };
 
 #endif

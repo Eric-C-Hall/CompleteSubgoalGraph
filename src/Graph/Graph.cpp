@@ -139,4 +139,21 @@ void Graph::debug_cut_sides(int xlowercut, int xuppercut, int ylowercut, int yup
   add_collar();
 }
 
+void Graph::print(Printer &printer) const
+{
+  for (map_position p = 0; p < num_positions(); p++)
+  {
+    xyLoc l = loc(p);
+    char c = (is_obstacle(p) ? '@' : '.');
+    printer.add_char(c, l);
+  }
+}
+
+void Graph::print() const
+{
+  Printer printer;
+  print(printer);
+  printer.print();
+}
+
 // eof

@@ -10,6 +10,7 @@
 #include "ExactDistance.hpp"
 #include "XYLoc.hpp"
 #include "Directions.hpp"
+#include "../Visualise/Printer.hpp"
 
 // top left is zero
 
@@ -68,6 +69,9 @@ class Graph {
   inline bool adjacent(map_position a, map_position b) const;
 
   void debug_cut_sides(int xmin, int xmax, int ymin, int ymax);
+
+  void print(Printer &printer) const;
+  void print() const;
 };
 
 inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const xyLoc a, const xyLoc b) const

@@ -18,14 +18,13 @@ class CompleteCornerGraph
   void find_optimal_distances_from_corner(corner_index i, const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
   void find_optimal_first_corners_from_corner_to_corner(corner_index i, corner_index j, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
   void find_optimal_first_corners_from_corner(corner_index i, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
-  void find_complete_corner_graph(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
 
   void push_corners_in_corner_graph();
 
   public:
   inline exact_distance get_exact_distance_between_corner_indices(corner_index i, corner_index j) const {return pair_of_corner_indices_to_dist[i][j];}
 
-  void preprocess();
+  void preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
   void save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const;
   void load(std::istream &stream, const Graph &graph, const CornerVector &corner_vector);
 };

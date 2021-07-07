@@ -44,6 +44,8 @@ void PreprocessingData::preprocess()
   corner_vector.preprocess(graph);
   end_computation("Corners computed", t, total_time);
   
+  graph.print();
+
   // Find nearby corners
   start_computation("Finding nearby corners", t);
   nearby_corners.preprocess(graph, corner_vector);
@@ -51,7 +53,7 @@ void PreprocessingData::preprocess()
   
   // Find complete corner graph
   start_computation("Finding complete corner graph", t);
-  complete_corner_graph.preprocess();
+  complete_corner_graph.preprocess(graph, corner_vector, nearby_corners);
   end_computation("Complete corner graph found",t,total_time);
   
   std::cout << "Preprocessing complete" << std::endl;
