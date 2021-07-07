@@ -2,15 +2,17 @@
 
 #include <algorithm>
 
-// Hitting an obstacle decreases num_step_bound, to ensure that all points are safe-reachable rather than just octile-reachable
 // num_step_bound starts as INT_MAX by default
 //
 // Note: origin is included, and if doing this multiple times in multiple direction pairs, may have duplicates.
 void Preprocessing::get_safe_reachable_in_directions(const Graph &graph, std::vector<map_position> &output, const map_position origin, const Direction straight_direction, const Direction diagonal_direction, const int num_step_bound)
 {
+  assert (origin < graph.num_positions());
+
   map_position curr_pos = origin;
   int num_steps = 0;
 
+  // Add points in straight direction until we hit an obstacle or reach the step bound
   while (!graph.is_obstacle(curr_pos) && num_steps < num_step_bound)
   {
     output.push_back(curr_pos);
@@ -19,11 +21,19 @@ void Preprocessing::get_safe_reachable_in_directions(const Graph &graph, std::ve
     num_steps++;
   }
 
+  // If we hit an obstacle, then in the next recursion we can only go at most
+  // one fewer steps, since we don't allow corner cutting.
+  // This does not apply if we did not hit an obstacle
+  if (graph.is_obstacle(curr_pos) && num_steps != 0)
+    num_steps--;
+
+  // Move in diagonal direction, and recursively call with appropriate bound
+  // that ensures all points added are safe-reachable
   if (num_steps != 0)
   {
     map_position new_origin = origin;
     moving_direction(diagonal_direction, new_origin, graph);
-    get_safe_reachable_in_directions(graph, output, new_origin, straight_direction, diagonal_direction, num_steps - 1);
+    get_safe_reachable_in_directions(graph, output, new_origin, straight_direction, diagonal_direction, num_steps);
   }
 }
 
