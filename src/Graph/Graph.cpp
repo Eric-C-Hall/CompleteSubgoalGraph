@@ -144,7 +144,7 @@ void Graph::print(Printer &printer) const
   for (map_position p = 0; p < num_positions(); p++)
   {
     xyLoc l = loc(p);
-    char c = (is_obstacle(p) ? '@' : '.');
+    char c = (is_obstacle(p) ? '@' : '-');
     printer.add_char(c, l);
   }
 }

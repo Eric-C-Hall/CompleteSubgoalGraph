@@ -21,7 +21,7 @@ char int_to_drawn_char(int i)
   }
   if (i == -1)
   {
-    return '-';
+    return '~';
   }
   else if (i <= 9)
   {

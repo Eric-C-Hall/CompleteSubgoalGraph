@@ -78,8 +78,18 @@ void CornerVector::load(std::istream &stream)
   }
 }
 
-void CornerVector::print(const Graph &graph)
+void CornerVector::print(Printer &printer, const Graph &graph) const
 {
-  
+  for (map_position c : corners)
+  {
+    printer.add_char('+', graph.loc(c));
+  }
 }
 
+void CornerVector::print(const Graph &graph) const
+{
+  Printer printer;
+  graph.print(printer);
+  print(printer, graph);
+  printer.print();
+}

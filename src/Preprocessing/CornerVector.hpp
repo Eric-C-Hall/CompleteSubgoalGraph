@@ -4,6 +4,7 @@
 #include <limits>
 #include "../Graph/Graph.hpp"
 #include "../Graph/MapPosition.hpp"
+#include "../Visualise/Printer.hpp"
 
 typedef uint16_t corner_index;
 
@@ -24,7 +25,8 @@ class CornerVector
   map_position get_corner(int i) const {return corners[i];}
   size_t size() const {return corners.size();}
 
-  void print(const Graph &graph);
+  void print(Printer &printer, const Graph &graph) const;
+  void print(const Graph &graph) const;
 };
 
 #endif

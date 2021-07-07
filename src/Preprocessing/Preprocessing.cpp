@@ -44,7 +44,7 @@ void PreprocessingData::preprocess()
   corner_vector.preprocess(graph);
   end_computation("Corners computed", t, total_time);
   
-  graph.print();
+  corner_vector.print(graph);
 
   // Find nearby corners
   start_computation("Finding nearby corners", t);
