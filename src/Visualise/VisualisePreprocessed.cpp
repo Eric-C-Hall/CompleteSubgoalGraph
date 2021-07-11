@@ -200,10 +200,20 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
 
   Printer printer;
   graph.print(printer);
+
+  // Print nearby corners
   if (args.show_nearby && cursors.size() > 0)
   {
     nearby_corners.print_nearby(cursors[0], printer, graph, corner_vector);
   }
+
+  // Print cursors
+  for (map_position p : cursors)
+  {
+    if (p < graph.num_positions())
+      printer.add_highlight(Highlight(1), graph.loc(p));
+  }
+
   printer.print();
 }
 
