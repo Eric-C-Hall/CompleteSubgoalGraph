@@ -207,6 +207,12 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
     nearby_corners.print_nearby(cursors[0], printer, graph, corner_vector);
   }
 
+  // Print path
+  for (xyLoc l : path)
+  {
+    printer.add_highlight(Highlight(2), l);
+  }
+
   // Print cursors
   for (map_position p : cursors)
   {
