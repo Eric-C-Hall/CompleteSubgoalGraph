@@ -1,6 +1,7 @@
 #include "CompleteCornerGraph.hpp"
 
 #include "../Utility/SaveLoad.hpp"
+#include "../Graph/Reachable.hpp"
 
 #include <deque>
 
@@ -29,7 +30,7 @@ void CompleteCornerGraph::find_optimal_distances_from_corner(corner_index i, con
 
     for (corner_index neighbour_index : nearby_corners.get_nearby_corner_indices(corner_vector.get_corner(curr_index)))
     {
-      exact_distance new_distance = corner_index_to_distance[curr_index] + graph.octile_distance(corner_vector.get_corner(curr_index), corner_vector.get_corner(neighbour_index));
+      exact_distance new_distance = corner_index_to_distance[curr_index] + Reachable::octile_distance(graph, corner_vector.get_corner(curr_index), corner_vector.get_corner(neighbour_index));
       assert(new_distance >= ZERO_EXACT_DISTANCE);
       if (new_distance < corner_index_to_distance[neighbour_index])
       {

@@ -5,6 +5,7 @@
 #include "../Run/GetPath/GetPath.hpp"
 #include "../Graph/ValidatePath.hpp"
 #include "SimpleDijkstraExactDistance.hpp"
+#include "../Graph/Reachable.hpp"
 
 xyLoc TestPointGenerator::get_random_first_point()
 {
@@ -30,7 +31,7 @@ xyLoc TestPointGenerator::get_random_other_point(xyLoc first_point)
     // TODO: use island bounds to customize width/height of these distributions
     return_value.x = width_distr(gen);
     return_value.y = height_distr(gen);
-    dist = graph.octile_distance(graph.pos(first_point), graph.pos(return_value));
+    dist = Reachable::octile_distance(graph, graph.pos(first_point), graph.pos(return_value));
   }
   while (graph.is_obstacle(graph.pos(return_value)) // Don't choose obstacles
          || islands.get_island_index(return_value) != islands.get_island_index(first_point) // Don't choose points in different islands

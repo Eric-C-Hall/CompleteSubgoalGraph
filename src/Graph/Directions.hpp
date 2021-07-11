@@ -51,8 +51,8 @@ inline Direction get_n_steps_clockwise(Direction dir);
 template <int n>
 inline Direction get_n_steps_anticlockwise(Direction dir);
 
-inline Direction get_direction_between_points(xyLoc source, xyLoc target);
-inline Direction get_alt_direction_between_points(xyLoc source, xyLoc target);
+inline Direction get_diagonal_direction_between_points(xyLoc source, xyLoc target);
+inline Direction get_straight_direction_between_points(xyLoc source, xyLoc target);
 inline MidDirection get_middirection_between_points(xyLoc source, xyLoc target);
 
 inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir);
@@ -149,7 +149,7 @@ inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir)
   }
 }
 
-inline Direction get_direction_between_points(xyLoc source, xyLoc target)
+inline Direction get_diagonal_direction_between_points(xyLoc source, xyLoc target)
 {
   assert(source != target);
   xyLoc delta = target - source;
@@ -175,7 +175,7 @@ inline Direction get_direction_between_points(xyLoc source, xyLoc target)
       return Dir_SW;
 }
 
-inline Direction get_alt_direction_between_points(xyLoc source, xyLoc target)
+inline Direction get_straight_direction_between_points(xyLoc source, xyLoc target)
 {
   assert(source != target);
   xyLoc delta = target - source;
