@@ -132,7 +132,7 @@ void CompleteCornerGraph::find_optimal_first_corners_from_corner(corner_index i,
       if (furthest_index != source_index)
       {
         new_first_corner_map[target_index][source_index] = furthest_index;
-        if (furthest_index == _pair_of_corner_indices_to_first_corner[target_index][source_index])
+        if (furthest_index == pair_of_corner_indices_to_first_corner[target_index][source_index])
           num_unpushed++;
         else
           num_pushed++;
@@ -186,7 +186,7 @@ void CompleteCornerGraph::save(std::ostream &stream, const Graph &graph, const C
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
     assert (pair_of_corner_indices_to_dist.size() > i);
-    for (corner_index j = 0; j <= i; j++)
+    for (corner_index j = 0; j < i; j++)
     {
       assert (pair_of_corner_indices_to_dist[i].size() > j);
       exact_distance d = pair_of_corner_indices_to_dist[i][j];
@@ -211,14 +211,14 @@ void CompleteCornerGraph::load(std::istream &stream, const Graph &graph, const C
   pair_of_corner_indices_to_dist.clear();
   pair_of_corner_indices_to_first_corner.clear();
 
-  // Load _pair_of_corner_indices_to_dist and _pair_of_corner_indices_to_first_corner
+  // Load pair_of_corner_indices_to_dist and pair_of_corner_indices_to_first_corner
   pair_of_corner_indices_to_dist.resize(corner_vector.size());
   pair_of_corner_indices_to_first_corner.resize(corner_vector.size());
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
     pair_of_corner_indices_to_dist[i].reserve(i+1);
     pair_of_corner_indices_to_first_corner[i].reserve(corner_vector.size());
-    for (corner_index j = 0; j <= i; j++)
+    for (corner_index j = 0; j < i; j++)
     {
       int num_straight = SaveLoad::load_uint16_t_as_binary(stream);
       int num_diagonal = SaveLoad::load_uint16_t_as_binary(stream);

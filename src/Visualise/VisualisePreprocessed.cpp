@@ -6,6 +6,7 @@
 #include "../Graph/MapPosition.hpp"
 #include "../Run/GetPath/GetPath.hpp"
 #include "../Graph/Islands.hpp"
+#include "Printer.hpp"
 
 void VisualiseRequestInput(std::string &input)
 {
