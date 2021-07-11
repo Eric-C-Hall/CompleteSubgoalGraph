@@ -1,6 +1,7 @@
 #include "Printer.hpp"
 
 #include <cassert>
+#include <cmath>
 
 const Highlight Highlight::NO_HIGHLIGHTING = Highlight(0);
 
@@ -54,10 +55,65 @@ void Printer::add_highlight(Highlight h, xyLoc l)
   highlight_matrix[l.x][l.y] = h;
 }
 
+// The negative sign on negative numbers counts as a digit
+int num_digits(int n)
+{
+  if (n == 0)
+    return 1;
+
+  if (n < 0)
+    return num_digits(-n) + 1;
+
+  int order = 0;
+
+  while (std::pow(10, order) <= n)
+  {
+    order++;
+  }
+
+  return order;
+}
+
+void print_n_spaces(int n)
+{
+  while (n > 0)
+  {
+    std::cout << " ";
+    n--;
+  }
+}
+
+void print_sidebar(int y, unsigned int max_y)
+{
+  std::cout << y;
+
+  int margin = num_digits(max_y) - num_digits(y) + 1;
+
+  print_n_spaces(margin);
+}
+
+void print_topbar(const unsigned int width, const unsigned int max_y)
+{
+  print_n_spaces(num_digits(max_y) + 1);
+
+  int i = 0;
+  while ((int)width - i >= (int)num_digits(i))
+  {
+    std::cout << i;
+    i += num_digits(i);
+    std::cout << " ";
+    i += 1;
+  }
+  std::cout << "\n";
+}
+
 void Printer::print()
 {
+  print_topbar(width, height-1);
+
   for (int y = 0; y < height; y++)
   {
+    print_sidebar(y, height-1);
     for (int x = 0; x < width; x++)
     {
       assert ((int16_t)highlight_matrix.size() > x);
@@ -78,4 +134,5 @@ void Printer::print()
     }
     std::cout << '\n';
   }
+  std::cout << std::flush;
 }

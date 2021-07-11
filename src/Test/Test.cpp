@@ -149,7 +149,7 @@ void Test(const PreprocessingData &preprocessing_data)
       if (!ValidatePath(graph, path))
       {
         PrintGraphArguments args;
-        print_graph(preprocessing_data, graph, std::vector<map_position>(), path, args);
+        print_graph(preprocessing_data, std::vector<map_position>(), path, args);
         throw std::runtime_error("Failed to validate path returned from main. Source: ("  + std::to_string(loc1.x) + ", " + std::to_string(loc1.y) + "). Target: (" + std::to_string(loc2.x) + ", " + std::to_string(loc2.y) + ").");
       }
 
@@ -173,7 +173,7 @@ void Test(const PreprocessingData &preprocessing_data)
       if (path_length != simple_path_length)
       {
         PrintGraphArguments args;
-        print_graph(preprocessing_data, graph, std::vector<map_position>(), path, args);
+        print_graph(preprocessing_data, std::vector<map_position>(), path, args);
         throw std::runtime_error("Test failed from (" + std::to_string(loc1.x) + ", " + std::to_string(loc1.y) + ") to (" + std::to_string(loc2.x) + ", " + std::to_string(loc2.y) + "). Simple had " + std::to_string(simple_path_length.num_straight) + " straight, " + std::to_string(simple_path_length.num_diagonal) + " diagonal. Main had " + std::to_string(path_length.num_straight) + " straight, " + std::to_string(path_length.num_diagonal) + " diagonal.");
       }
     }

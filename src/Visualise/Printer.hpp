@@ -15,6 +15,7 @@ class Highlight
   Highlight(const unsigned int input_which_highlight) : which_highlight(input_which_highlight) {}
   std::string to_string();
   bool is_no_highlighting() {return which_highlight == 0;}
+  bool is_valid_highlighting() {return which_highlight >= 1 && which_highlight <= 13;}
 
   const static Highlight NO_HIGHLIGHTING;
 };

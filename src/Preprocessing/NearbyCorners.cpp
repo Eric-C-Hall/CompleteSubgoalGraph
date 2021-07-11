@@ -70,6 +70,15 @@ void NearbyCorners::load(std::istream &stream, const Graph &graph, const CornerV
   }
 }
 
+void NearbyCorners::print_nearby(map_position pos, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const
+{
+  printer.add_highlight(Highlight(2), graph.loc(pos));
+  for (corner_index i : point_to_nearby_corner_indices[pos])
+  {
+    printer.add_highlight(Highlight(3), graph.loc(corner_vector.get_corner(i)));
+  }
+}
+
 void NearbyCorners::print(corner_index which_index, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const
 {
   // print the chosen corner
