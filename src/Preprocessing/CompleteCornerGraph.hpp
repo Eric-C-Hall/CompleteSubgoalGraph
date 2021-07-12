@@ -42,7 +42,8 @@ class CompleteCornerGraph
 
 inline exact_distance CompleteCornerGraph::get_exact_distance_between_corner_indices(corner_index i, corner_index j) const
 {
-  assert (i != j);
+  if (i == j)
+    return ZERO_EXACT_DISTANCE;
 
   if (i < j)
     std::swap(i,j);
