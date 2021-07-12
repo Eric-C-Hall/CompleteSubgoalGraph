@@ -48,11 +48,24 @@ inline void RunningHelper::compute_diagonal_then_straight_path(xyLoc start, int1
 {
   while(num_diagonal > 0)
   {
-    start.x += x_step;
-    start.y += y_step;
     if (test_valid)
+    {
+      if (graph.is_obstacle(graph.pos(start.x, start.y + y_step)))
+        return;
+
+      start.x += x_step;
       if (graph.is_obstacle(graph.pos(start.x, start.y)))
         return;
+
+      start.y += y_step;
+      if (graph.is_obstacle(graph.pos(start.x, start.y)))
+        return;
+    }
+    else
+    {
+      start.x += x_step;
+      start.y += y_step;
+    }
     path.push_back(start);
     num_diagonal--;
   }
