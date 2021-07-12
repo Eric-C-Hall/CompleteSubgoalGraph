@@ -234,7 +234,7 @@ void CompleteCornerGraph::load(std::istream &stream, const Graph &graph, const C
   }
 }
 
-void CompleteCornerGraph::print_first(corner_index i, corner_index j, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const
+void CompleteCornerGraph::print_first(const corner_index i, const corner_index j, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const
 {
   assert (i != j);
 
@@ -249,7 +249,21 @@ void CompleteCornerGraph::print_first(corner_index i, corner_index j, Printer &p
   printer.add_char('O', o);
 }
 
-void CompleteCornerGraph::print_all_first(const Graph &graph, const CornerVector &corner_vector) const
+void CompleteCornerGraph::print_dist(corner_index i, corner_index j, const Graph &graph, const CornerVector &corner_vector) const
+{
+  assert (i != j);
+
+  if (i < j)
+    std::swap(i,j);
+
+  assert(j < i);
+  assert(i < pair_of_corner_indices_to_dist.size());
+  assert(j < pair_of_corner_indices_to_dist[i].size());
+
+  std::cout << pair_of_corner_indices_to_dist[i][j] << std::endl;
+}
+
+void CompleteCornerGraph::print_all_first_and_dist(const Graph &graph, const CornerVector &corner_vector) const
 {
   for (corner_index i = 0; i < corner_vector.size(); i++)
     for (corner_index j = 0; j < corner_vector.size(); j++)
@@ -261,6 +275,7 @@ void CompleteCornerGraph::print_all_first(const Graph &graph, const CornerVector
       graph.print(printer);
       print_first(i,j,printer,graph,corner_vector);
       printer.print();
+      print_dist(i,j,graph,corner_vector);
     }
 }
 
