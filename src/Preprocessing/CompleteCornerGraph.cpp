@@ -263,6 +263,16 @@ void CompleteCornerGraph::print_dist(corner_index i, corner_index j, const Graph
   std::cout << pair_of_corner_indices_to_dist[i][j] << std::endl;
 }
 
+void CompleteCornerGraph::print_first_and_dist(const corner_index i, const corner_index j, const Graph &graph, const CornerVector &corner_vector) const
+{
+  assert (i != j);
+  Printer printer;
+  graph.print(printer);
+  print_first(i,j,printer,graph,corner_vector);
+  printer.print();
+  print_dist(i,j,graph,corner_vector);
+}
+
 void CompleteCornerGraph::print_all_first_and_dist(const Graph &graph, const CornerVector &corner_vector) const
 {
   for (corner_index i = 0; i < corner_vector.size(); i++)
@@ -271,11 +281,7 @@ void CompleteCornerGraph::print_all_first_and_dist(const Graph &graph, const Cor
       if (i == j)
         continue;
 
-      Printer printer;
-      graph.print(printer);
-      print_first(i,j,printer,graph,corner_vector);
-      printer.print();
-      print_dist(i,j,graph,corner_vector);
+      print_first_and_dist(i,j,graph,corner_vector);
     }
 }
 

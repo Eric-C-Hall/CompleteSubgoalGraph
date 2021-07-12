@@ -33,6 +33,7 @@ class CompleteCornerGraph
 
   void print_first(corner_index i, corner_index j, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const;
   void print_dist(const corner_index i, const corner_index j, const Graph &graph, const CornerVector &corner_vector) const;
+  void print_first_and_dist(const corner_index i, const corner_index j, const Graph &graph, const CornerVector &corner_vector) const;
   void print_all_first_and_dist(const Graph &graph, const CornerVector &corner_vector) const;
 };
 
