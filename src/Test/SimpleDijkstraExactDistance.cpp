@@ -34,18 +34,31 @@ void SimpleDijkstraExactDistance::expand_first()
   _open.pop_front();
   exact_distance current_distance = _distances[first];
 
-  for (unsigned int dir = Dir_MIN ; dir <= Dir_MAX ; dir++) {
-    map_position other = first;
-    moving_direction(dir,other,graph);
+  for (const Direction dir : get_directions()) {
+    // Ensure no corners are being cut
+    if (!is_cardinal_direction(dir))
+    {
+      map_position cut_corner_a = graph.step_in_direction(first, get_45_degrees_clockwise(dir));
+      map_position cut_corner_b = graph.step_in_direction(first, get_45_degrees_anticlockwise(dir));
+      if (graph.is_obstacle(cut_corner_a) || graph.is_obstacle(cut_corner_b))
+      {
+        continue;
+      }
+    }
 
+    // Ensure new position is not an obstacle
+    map_position other = graph.step_in_direction(first, dir);
     if (graph.is_obstacle(other)) {
       continue;
     }
 
+    // Ensure path to new position is fastest known path
     exact_distance other_distance = current_distance + exact_distance_of_direction((Direction)dir);
     if (other_distance >= _distances[other]) {
       continue;
     }
+
+    // Update fastest known path to other
     _distances[other] = other_distance;
     _open.push_back(other);
   }
