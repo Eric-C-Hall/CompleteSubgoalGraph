@@ -212,6 +212,11 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   {
     printer.add_highlight(Highlight(2), l);
   }
+  if (path.size() > 0)
+  {
+    printer.add_highlight(Highlight(4), path.front());
+    printer.add_highlight(Highlight(3), path.back());
+  }
 
   // Print cursors
   for (map_position p : cursors)

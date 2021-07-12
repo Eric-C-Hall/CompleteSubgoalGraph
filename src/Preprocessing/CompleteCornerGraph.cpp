@@ -233,3 +233,34 @@ void CompleteCornerGraph::load(std::istream &stream, const Graph &graph, const C
     }
   }
 }
+
+void CompleteCornerGraph::print_first(corner_index i, corner_index j, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const
+{
+  assert (i != j);
+
+  corner_index first = pair_of_corner_indices_to_first_corner[j][i];
+
+  xyLoc a = graph.loc(corner_vector.get_corner(i));
+  xyLoc b = graph.loc(corner_vector.get_corner(j));
+  xyLoc o = graph.loc(corner_vector.get_corner(first));
+
+  printer.add_char('A', a);
+  printer.add_char('B', b);
+  printer.add_char('O', o);
+}
+
+void CompleteCornerGraph::print_all_first(const Graph &graph, const CornerVector &corner_vector) const
+{
+  for (corner_index i = 0; i < corner_vector.size(); i++)
+    for (corner_index j = 0; j < corner_vector.size(); j++)
+    {
+      if (i == j)
+        continue;
+
+      Printer printer;
+      graph.print(printer);
+      print_first(i,j,printer,graph,corner_vector);
+      printer.print();
+    }
+}
+

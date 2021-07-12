@@ -6,6 +6,7 @@
 #include "../Graph/ExactDistance.hpp"
 #include "CornerVector.hpp"
 #include "NearbyCorners.hpp"
+#include "../Visualise/Printer.hpp"
 
 class CompleteCornerGraph
 {
@@ -29,6 +30,9 @@ class CompleteCornerGraph
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
   void save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const;
   void load(std::istream &stream, const Graph &graph, const CornerVector &corner_vector);
+
+  void print_first(corner_index i, corner_index j, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const;
+  void print_all_first(const Graph &graph, const CornerVector &corner_vector) const;
 };
 
 #endif
