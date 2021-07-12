@@ -23,7 +23,7 @@ class CompleteCornerGraph
   void push_corners_in_corner_graph();
 
   public:
-  inline exact_distance get_exact_distance_between_corner_indices(corner_index i, corner_index j) const {return pair_of_corner_indices_to_dist[i][j];}
+  inline exact_distance get_exact_distance_between_corner_indices(corner_index i, corner_index j) const;
   inline corner_index get_first_corner(corner_index i, corner_index j) const {return pair_of_corner_indices_to_first_corner[j][i];}
   inline const std::vector<corner_index> &get_corner_index_to_first_corner(corner_index i) const {return pair_of_corner_indices_to_first_corner[i];}
 
@@ -32,9 +32,22 @@ class CompleteCornerGraph
   void load(std::istream &stream, const Graph &graph, const CornerVector &corner_vector);
 
   void print_first(corner_index i, corner_index j, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const;
-  void print_dist(const corner_index i, const corner_index j, const Graph &graph, const CornerVector &corner_vector) const;
   void print_first_and_dist(const corner_index i, const corner_index j, const Graph &graph, const CornerVector &corner_vector) const;
   void print_all_first_and_dist(const Graph &graph, const CornerVector &corner_vector) const;
 };
+
+// -------------------
+// Implementation
+// -------------------
+
+inline exact_distance CompleteCornerGraph::get_exact_distance_between_corner_indices(corner_index i, corner_index j) const
+{
+  assert (i != j);
+
+  if (i < j)
+    std::swap(i,j);
+  
+  return pair_of_corner_indices_to_dist[i][j];
+}
 
 #endif

@@ -182,14 +182,12 @@ void CompleteCornerGraph::save(std::ostream &stream, const Graph &graph, const C
 {
   int num_exact_distances = 0;
   int num_first_corners = 0;
-  // Save pair_of_corner_indices_to_first_corner and pair_of_corner_indices_to_dist
+  // Save distances and first corners
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
-    assert (pair_of_corner_indices_to_dist.size() > i);
     for (corner_index j = 0; j < i; j++)
     {
-      assert (pair_of_corner_indices_to_dist[i].size() > j);
-      exact_distance d = pair_of_corner_indices_to_dist[i][j];
+      exact_distance d = get_exact_distance_between_corner_indices(i,j);
       SaveLoad::save_uint16_t_as_binary(stream, d.num_straight);
       SaveLoad::save_uint16_t_as_binary(stream, d.num_diagonal);
       num_exact_distances++;
@@ -211,12 +209,12 @@ void CompleteCornerGraph::load(std::istream &stream, const Graph &graph, const C
   pair_of_corner_indices_to_dist.clear();
   pair_of_corner_indices_to_first_corner.clear();
 
-  // Load pair_of_corner_indices_to_dist and pair_of_corner_indices_to_first_corner
+  // Load distances and first corners
   pair_of_corner_indices_to_dist.resize(corner_vector.size());
   pair_of_corner_indices_to_first_corner.resize(corner_vector.size());
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
-    pair_of_corner_indices_to_dist[i].reserve(i+1);
+    pair_of_corner_indices_to_dist[i].reserve(i);
     pair_of_corner_indices_to_first_corner[i].reserve(corner_vector.size());
     for (corner_index j = 0; j < i; j++)
     {
@@ -249,20 +247,6 @@ void CompleteCornerGraph::print_first(const corner_index i, const corner_index j
   printer.add_char('O', o);
 }
 
-void CompleteCornerGraph::print_dist(corner_index i, corner_index j, const Graph &graph, const CornerVector &corner_vector) const
-{
-  assert (i != j);
-
-  if (i < j)
-    std::swap(i,j);
-
-  assert(j < i);
-  assert(i < pair_of_corner_indices_to_dist.size());
-  assert(j < pair_of_corner_indices_to_dist[i].size());
-
-  std::cout << pair_of_corner_indices_to_dist[i][j] << std::endl;
-}
-
 void CompleteCornerGraph::print_first_and_dist(const corner_index i, const corner_index j, const Graph &graph, const CornerVector &corner_vector) const
 {
   assert (i != j);
@@ -270,7 +254,7 @@ void CompleteCornerGraph::print_first_and_dist(const corner_index i, const corne
   graph.print(printer);
   print_first(i,j,printer,graph,corner_vector);
   printer.print();
-  print_dist(i,j,graph,corner_vector);
+  std::cout << get_exact_distance_between_corner_indices(i,j) << std::endl;
 }
 
 void CompleteCornerGraph::print_all_first_and_dist(const Graph &graph, const CornerVector &corner_vector) const
