@@ -1,6 +1,7 @@
 #include "RelevantPoints.hpp"
 
 #include "../Graph/XYLocStep.hpp"
+#include "../Graph/Reachable.hpp"
 
 // Relevant: A corner is relevant to a pair of points if they are not safe reachable from each other, but c is safe-reachable from each point. 
 //
@@ -63,24 +64,31 @@ void RelevantPoints::update_outgoing_divdirections(std::vector<std::set<DivDirec
   }
 }
 
-/*void RelevantPoints::get_relevant_points(corner_index i, DivDirection divdirection, const Graph &graph)
+void RelevantPoints::compute_relevant_points(const corner_index i, const Graph &graph, const CornerVector &corner_vector)
 {
-  
+  const map_position corner = corner_vector.get_corner(i);
+  for (map_position p : Reachable::get_safe_reachable_in_all_directions(graph, corner))
+  {
+    if (p == corner)
+      continue;
+    DivDirection towards_p_divdirection = get_divdirection_between_points(graph.loc(corner), graph.loc(p));
+    
+    corner_to_outgoing_divdirection_to_relevant_points[i][towards_p_divdirection].push_back(p);
+  }
 }
 
-void RelevantPoints::get_relevant_corners(corner_index i, DivDirection divdirection, const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners)
+void RelevantPoints::compute_relevant_corners(const corner_index i, const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners)
 {
-  for (corner_index j : nearby_corners.get_nearby_corner_indices(i))
+  for (corner_index j : nearby_corners.get_nearby_corner_indices(corner_vector.get_corner(i)))
   {
     xyLoc i_loc = graph.loc(corner_vector.get_corner(i));
     xyLoc j_loc = graph.loc(corner_vector.get_corner(j));
 
-    if (is_point_relevant_assuming_safe_reachable(i_loc, divdirection, j_loc))
-    {
-      corner_to_divdirection_to_relevant_corners[i][divdirection].push_back(j);
-    }
+    DivDirection towards_j_divdirection = get_divdirection_between_points(i_loc, j_loc);
+
+    corner_to_outgoing_divdirection_to_relevant_corners[i][towards_j_divdirection].push_back(j);
   }
-}*/
+}
 
 void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners)
 {
@@ -109,8 +117,7 @@ void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_v
     if (i % 100 == 0)
       std::cout << i << ", " << std::flush;
     corner_to_outgoing_divdirection_to_relevant_points[i].resize(num_divdirections());
-    // TODO: Compute outgoing relevant points
-
+    compute_relevant_points(i, graph, corner_vector);
   }
   std::cout << i - 1 << std::endl;
 
@@ -123,7 +130,7 @@ void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_v
     if (i % 100 == 0)
       std::cout << i << ", " << std::flush;
     corner_to_outgoing_divdirection_to_relevant_corners[i].resize(num_divdirections());
-    // TODO: Compute outgoing relevant corners
+    compute_relevant_corners(i, graph, corner_vector, nearby_corners);
   }
   std::cout << i - 1 << std::endl;
   
@@ -131,14 +138,19 @@ void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_v
 
 void RelevantPoints::print_outgoing_divdirections(const corner_index i, const DivDirection incoming_divdirection, Printer &printer, const Graph &graph, const CornerVector &corner_vector)
 {
-  const auto &divdirections = corner_to_incoming_divdirection_to_relevant_outgoing_divdirections[i][incoming_divdirection];
+  const auto &outgoing_divdirections = corner_to_incoming_divdirection_to_relevant_outgoing_divdirections[i][incoming_divdirection];
   
   const map_position corner = corner_vector.get_corner(i);
   printer.add_char('C', graph.loc(corner));
-  for (DivDirection d : divdirections)
+  for (DivDirection d : outgoing_divdirections)
   {
     const map_position new_pos = graph.step_in_direction(corner, d);
     printer.add_highlight(Highlight(2), graph.loc(new_pos));
+
+    for (corner_index j : corner_to_outgoing_divdirection_to_relevant_corners[i][d])
+    {
+      printer.add_highlight(Highlight(4), graph.loc(corner_vector.get_corner(j)));
+    }
   }
   const map_position incoming_pos = graph.step_in_direction(corner, get_opposite_direction(incoming_divdirection));
   printer.add_highlight(Highlight(3), graph.loc(incoming_pos));

@@ -16,8 +16,8 @@ class RelevantPoints
 
   void update_outgoing_divdirections(std::vector<std::set<DivDirection>> & divdirection_to_divdirections, const DivDirection corner_divdirection, const DivDirection relative_divdirection, const std::vector<DivDirection> &added_relative_divdirections);
   void compute_relevant_divdirections(const corner_index i, const DivDirection corner_divdirection, const Graph &graph, const CornerVector &corner_vector);
-  //void get_relevant_points(corner_index i, DivDirection divdirection, const Graph &graph);
-  //void get_relevant_corners(corner_index i, DivDirection divdirection, const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
+  void compute_relevant_points(const corner_index i, const Graph &graph, const CornerVector &corner_vector);
+  void compute_relevant_corners(const corner_index i, const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
 
   public:
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
