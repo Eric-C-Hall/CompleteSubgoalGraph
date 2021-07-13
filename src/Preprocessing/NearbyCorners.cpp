@@ -28,12 +28,11 @@ void NearbyCorners::preprocess(const Graph &graph, const CornerVector &corner_ve
   for (i = 0; i < corner_vector.size(); i++)
   {
     if (i % 100 == 0)
-      std::cout << i << (i != corner_vector.size() - 1 ? ", " : "") << std::flush;
+      std::cout << i << ", " << std::flush;
     find_points_near_corner(i, graph, corner_vector);
   }
-  if ((i - 1) % 100 != 0)
-    std::cout << i - 1;
-  std::cout << "\n";
+
+  std::cout << i - 1 << "\n";
 }
 
 void NearbyCorners::save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const

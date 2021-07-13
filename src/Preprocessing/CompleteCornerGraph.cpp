@@ -167,7 +167,7 @@ void CompleteCornerGraph::preprocess(const Graph &graph, const CornerVector &cor
       std::cout << i << ", " << std::flush;
     find_optimal_distances_from_corner(i, graph, corner_vector, nearby_corners);
   }
-  std::cout << std::endl;
+  std::cout << i - 1 << std::endl;
 
   for (i = 0; i < corner_vector.size(); i++)
   {
@@ -175,7 +175,7 @@ void CompleteCornerGraph::preprocess(const Graph &graph, const CornerVector &cor
       std::cout << i << ", " << std::flush;
     find_optimal_first_corners_from_corner(i, corner_vector, nearby_corners);
   }
-  std::cout << std::endl;
+  std::cout << i - 1 << std::endl;
 }
 
 void CompleteCornerGraph::save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const
