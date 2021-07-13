@@ -2,6 +2,7 @@
 #define CORNERGRAPH_PROJECT__DIRECTIONS_HPP
 
 #include <cassert>
+#include <vector>
 
 #include "XYLoc.hpp"
 #include "ExactDistance.hpp"
@@ -52,7 +53,7 @@ enum DivDirection {
   DivDir_NNW = 15,
   DivDir_MAX = DivDir_NNW,
   DivDir_MIN = DivDir_N
-}
+};
 
 inline int num_directions() {return Dir_MAX - Dir_MIN + 1;}
 inline unsigned int num_middirections() {return DivDir_MAX - DivDir_MIN + 1;}
@@ -259,7 +260,7 @@ inline MidDirection get_middirection_between_points(xyLoc source, xyLoc target)
         return Dir_SSW;
 }
 
-inline MidDirection get_divdirection_between_points(xyLoc source, xyLoc target)
+inline DivDirection get_divdirection_between_points(xyLoc source, xyLoc target)
 {
   assert(source != target);
   xyLoc delta = target - source;

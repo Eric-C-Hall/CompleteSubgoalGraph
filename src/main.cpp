@@ -6,7 +6,10 @@
 #include <random>
 #include <algorithm>
 
+#include "Debug/DirectionsDebug.hpp"
 #include "Graph/Graph.hpp"
+#include "Graph/XYLoc.hpp"
+#include "Graph/Directions.hpp"
 #include "Preprocessing/Preprocessing.hpp"
 #include "Run/RunScenario/RunScenario.hpp"
 #include "Test/Test.hpp"

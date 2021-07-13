@@ -19,9 +19,13 @@
 //
 // The bottom triangle are those that can safe-reach c with straight direction NE or N.
 
-void get_relevant_points(corner_index i, DivDirection middirection, const Graph &graph)
+void RelevantPoints::get_relevant_points(corner_index i, DivDirection divdirection, const Graph &graph)
 {
   
+}
+
+void RelevantPoints::get_relevant_corners(corner_index i, DivDirection divdirection)
+{
 }
 
 void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners)
@@ -33,10 +37,10 @@ void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_v
     if (i % 100 == 0)
       std::cout << i << ", " << std::flush;
 
-    for (MidDirection middirection : get_middirections())
+    for (DivDirection divdirection : get_divdirections())
     {
-      get_relevant_points(i, middirection, graph);
-      get_relevant_corners(i, middirection);
+      get_relevant_points(i, divdirection, graph);
+      get_relevant_corners(i, divdirection);
     }
   }
   std::cout << '\n';

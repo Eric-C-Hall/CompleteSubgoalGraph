@@ -36,4 +36,6 @@ class Printer
   void print();
 };
 
+char int_to_drawn_char(int i);
+
 #endif

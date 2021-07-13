@@ -14,34 +14,6 @@ void VisualiseRequestInput(std::string &input)
   std::cin >> input;
 }
 
-char int_to_drawn_char(int i)
-{
-  if (i < -1)
-  {
-    return '<';
-  }
-  if (i == -1)
-  {
-    return '~';
-  }
-  else if (i <= 9)
-  {
-    return '0' + i;
-  }
-  else if (i <= 10 + 25)
-  {
-    return 'a' + i - 10;
-  }
-  else if (i <= 10 + 26 + 25)
-  {
-    return 'A' + i - (10 + 26);
-  }
-  else
-  {
-    return '>';
-  }
-}
-
 
 // -------------------------
 // TODO: This is very messy, it's just a copy of an existing function in Preprocess.cpp. Need to find a way to clean this up.
