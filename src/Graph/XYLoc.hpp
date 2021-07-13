@@ -38,4 +38,9 @@ struct xyLocLessThan
 
 std::ostream& operator<< (std::ostream& stream, const xyLoc& loc);
 
+inline xyLoc up(xyLoc l) {return xyLoc(l.x, l.y + 1);}
+inline xyLoc down(xyLoc l) {return xyLoc(l.x, l.y - 1);}
+inline xyLoc left(xyLoc l) {return xyLoc(l.x - 1, l.y);}
+inline xyLoc right(xyLoc l) {return xyLoc(l.x + 1, l.y);}
+
 #endif

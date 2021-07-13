@@ -45,6 +45,7 @@ class Graph {
   inline map_position left(map_position p) const {return p - 1;}
   inline map_position right(map_position p) const {return p + 1;}
   inline map_position step_in_direction(map_position p, Direction dir) const;
+  inline map_position step_in_direction(map_position l, DivDirection divdirection) const;
   inline map_position translate_x(map_position p, int num) const {return p + num;}
   inline map_position translate_y(map_position p, int num) const {return p + num * get_width();}
 
@@ -120,6 +121,67 @@ inline map_position move_in_middirection(const MidDirection middirection, const 
 inline map_position Graph::step_in_direction(map_position p, Direction dir) const
 {
   moving_direction(dir, p, *this);
+  return p;
+}
+
+inline map_position Graph::step_in_direction(map_position p, DivDirection divdirection) const
+{
+  switch (divdirection)
+  {
+    case DivDir_NNE:
+    case DivDir_NNW:
+      p = up(p);
+      // No break here is deliberate
+    case DivDir_N:
+    case DivDir_NE:
+    case DivDir_NW:
+    case DivDir_ENE:
+    case DivDir_WNW:
+      p = up(p);
+      break;
+    case DivDir_SSE:
+    case DivDir_SSW:
+      p = down(p);
+      // No break here is deliberate
+    case DivDir_S:
+    case DivDir_SE:
+    case DivDir_SW:
+    case DivDir_ESE:
+    case DivDir_WSW:
+      p = down(p);
+      break;
+    default:
+      break;
+  }
+
+  switch (divdirection)
+  {
+    case DivDir_ENE:
+    case DivDir_ESE:
+      p = right(p);
+      // No break here is deliberate
+    case DivDir_E:
+    case DivDir_NE:
+    case DivDir_SE:
+    case DivDir_NNE:
+    case DivDir_SSE:
+      p = right(p);
+      break;
+    case DivDir_WNW:
+    case DivDir_WSW:
+      p = left(p);
+      // No break here is deliberate
+    case DivDir_W:
+    case DivDir_NW:
+    case DivDir_SW:
+    case DivDir_NNW:
+    case DivDir_SSW:
+      p = left(p);
+      break;
+    default:
+      break;
+  }
+
   return p;
 }
 

@@ -8,6 +8,8 @@
 #include <set>
 #include <algorithm>
 
+#include "RelevantPoints.hpp"
+
 #include "../Graph/ExactDistance.hpp"
 #include "../Graph/Directions.hpp"
 
@@ -53,6 +55,12 @@ void PreprocessingData::preprocess()
   start_computation("Finding complete corner graph", t);
   complete_corner_graph.preprocess(graph, corner_vector, nearby_corners);
   end_computation("Complete corner graph found",t,total_time);
+
+  // Find relevant points, corners, etc
+  RelevantPoints relevant_points;
+  start_computation("Finding relevant points", t);
+  relevant_points.preprocess(graph, corner_vector, nearby_corners);
+  end_computation("Found relevant points", t, total_time);
   
   std::cout << "Preprocessing complete" << std::endl;
   std::cout << "Total preprocessing time: " << total_time << std::endl;
