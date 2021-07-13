@@ -165,7 +165,6 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   const NearbyCorners &nearby_corners = preprocessing_data.get_nearby_corners();
-  const CompleteCornerGraph &complete_corner_graph = preprocessing_data.get_complete_corner_graph();
 
   // TODO: Maybe don't compute this every time, on the other hand maybe it's not important to be efficient
   const Islands islands(graph);

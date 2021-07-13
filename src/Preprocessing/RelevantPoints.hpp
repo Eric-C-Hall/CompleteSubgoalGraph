@@ -5,6 +5,7 @@
 #include "../Graph/Directions.hpp"
 #include "CornerVector.hpp"
 #include "NearbyCorners.hpp"
+#include "../Visualise/Printer.hpp"
 
 class RelevantPoints
 {
@@ -20,6 +21,8 @@ class RelevantPoints
 
   public:
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
+  void print_outgoing_divdirections(const corner_index i, const DivDirection incoming_divdirection, Printer &printer, const Graph &graph, const CornerVector &corner_vector);
+  void print_all_outgoing_divdirections(const Graph &graph, const CornerVector &corner_vector);
 };
 
 #endif

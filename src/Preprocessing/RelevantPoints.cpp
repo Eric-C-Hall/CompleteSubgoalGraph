@@ -128,3 +128,33 @@ void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_v
   std::cout << i - 1 << std::endl;
   
 }
+
+void RelevantPoints::print_outgoing_divdirections(const corner_index i, const DivDirection incoming_divdirection, Printer &printer, const Graph &graph, const CornerVector &corner_vector)
+{
+  const auto &divdirections = corner_to_incoming_divdirection_to_relevant_outgoing_divdirections[i][incoming_divdirection];
+  
+  const map_position corner = corner_vector.get_corner(i);
+  printer.add_char('C', graph.loc(corner));
+  for (DivDirection d : divdirections)
+  {
+    const map_position new_pos = graph.step_in_direction(corner, d);
+    printer.add_highlight(Highlight(2), graph.loc(new_pos));
+  }
+  const map_position incoming_pos = graph.step_in_direction(corner, get_opposite_direction(incoming_divdirection));
+  printer.add_highlight(Highlight(3), graph.loc(incoming_pos));
+}
+
+void RelevantPoints::print_all_outgoing_divdirections(const Graph &graph, const CornerVector &corner_vector)
+{
+  for (corner_index i = 0; i < corner_vector.size(); i++)
+  {
+    for (DivDirection d : get_divdirections())
+    {
+      Printer printer;
+      graph.print(printer);
+      print_outgoing_divdirections(i, d, printer, graph, corner_vector);
+      printer.print();
+    }
+  }
+}
+

@@ -91,7 +91,7 @@ inline char direction_to_char(const Direction dir);
 
 inline unsigned int num_middirections() {return Dir_MIDMAX - Dir_MIDMIN + 1;}
 inline std::vector<MidDirection> get_middirections();
-inline MidDirection get_opposite_middirection(MidDirection middirecion);
+inline MidDirection get_opposite_middirection(MidDirection middirection);
 inline MidDirection get_middirection_between_points(xyLoc source, xyLoc target);
 
 // ---------------
@@ -107,6 +107,7 @@ inline DivDirection get_45_degrees_clockwise(DivDirection dir);
 inline DivDirection get_45_degrees_anticlockwise(DivDirection dir);
 inline DivDirection get_90_degrees_clockwise(DivDirection dir);
 inline DivDirection get_90_degrees_anticlockwise(DivDirection dir);
+inline DivDirection get_opposite_direction(DivDirection dir);
 
 inline DivDirection get_divdirection_between_points(xyLoc source, xyLoc target);
 
@@ -115,7 +116,7 @@ inline std::vector<DivDirection> get_diagonal_divdirections();
 inline bool is_cardinal_direction(DivDirection divdirection);
 inline bool is_diagonal_direction(DivDirection divdirection);
 
-inline DivDirection operator+(DivDirection a, DivDirection b) {return (DivDirection)((a + b) % num_divdirections());}
+inline DivDirection operator+(DivDirection a, DivDirection b) {return (DivDirection)(((int)a + (int)b) % num_divdirections());}
 
 // --------------------------------------------------------
 
@@ -176,37 +177,43 @@ inline Direction get_45_degrees_anticlockwise(Direction dir)
 
 inline DivDirection get_22_degrees_clockwise(DivDirection dir)
 {
-  const int return_value = (dir + 1) % num_divdirections();
+  const int return_value = dir + (DivDirection)1;
   return (DivDirection)(return_value);
 }
 
 inline DivDirection get_22_degrees_anticlockwise(DivDirection dir)
 {
-  const int return_value = (dir + (num_divdirections() - 1)) % num_divdirections();
+  const int return_value = dir + (DivDirection)(num_divdirections() - 1);
   return (DivDirection)(return_value);
 }
 
 inline DivDirection get_45_degrees_clockwise(DivDirection dir)
 {
-  const int return_value = (dir + 2) % num_divdirections();
+  const int return_value = dir + (DivDirection)2;
   return (DivDirection)(return_value);
 }
 
 inline DivDirection get_45_degrees_anticlockwise(DivDirection dir)
 {
-  const int return_value = (dir + (num_divdirections() - 2)) % num_divdirections();
+  const int return_value = dir + (DivDirection)(num_divdirections() - 2);
   return (DivDirection)(return_value);
 }
 
 inline DivDirection get_90_degrees_clockwise(DivDirection dir)
 {
-  const int return_value = (dir + 4) % num_divdirections();
+  const int return_value = dir + (DivDirection)4;
   return (DivDirection)(return_value);
 }
 
 inline DivDirection get_90_degrees_anticlockwise(DivDirection dir)
 {
-  const int return_value = (dir + (num_divdirections() - 4)) % num_divdirections();
+  const int return_value = dir + (DivDirection)(num_divdirections() - 4);
+  return (DivDirection)(return_value);
+}
+
+inline DivDirection get_opposite_direction(DivDirection dir)
+{
+  const int return_value = dir + (DivDirection)(num_divdirections() / 2);
   return (DivDirection)(return_value);
 }
 
@@ -215,9 +222,9 @@ inline Direction get_opposite_direction(Direction dir)
   return (Direction)(dir >= 4 ?  dir - 4 : dir + 4);
 }
 
-inline MidDirection get_opposite_middirection(MidDirection middirecion)
+inline MidDirection get_opposite_middirection(MidDirection middirection)
 {
-  return (MidDirection)(middirecion >= 4 ?  middirecion - 4 : middirecion + 4);
+  return (MidDirection)(middirection >= 4 ?  middirection - 4 : middirection + 4);
 }
 
 template <int n>
