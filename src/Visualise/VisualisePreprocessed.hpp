@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "../Preprocess/Preprocess.hpp"
+#include "../Preprocessing/Preprocessing.hpp"
 
 void Visualise(const PreprocessingData &preprocessing_data);
 
@@ -20,8 +20,6 @@ struct PrintGraphArguments
   int selected_island = -1;
 };
 
-void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &print_graph_arguments);
-
-char int_to_drawn_char(int i);
+void print_graph(const PreprocessingData &preprocessing_data, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &print_graph_arguments);
 
 #endif

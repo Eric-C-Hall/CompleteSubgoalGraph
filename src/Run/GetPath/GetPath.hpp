@@ -1,9 +1,20 @@
-#ifndef CORNERGRAPH_PROJECT__ENTRY_H
-#define CORNERGRAPH_PROJECT__ENTRY_H
+#ifndef CORNERGRAPH_PROJECT__GET_PATH_HPP
+#define CORNERGRAPH_PROJECT__GET_PATH_HPP
 
-#include "../../Preprocess/Preprocess.hpp"
+#include "../../Preprocessing/Preprocessing.hpp"
 #include "../../Graph/XYLoc.hpp"
 
 bool GetPath(const PreprocessingData &preprocessing_data, xyLoc s, xyLoc g, std::vector<xyLoc> &path);
+
+namespace Running
+{
+  template<bool try_octile, bool test_double, bool test_single, bool compute_path>
+  bool get_path_partial_computation(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data);
+
+  bool get_path_octile_step_only(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data);
+  bool get_path_up_to_double_step(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data);
+  bool get_path_up_to_single_step(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data);
+  bool get_path(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data);
+}
 
 #endif

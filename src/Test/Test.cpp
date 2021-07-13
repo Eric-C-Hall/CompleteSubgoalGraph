@@ -5,6 +5,7 @@
 #include "../Run/GetPath/GetPath.hpp"
 #include "../Graph/ValidatePath.hpp"
 #include "SimpleDijkstraExactDistance.hpp"
+#include "../Graph/Reachable.hpp"
 
 xyLoc TestPointGenerator::get_random_first_point()
 {
@@ -30,7 +31,7 @@ xyLoc TestPointGenerator::get_random_other_point(xyLoc first_point)
     // TODO: use island bounds to customize width/height of these distributions
     return_value.x = width_distr(gen);
     return_value.y = height_distr(gen);
-    dist = graph.octile_distance(graph.pos(first_point), graph.pos(return_value));
+    dist = Reachable::octile_distance(graph, graph.pos(first_point), graph.pos(return_value));
   }
   while (graph.is_obstacle(graph.pos(return_value)) // Don't choose obstacles
          || islands.get_island_index(return_value) != islands.get_island_index(first_point) // Don't choose points in different islands
@@ -148,7 +149,7 @@ void Test(const PreprocessingData &preprocessing_data)
       if (!ValidatePath(graph, path))
       {
         PrintGraphArguments args;
-        print_graph(preprocessing_data, graph, std::vector<map_position>(), path, args);
+        print_graph(preprocessing_data, std::vector<map_position>(), path, args);
         throw std::runtime_error("Failed to validate path returned from main. Source: ("  + std::to_string(loc1.x) + ", " + std::to_string(loc1.y) + "). Target: (" + std::to_string(loc2.x) + ", " + std::to_string(loc2.y) + ").");
       }
 
@@ -172,7 +173,7 @@ void Test(const PreprocessingData &preprocessing_data)
       if (path_length != simple_path_length)
       {
         PrintGraphArguments args;
-        print_graph(preprocessing_data, graph, std::vector<map_position>(), path, args);
+        print_graph(preprocessing_data, std::vector<map_position>(), path, args);
         throw std::runtime_error("Test failed from (" + std::to_string(loc1.x) + ", " + std::to_string(loc1.y) + ") to (" + std::to_string(loc2.x) + ", " + std::to_string(loc2.y) + "). Simple had " + std::to_string(simple_path_length.num_straight) + " straight, " + std::to_string(simple_path_length.num_diagonal) + " diagonal. Main had " + std::to_string(path_length.num_straight) + " straight, " + std::to_string(path_length.num_diagonal) + " diagonal.");
       }
     }

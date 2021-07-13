@@ -9,11 +9,11 @@
 
 struct exact_distance
 {
-  exact_distance() {}
-  constexpr exact_distance(int num_straight_input, int num_diagonal_input) : num_straight(num_straight_input), num_diagonal(num_diagonal_input) {}
-
   int num_straight;
   int num_diagonal;
+
+  exact_distance() {}
+  constexpr exact_distance(int num_straight_input, int num_diagonal_input) : num_straight(num_straight_input), num_diagonal(num_diagonal_input) {}
 };
 
 constexpr exact_distance MAX_EXACT_DISTANCE = exact_distance(INT_MAX, INT_MAX);

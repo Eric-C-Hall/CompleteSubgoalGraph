@@ -2,8 +2,10 @@
 #define CORNERGRAPH_PROJECT__DIRECTIONS_HPP
 
 #include <cassert>
+#include <vector>
 
 #include "XYLoc.hpp"
+#include "ExactDistance.hpp"
 
 enum Direction {
   Dir_N  = 0,
@@ -32,13 +34,36 @@ enum MidDirection {
   Dir_MIDMIN = Dir_NNE
 };
 
+enum DivDirection {
+  DivDir_N = 0,
+  DivDir_NNE = 1,
+  DivDir_NE = 2,
+  DivDir_ENE = 3,
+  DivDir_E = 4,
+  DivDir_ESE = 5,
+  DivDir_SE = 6,
+  DivDir_SSE = 7,
+  DivDir_S = 8,
+  DivDir_SSW = 9,
+  DivDir_SW = 10,
+  DivDir_WSW = 11,
+  DivDir_W = 12,
+  DivDir_WNW = 13,
+  DivDir_NW = 14,
+  DivDir_NNW = 15,
+  DivDir_MAX = DivDir_NNW,
+  DivDir_MIN = DivDir_N
+};
+
 inline int num_directions() {return Dir_MAX - Dir_MIN + 1;}
-inline unsigned int num_middirections() {return Dir_MIDMAX - Dir_MIDMIN + 1;}
+inline unsigned int num_middirections() {return DivDir_MAX - DivDir_MIN + 1;}
+inline unsigned int num_divdirections() {return DivDir_MAX - DivDir_MIN + 1;}
 
 inline std::vector<Direction> get_cardinal_directions();
 inline std::vector<Direction> get_directions();
 inline std::vector<Direction> get_diagonal_directions();
 inline std::vector<MidDirection> get_middirections();
+inline std::vector<DivDirection> get_divdirections();
 inline bool is_cardinal_direction(const Direction dir);
 
 inline Direction get_45_degrees_clockwise(Direction dir);
@@ -50,9 +75,10 @@ inline Direction get_n_steps_clockwise(Direction dir);
 template <int n>
 inline Direction get_n_steps_anticlockwise(Direction dir);
 
-inline Direction get_direction_between_points(xyLoc source, xyLoc target);
-inline Direction get_alt_direction_between_points(xyLoc source, xyLoc target);
+inline Direction get_diagonal_direction_between_points(xyLoc source, xyLoc target);
+inline Direction get_straight_direction_between_points(xyLoc source, xyLoc target);
 inline MidDirection get_middirection_between_points(xyLoc source, xyLoc target);
+inline DivDirection get_divdirection_between_points(xyLoc source, xyLoc target);
 
 inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir);
 inline bool within_45_degrees_clockwise_from_point(xyLoc a, xyLoc b, Direction dir);
@@ -67,27 +93,32 @@ inline char direction_to_char(const Direction dir);
 inline std::vector<Direction> get_cardinal_directions()
 {
   return std::vector<Direction>{Dir_N, Dir_E, Dir_S, Dir_W};
-};
+}
 
 inline std::vector<Direction> get_directions()
 {
   return std::vector<Direction>{Dir_N, Dir_NE, Dir_E, Dir_SE, Dir_S, Dir_SW, Dir_W, Dir_NW};
-};
+}
 
 inline std::vector<Direction> get_diagonal_directions()
 {
   return std::vector<Direction>{Dir_NE, Dir_SE, Dir_SW, Dir_NW};
-};
+}
 
 inline std::vector<MidDirection> get_middirections()
 {
   return std::vector<MidDirection>{Dir_NNE, Dir_ENE, Dir_ESE, Dir_SSE, Dir_SSW, Dir_WSW, Dir_WNW, Dir_NNW};
-};
+}
+
+inline std::vector<DivDirection> get_divdirections()
+{
+  return std::vector<DivDirection>{DivDir_N, DivDir_NNE, DivDir_NE, DivDir_ENE, DivDir_E, DivDir_ESE, DivDir_SE, DivDir_SSE, DivDir_S, DivDir_SSW, DivDir_SW, DivDir_WSW, DivDir_W, DivDir_WNW, DivDir_NW, DivDir_NNW};
+}
 
 inline bool is_cardinal_direction(const Direction dir)
 {
   return dir == (Direction)(2 * (dir >> 1));
-};
+}
 
 inline Direction get_45_degrees_clockwise(Direction dir)
 {
@@ -148,7 +179,7 @@ inline bool in_direction_from_point(xyLoc a, xyLoc b, Direction dir)
   }
 }
 
-inline Direction get_direction_between_points(xyLoc source, xyLoc target)
+inline Direction get_diagonal_direction_between_points(xyLoc source, xyLoc target)
 {
   assert(source != target);
   xyLoc delta = target - source;
@@ -174,7 +205,7 @@ inline Direction get_direction_between_points(xyLoc source, xyLoc target)
       return Dir_SW;
 }
 
-inline Direction get_alt_direction_between_points(xyLoc source, xyLoc target)
+inline Direction get_straight_direction_between_points(xyLoc source, xyLoc target)
 {
   assert(source != target);
   xyLoc delta = target - source;
@@ -227,6 +258,52 @@ inline MidDirection get_middirection_between_points(xyLoc source, xyLoc target)
         return Dir_WSW;
       else // delta.y <= delta.x
         return Dir_SSW;
+}
+
+inline DivDirection get_divdirection_between_points(xyLoc source, xyLoc target)
+{
+  assert(source != target);
+  xyLoc delta = target - source;
+
+  if (delta.x > 0)
+    if (delta.y > 0)
+      if (delta.y > delta.x)
+        return DivDir_NNE;
+      else if (delta.y == delta.x)
+        return DivDir_NE;
+      else // delta.y < delta.x
+        return DivDir_ENE;
+    else if (delta.y == 0)
+      return DivDir_E;
+    else // delta.y < 0
+      if (delta.y > -delta.x)
+        return DivDir_ESE;
+      else if (delta.y == -delta.x)
+        return DivDir_SE;
+      else // delta.y < -delta.x
+        return DivDir_SSE;
+  else if (delta.x == 0)
+    if (delta.y > 0)
+      return DivDir_N;
+    else // delta.y < 0, since we assume source != target
+      return DivDir_S;
+  else // delta.x < 0
+    if (delta.y > 0)
+      if (delta.y > -delta.x)
+        return DivDir_NNW;
+      else if (delta.y == -delta.x)
+        return DivDir_NW;
+      else // delta.y < -delta.x
+        return DivDir_WNW;
+    else if (delta.y == 0)
+      return DivDir_W;
+    else // delta.y < 0
+      if (delta.y > delta.x)
+        return DivDir_WSW;
+      else if (delta.y == delta.x)
+        return DivDir_SW;
+      else // delta.y < delta.x
+        return DivDir_SSW;
 }
 
 // Is the direction to travel towards b from a strictly between the directions dir and dir + 45 degrees clockwise? 

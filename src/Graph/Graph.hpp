@@ -10,6 +10,7 @@
 #include "ExactDistance.hpp"
 #include "XYLoc.hpp"
 #include "Directions.hpp"
+#include "../Visualise/Printer.hpp"
 
 // top left is zero
 
@@ -33,14 +34,11 @@ class Graph {
   void load_map(const char *fname);
 
   std::vector<std::pair<map_position, exact_distance>> adjacent_locations_and_dists(map_position p) const;  
-  bool safe_reachable(map_position a, map_position b) const;
 
   inline bool is_obstacle(map_position p) const {return _obstacles[p];}
 
   inline unsigned int y(map_position p) const {return p / get_width();}
   inline unsigned int x(map_position p) const {return p % get_width();}
-  // TODO: maybe this can be done without converting to xyLoc? Maybe not though
-  inline exact_distance octile_distance(map_position a, map_position b) const;
 
   inline map_position up(map_position p) const {return p + get_width();}
   inline map_position down(map_position p) const {return p - get_width();}
@@ -59,9 +57,6 @@ class Graph {
   inline map_position pos(const xyLoc &loc) const {return pos(loc.x, loc.y);}
   inline xyLoc loc(map_position p) const {return xyLoc(x(p), y(p));}
 
-  void get_safe_reachable_in_directions(std::vector<map_position> &output, const map_position origin, const Direction straight_direction, const Direction diagonal_direction, const int num_step_bound = INT_MAX) const;
-  std::vector<map_position> get_safe_reachable_in_all_directions(const map_position origin) const;
-
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const std::vector<map_position> &v) const;
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const xyLoc a, const xyLoc b) const;
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const std::pair<xyLoc, xyLoc> bounds, const xyLoc c) const;
@@ -72,6 +67,9 @@ class Graph {
   inline bool adjacent(map_position a, map_position b) const;
 
   void debug_cut_sides(int xmin, int xmax, int ymin, int ymax);
+
+  void print(Printer &printer) const;
+  void print() const;
 };
 
 inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const xyLoc a, const xyLoc b) const
@@ -182,21 +180,6 @@ inline map_position move_in_middirection(const MidDirection middirection, const 
     default:
       return pos;
   }
-}
-
-inline exact_distance Graph::octile_distance(map_position a, map_position b) const
-{
-  unsigned int x_a = x(a);
-  unsigned int x_b = x(b);
-  unsigned int y_a = y(a);
-  unsigned int y_b = y(b);
-
-  unsigned int abs_x_diff = (x_a > x_b ? x_a - x_b : x_b - x_a);
-  unsigned int abs_y_diff = (y_a > y_b ? y_a - y_b : y_b - y_a);
-
-  int num_diagonal = std::min(abs_x_diff, abs_y_diff);
-  int num_straight = std::max(abs_x_diff, abs_y_diff) - num_diagonal;
-  return exact_distance(num_straight, num_diagonal);
 }
 
 inline bool Graph::adjacent(map_position a, map_position b) const

@@ -99,7 +99,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    preprocessing_data.get_path_octile_step_only(graph.pos(sourceLoc), graph.pos(destLoc), path);
+    Running::get_path_octile_step_only(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data);
   }
 
   octile_t.EndTimer();
@@ -122,7 +122,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    preprocessing_data.get_path_up_to_double_step(graph.pos(sourceLoc), graph.pos(destLoc), path);
+    Running::get_path_up_to_double_step(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data);
   }
 
   double_t.EndTimer();
@@ -145,7 +145,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    preprocessing_data.get_path_up_to_single_step(graph.pos(sourceLoc), graph.pos(destLoc), path);
+    Running::get_path_up_to_single_step(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data);
   }
 
   single_t.EndTimer();
