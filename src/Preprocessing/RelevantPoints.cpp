@@ -92,6 +92,7 @@ void RelevantPoints::compute_relevant_corners(const corner_index i, const Graph 
 
 void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners)
 {
+  corner_to_incoming_divdirection_to_relevant_outgoing_divdirections.clear();
   corner_to_incoming_divdirection_to_relevant_outgoing_divdirections.resize(corner_vector.size());
   std::cout << "Computing incoming to outgoing divdirections: " << std::flush;
   corner_index i;
@@ -110,6 +111,7 @@ void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_v
 
   // -------------------------------------------------------------------
 
+  corner_to_outgoing_divdirection_to_relevant_points.clear();
   corner_to_outgoing_divdirection_to_relevant_points.resize(corner_vector.size());
   std::cout << "Computing outgoing relevant points: " << std::flush;
   for (i = 0; i < corner_vector.size(); i++)
@@ -123,6 +125,7 @@ void RelevantPoints::preprocess(const Graph &graph, const CornerVector &corner_v
 
   // -------------------------------------------------------------------
 
+  corner_to_outgoing_divdirection_to_relevant_corners.clear();
   corner_to_outgoing_divdirection_to_relevant_corners.resize(corner_vector.size());
   std::cout << "Computing outgoing relevant corners: " << std::flush;
   for (i = 0; i < corner_vector.size(); i++)
