@@ -54,14 +54,22 @@ void PreprocessingData::preprocess()
   // Find complete corner graph
   start_computation("Finding complete corner graph", t);
   complete_corner_graph.preprocess(graph, corner_vector, nearby_corners);
-  end_computation("Complete corner graph found",t,total_time);
+  end_computation("Complete corner graph found", t, total_time);
 
   // Find relevant points, corners, etc
   RelevantPoints relevant_points;
   start_computation("Finding relevant points", t);
   relevant_points.preprocess(graph, corner_vector, nearby_corners);
   end_computation("Found relevant points", t, total_time);
+
+  // Geometric containers outgoing
+  GeometricContainersOutgoing geometric_containers_outgoing;
+  start_computation("Finding geometric containers", t);
+  geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
+  end_computation("Found geometric containers", t, total_time);
   
+  geometric_containers_outgoing.print_all_bounds(graph, corner_vector);
+
   std::cout << "Preprocessing complete" << std::endl;
   std::cout << "Total preprocessing time: " << total_time << std::endl;
 }

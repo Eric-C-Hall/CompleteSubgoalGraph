@@ -3,10 +3,12 @@
 
 #include <vector>
 #include <algorithm>
+#include <deque>
 
 #include "../Graph/Graph.hpp"
+#include "CompleteCornerGraph.hpp"
 #include "CornerVector.hpp"
-#include "RelevantCorners.hpp"
+#include "RelevantPoints.hpp"
 
 class Bound
 {
@@ -17,7 +19,8 @@ class Bound
   public:
   Bound(xyLoc input_upper_bound, xyLoc input_lower_bound) : upper_bound(input_upper_bound), lower_bound(input_lower_bound) {}
   inline Bound combine(const Bound &other) const;
-}
+  void print(Printer &printer, const Highlight &highlight);
+};
 
 class GeometricContainersOutgoing
 {
@@ -34,6 +37,9 @@ class GeometricContainersOutgoing
 
   public:
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const CompleteCornerGraph &complete_corner_graph, const RelevantPoints &relevant_points);
+  void print_bound(const corner_index i, const DivDirection dir, Printer &printer);
+  void print_immediate_bound(const corner_index i, const DivDirection dir, Printer &printer);
+  void print_all_bounds(const Graph &graph, const CornerVector &corner_vector);
 };
 
 class GeometricContainersIncoming

@@ -10,6 +10,7 @@
 #include "CornerVector.hpp"
 #include "NearbyCorners.hpp"
 #include "CompleteCornerGraph.hpp"
+#include "GeometricContainers.hpp"
 
 void PreprocessMap(const Graph &graph);
 
