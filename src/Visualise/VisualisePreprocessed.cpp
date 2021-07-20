@@ -25,8 +25,7 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   static GeometricContainersOutgoing geometric_containers_outgoing;
   static RelevantPoints relevant_points;
   static bool preprocessing_done = false;
-  if ((args.show_bounds || args.show_relevant_corners)
-      && !preprocessing_done)
+  if (!preprocessing_done)
   {
     relevant_points.preprocess(graph, corner_vector, nearby_corners);
     geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
@@ -76,12 +75,16 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
       geometric_containers_outgoing.print_bound(selected_corner, args.divdirection, printer);
       geometric_containers_outgoing.print_immediate_bound(selected_corner, args.divdirection, printer);
     }
-    
 
   // Print relevant corners
   if (args.show_relevant_corners)
     if (selected_corner != corner_vector.size())
       relevant_points.print_relevant_corners(selected_corner, args.divdirection, printer, graph, corner_vector);
+
+  // Print outgoing divdirections
+  if (args.show_relevant_divdirections)
+    if (selected_corner != corner_vector.size())
+      relevant_points.print_outgoing_divdirections(selected_corner, args.divdirection, printer, graph, corner_vector);
 
   printer.print();
 }
@@ -186,6 +189,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       args.show_relevant_corners = !args.show_relevant_corners;
     }
+    else if (input == "relevant_divdirections")
+    {
+      args.show_relevant_divdirections = !args.show_relevant_divdirections;
+    }
 
     print_graph(preprocessing_data, cursors, path, args);
 
@@ -201,6 +208,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "bounds: show bounds with corner under cursor 0 and outgoing divdirection selected with divdirection command" << std::endl;
       std::cout << "divdirection i: select/highlight the ith divdirection, or unhighlight it if already selected. Alias: dd" << std::endl;
       std::cout << "relevant_corners: show corners relevant to corner under cursor 0 with outgoing divdirection selected with divdirection command" << std::endl;
+      std::cout << "relevant_divdirections: show outgoing divdirections relevant to incoming divdirection selected with divdirection command" << std::endl;
       std::cout << std::endl;
     }
 
