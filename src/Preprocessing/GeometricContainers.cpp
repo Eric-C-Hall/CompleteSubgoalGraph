@@ -39,7 +39,7 @@ Bound GeometricContainersOutgoing::search_relevant(const corner_index i, const D
         continue;
 
       const DivDirection next_incoming_divdirection = curr_outgoing_divdirection;
-      for (DivDirection next_outgoing_divdirection : relevant_points.get_relevant_outgoing_divdirections(curr_index, next_incoming_divdirection))
+      for (DivDirection next_outgoing_divdirection : relevant_points.get_relevant_outgoing_divdirections(next_index, next_incoming_divdirection))
       {
         open.push_back(next_index);
         outgoing_divdirections.push_back(next_outgoing_divdirection);
