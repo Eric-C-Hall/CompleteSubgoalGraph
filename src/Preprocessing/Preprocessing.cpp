@@ -68,7 +68,7 @@ void PreprocessingData::preprocess()
   geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
   end_computation("Found geometric containers", t, total_time);
   
-  geometric_containers_outgoing.print_all_bounds(graph, corner_vector);
+  //geometric_containers_outgoing.print_all_bounds(graph, corner_vector);
 
   std::cout << "Preprocessing complete" << std::endl;
   std::cout << "Total preprocessing time: " << total_time << std::endl;

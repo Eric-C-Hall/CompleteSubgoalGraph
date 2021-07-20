@@ -19,7 +19,18 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
 {
   const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
+  const CompleteCornerGraph &complete_corner_graph = preprocessing_data.get_complete_corner_graph();
   const NearbyCorners &nearby_corners = preprocessing_data.get_nearby_corners();
+
+  static GeometricContainersOutgoing geometric_containers_outgoing;
+  static RelevantPoints relevant_points;
+  static bool preprocessing_done = false;
+  if (args.show_bounds && !preprocessing_done)
+  {
+    relevant_points.preprocess(graph, corner_vector, nearby_corners);
+    geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
+    preprocessing_done = true;
+  }
 
   // TODO: Maybe don't compute this every time, on the other hand maybe it's not important to be efficient
   const Islands islands(graph);
@@ -50,6 +61,22 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   // Print divdirection
   if (args.show_divdirection && cursors.size() > 0)
     printer.add_char('$', step_in_direction(graph.loc(cursors[0]), args.divdirection));
+
+  // Find the index of the selected corner
+  corner_index selected_corner = corner_vector.size();
+  if (cursors.size() > 0)
+    for (selected_corner = 0; selected_corner < corner_vector.size() && corner_vector.get_corner(selected_corner) != cursors[0]; selected_corner++)
+    {
+    }
+
+  // Print bounds
+  if (args.show_bounds)
+    if (selected_corner != corner_vector.size())
+    {
+      geometric_containers_outgoing.print_bound(selected_corner, args.divdirection, printer);
+      geometric_containers_outgoing.print_immediate_bound(selected_corner, args.divdirection, printer);
+    }
+    
 
   printer.print();
 }
@@ -109,13 +136,8 @@ void Visualise(const PreprocessingData &preprocessing_data)
 
   PrintGraphArguments args;
   args.show_nearby               = false;
-  args.show_num_nearby           = false;
-  args.show_nearby_with_next     = false;
-  args.show_num_nearby_with_next = false;
-  args.show_islands              = false;
   args.show_bounds               = false;
   args.middirection              = Dir_NNE;
-  args.which_nearby_corner       = 100000;
 
   print_graph(preprocessing_data, cursors, path, args);
   VisualiseRequestInput(input);
@@ -141,26 +163,6 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       args.show_nearby = !args.show_nearby;
     }
-    else if (input == "numnearby")
-    {
-      args.show_num_nearby = !args.show_num_nearby;
-    }
-    else if (input == "numnearbywithnext")
-    {
-      args.show_num_nearby_with_next = !args.show_num_nearby_with_next;
-    }
-    else if (input == "nearbywithnext")
-    {
-      args.show_nearby_with_next = !args.show_nearby_with_next;
-    }
-    else if (input == "islands")
-    {
-      args.show_islands = !args.show_islands;
-    }
-    else if (input == "island")
-    {
-      std::cin >> args.selected_island;
-    }
     else if (input == "swap")
     {
       int n, m;
@@ -169,22 +171,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
     }
     else if (input == "bounds")
     {
-      MidDirection old_middirection = args.middirection;
-      unsigned int temp;
-      std::cin >> temp;
-      args.middirection = (MidDirection)temp;
-      if (!args.show_bounds || old_middirection != args.middirection)
-      {
-        args.show_bounds = true;
-      }
-      else
-      {
-        args.show_bounds = false;
-      }
-    }
-    else if (input == "whichnearbycorner")
-    {
-      std::cin >> args.which_nearby_corner;
+      args.show_bounds = !args.show_bounds;
     }
     else if (input == "divdirection" || input == "dd")
     {
@@ -201,18 +188,11 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << std::endl;
       std::cout << "cursor n x y: moves the nth cursor to (x,y)" << std::endl;
       std::cout << "cursort n x y: translate the nth cursor by (x,y)" << std::endl;
+      std::cout << "corner n m: move the nth cursor to select the mth corner" << std::endl;
       std::cout << "swap n m: swap the nth and mth cursors" << std::endl;
       std::cout << "compute: compute the path between cursors 1 and 2" << std::endl;
       std::cout << "nearby: show corners near the zeroth cursor" << std::endl;
-      std::cout << "nearbywithnext: show corners near the zeroth cursor with a next corner" << std::endl;
-      std::cout << "corner n m: move the nth cursor to select the mth corner" << std::endl;
-      std::cout << "numnearby: show number of nearby corners" << std::endl;
-      std::cout << "numnearbywithnext: show number of nearby corners with next" << std::endl;
-      std::cout << "island i: select the ith island" << std::endl;
-      std::cout << "islands: show islands" << std::endl;
-      std::cout << "bounds i: show bounds. Uses i to determine which middirection to use" << std::endl;
-      std::cout << "gonearbycorner: sets cursor 0 to the selected nearby corner" << std::endl;
-      std::cout << "whichnearbycorner i: highlight the ith nearby corner" << std::endl;
+      std::cout << "bounds: show bounds with corner under cursor 0 and outgoing divdirection selected with divdirection command" << std::endl;
       std::cout << "divdirection i: select/highlight the ith divdirection, or unhighlight it if already selected. Alias: dd" << std::endl;
       std::cout << std::endl;
     }
