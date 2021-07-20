@@ -23,6 +23,7 @@ class RelevantPoints
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
   void print_outgoing_divdirections(const corner_index i, const DivDirection incoming_divdirection, Printer &printer, const Graph &graph, const CornerVector &corner_vector);
   void print_all_outgoing_divdirections(const Graph &graph, const CornerVector &corner_vector);
+  void print_relevant_corners(const corner_index i, const DivDirection outgoing_divdirection, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const;
 
   inline const std::set<DivDirection> & get_relevant_outgoing_divdirections(const corner_index i, const DivDirection d) const {return corner_to_incoming_divdirection_to_relevant_outgoing_divdirections[i][d];}
   inline const std::vector<map_position> & get_relevant_points(const corner_index i, const DivDirection d) const {return corner_to_outgoing_divdirection_to_relevant_points[i][d];}

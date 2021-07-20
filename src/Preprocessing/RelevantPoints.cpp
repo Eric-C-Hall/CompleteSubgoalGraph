@@ -173,3 +173,13 @@ void RelevantPoints::print_all_outgoing_divdirections(const Graph &graph, const 
   }
 }
 
+void RelevantPoints::print_relevant_corners(const corner_index i, const DivDirection outgoing_divdirection, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const
+{
+  assert(corner_to_outgoing_divdirection_to_relevant_corners.size() > i);
+  assert(corner_to_outgoing_divdirection_to_relevant_corners[i].size() > outgoing_divdirection);
+  for (corner_index j : corner_to_outgoing_divdirection_to_relevant_corners[i][outgoing_divdirection])
+  {
+    printer.add_char('R', graph.loc(corner_vector.get_corner(j)));
+  }
+}
+
