@@ -84,7 +84,7 @@ void GeometricContainersOutgoing::preprocess_overall(const Graph &graph, const C
   for (i = 0; i < corner_vector.size(); i++)
   {
     if (i % 100 == 0)
-      std::cout << i << ", ";
+      std::cout << i << ", " << std::flush;
     corner_to_outgoing_direction_to_bound[i].reserve(num_divdirections());
     for (const DivDirection outgoing_divdirection : get_divdirections())
     {
