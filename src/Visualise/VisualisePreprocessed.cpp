@@ -6,6 +6,7 @@
 #include "../Graph/MapPosition.hpp"
 #include "../Run/GetPath/GetPath.hpp"
 #include "../Graph/Islands.hpp"
+#include "../Graph/XYLocStep.hpp"
 #include "Printer.hpp"
 
 void VisualiseRequestInput(std::string &input)
@@ -13,152 +14,6 @@ void VisualiseRequestInput(std::string &input)
   std::cout << "Type help for help. Type quit to quit." << std::endl;
   std::cin >> input;
 }
-
-
-// -------------------------
-// TODO: This is very messy, it's just a copy of an existing function in Preprocess.cpp. Need to find a way to clean this up.
-bool is_useful_nearby_corner_for_direction_copy(const map_position pos, const map_position corner, const Graph &graph, const Direction dir)
-{
-  const bool is_dir_cardinal = is_cardinal_direction(dir);
-
-  const Direction opposite_dir = get_opposite_direction(dir);
-  map_position opposite_pos = corner;
-  moving_direction(opposite_dir, opposite_pos, graph);
-  const bool is_opposite_obstacle = graph.is_obstacle(opposite_pos);
-
-  if (is_opposite_obstacle)
-    return false;
-
-  const Direction clockwise_obstacle_dir = (is_dir_cardinal ? get_n_steps_clockwise<2>(opposite_dir) : get_45_degrees_clockwise(opposite_dir));
-  map_position clockwise_obstacle_pos = corner;
-  moving_direction(clockwise_obstacle_dir, clockwise_obstacle_pos, graph);
-  const bool is_clockwise_obstacle = graph.is_obstacle(clockwise_obstacle_pos);
-
-  const Direction anticlockwise_obstacle_dir = (is_dir_cardinal ? get_n_steps_anticlockwise<2>(opposite_dir) : get_45_degrees_anticlockwise(opposite_dir));
-  map_position anticlockwise_obstacle_pos = corner;
-  moving_direction(anticlockwise_obstacle_dir, anticlockwise_obstacle_pos, graph);
-  const bool is_anticlockwise_obstacle = graph.is_obstacle(anticlockwise_obstacle_pos);
-
-  const xyLoc pos_loc = graph.loc(pos);
-  const xyLoc corner_loc = graph.loc(corner);
-
-  if (is_clockwise_obstacle)
-  {
-    const Direction anticlockwise_45 = get_45_degrees_anticlockwise(dir);
-    const Direction anticlockwise_90 = get_45_degrees_anticlockwise(anticlockwise_45);
-
-    if (in_direction_from_point(corner_loc, pos_loc, anticlockwise_45))
-      return true;
-
-    if (within_45_degrees_anticlockwise_from_point(corner_loc, pos_loc, dir))
-      return true;
-
-    if (!is_dir_cardinal)
-    {
-      if (in_direction_from_point(corner_loc, pos_loc, anticlockwise_90))
-        return true;
-
-      if (within_45_degrees_anticlockwise_from_point(corner_loc, pos_loc, anticlockwise_45))
-        return true;
-    }
-  }
-
-  if (is_anticlockwise_obstacle)
-  {
-    const Direction clockwise_45 = get_45_degrees_clockwise(dir);
-    const Direction clockwise_90 = get_45_degrees_clockwise(clockwise_45);
-
-    if (in_direction_from_point(corner_loc, pos_loc, clockwise_45))
-      return true;
-
-    if (within_45_degrees_clockwise_from_point(corner_loc, pos_loc, dir))
-      return true;
-
-    if (!is_dir_cardinal)
-    {
-      if (in_direction_from_point(corner_loc, pos_loc, clockwise_90))
-        return true;
-
-      if (within_45_degrees_clockwise_from_point(corner_loc, pos_loc, clockwise_45))
-        return true;
-    }
-  }
-
-  return false;
-}
-// -------------
-
-// TODO: looping through all cursors and path positions on every call to this seems slow.
-// If performance becomes an issue, maybe these could all be stored in a vector from map_position to path/cursor
-// Then it would only take constant time to check if is cursor or on path
-// It's not worth doing this unless performance is actually an issue, though
-void print_point(int x, int y, const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &args, const Islands &islands, const std::pair<xyLoc, xyLoc> bounds)
-{
-  map_position pos = graph.pos(x,y);
-
-  // Highlight bounds
-
-  if (args.show_bounds && cursors.size() > 0)
-  {
-    if (graph.is_point_in_bounds(xyLoc(x,y), bounds))
-    {
-      std::cout << "\e[45m";
-    }
-  }
-
-  if (0 <= args.selected_island && args.selected_island < islands.get_num_islands())
-  {
-    if (graph.is_point_in_bounds(xyLoc(x,y), islands.get_island_bounds(args.selected_island)))
-    {
-      std::cout << "\e[41m";
-    }
-  }
-
-  // Highlight cursors
-  for (map_position cursor : cursors)
-  {
-    if (pos == cursor)
-    {
-      std::cout << "\e[7m";
-    }
-  }
-
-  // Highlight path
-  for (xyLoc l : path)
-  {
-    if (pos == graph.pos(l))
-    {
-      std::cout << "\e[42m";
-    }
-  }
-
-  // Highlight middirection
-  if (args.show_bounds && cursors.size() > 0)
-  {
-    // Highlight middirection
-    if (pos == move_in_middirection(args.middirection, cursors[0], graph))
-      std::cout << "\e[47m";
-  }
-
-
-  // Instead of using if, else if, etc, we should use ifs and keep track of has_printed to ensure don't print twice
-  if (graph.is_obstacle(pos))
-  {
-    std::cout << "@";
-  }
-  else if (args.show_islands)
-  {
-    std::cout << int_to_drawn_char(islands.get_island_index(pos));
-  }
-  else
-  {
-    std::cout << "-";
-  }
-
-  // Remove formatting
-  std::cout << "\e[0m";
-}
-
 
 void print_graph(const PreprocessingData &preprocessing_data, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &args)
 {
@@ -170,19 +25,17 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   const Islands islands(graph);
 
   Printer printer;
+
+  // Print graph
   graph.print(printer);
 
   // Print nearby corners
   if (args.show_nearby && cursors.size() > 0)
-  {
     nearby_corners.print_nearby(cursors[0], printer, graph, corner_vector);
-  }
 
   // Print path
   for (xyLoc l : path)
-  {
     printer.add_highlight(Highlight(2), l);
-  }
   if (path.size() > 0)
   {
     printer.add_highlight(Highlight(4), path.front());
@@ -191,10 +44,12 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
 
   // Print cursors
   for (map_position p : cursors)
-  {
     if (p < graph.num_positions())
       printer.add_highlight(Highlight(1), graph.loc(p));
-  }
+
+  // Print divdirection
+  if (args.show_divdirection && cursors.size() > 0)
+    printer.add_char('$', step_in_direction(graph.loc(cursors[0]), args.divdirection));
 
   printer.print();
 }
@@ -331,6 +186,13 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       std::cin >> args.which_nearby_corner;
     }
+    else if (input == "divdirection" || input == "dd")
+    {
+      int new_divdirection;
+      std::cin >> new_divdirection;
+      args.show_divdirection = (args.divdirection != new_divdirection || !args.show_divdirection);
+      args.divdirection = (DivDirection)new_divdirection;
+    }
 
     print_graph(preprocessing_data, cursors, path, args);
 
@@ -351,6 +213,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "bounds i: show bounds. Uses i to determine which middirection to use" << std::endl;
       std::cout << "gonearbycorner: sets cursor 0 to the selected nearby corner" << std::endl;
       std::cout << "whichnearbycorner i: highlight the ith nearby corner" << std::endl;
+      std::cout << "divdirection i: select/highlight the ith divdirection, or unhighlight it if already selected. Alias: dd" << std::endl;
       std::cout << std::endl;
     }
 

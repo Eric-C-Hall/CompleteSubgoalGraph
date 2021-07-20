@@ -16,6 +16,8 @@ struct PrintGraphArguments
   bool show_islands = false;
   bool show_bounds = false;
   MidDirection middirection = Dir_NNE;
+  bool show_divdirection = false;
+  DivDirection divdirection = DivDir_N;
   unsigned int which_nearby_corner = 0;
   int selected_island = -1;
 };
