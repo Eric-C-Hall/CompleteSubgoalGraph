@@ -54,7 +54,7 @@ class GeometricContainersIncoming
   std::vector<std::vector<Bounds>> corner_to_incoming_direction_to_bounds;
 
   public:
-  void convert_from(const GeometricContainersOutgoing geometric_containers_outgoing, const CornerVector &corner_vector, const RelevantPoints &relevant_points);
+  void convert_from(const GeometricContainersOutgoing geometric_containers_outgoing, const Graph &graph, const CornerVector &corner_vector, const RelevantPoints &relevant_points);
 
   void save(std::ostream &stream) const;
   void load(std::istream &stream, const CornerVector &corner_vector);

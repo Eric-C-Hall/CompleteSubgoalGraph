@@ -45,12 +45,16 @@ void Printer::expand_to_include_point(xyLoc l)
 
 void Printer::add_char(char c, xyLoc l)
 {
+  assert (l.x >= 0);
+  assert (l.y >= 0);
   expand_to_include_point(l);
   char_matrix[l.x][l.y] = c;
 }
 
 void Printer::add_highlight(Highlight h, xyLoc l)
 {
+  assert (l.x >= 0);
+  assert (l.y >= 0);
   expand_to_include_point(l);
   highlight_matrix[l.x][l.y] = h;
 }

@@ -70,7 +70,7 @@ void PreprocessingData::preprocess()
   
   // Convert outgoing geometric containers to incoming geometric containers
   start_computation("Converting geometric containers", t);
-  geometric_containers_incoming.convert_from(geometric_containers_outgoing, corner_vector, relevant_points);
+  geometric_containers_incoming.convert_from(geometric_containers_outgoing, graph, corner_vector, relevant_points);
   end_computation("Converted geometric containers", t, total_time);
 
   //geometric_containers_outgoing.print_all_bounds(graph, corner_vector);

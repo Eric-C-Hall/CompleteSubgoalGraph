@@ -141,7 +141,7 @@ void GeometricContainersOutgoing::print_all_bounds(const Graph &graph, const Cor
   }
 }
 
-void GeometricContainersIncoming::convert_from(const GeometricContainersOutgoing geometric_containers_outgoing, const CornerVector &corner_vector, const RelevantPoints &relevant_points)
+void GeometricContainersIncoming::convert_from(const GeometricContainersOutgoing geometric_containers_outgoing, const Graph &graph, const CornerVector &corner_vector, const RelevantPoints &relevant_points)
 {
   std::cout << "Converting outgoing geometric containers to incoming geometric containers: ";
   corner_to_incoming_direction_to_bounds.resize(corner_vector.size());
@@ -153,7 +153,8 @@ void GeometricContainersIncoming::convert_from(const GeometricContainersOutgoing
     corner_to_incoming_direction_to_bounds[i].reserve(num_divdirections());
     for (DivDirection incoming_divdirection : get_divdirections())
     {
-      Bounds bounds(xyLoc(-1,-1),xyLoc(-1,-1));
+      const xyLoc ci_loc = graph.loc(corner_vector.get_corner(i));
+      Bounds bounds(ci_loc, ci_loc);
       bool bounds_initialized = false;
       for (DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(i, incoming_divdirection))
       {
@@ -209,6 +210,8 @@ void GeometricContainersIncoming::load(std::istream &stream, const CornerVector 
 
 void GeometricContainersIncoming::print_bounds(const corner_index i, const DivDirection dir, Printer &printer) const
 {
+  assert (i < corner_to_incoming_direction_to_bounds.size());
+  assert (dir < corner_to_incoming_direction_to_bounds[i].size());
   corner_to_incoming_direction_to_bounds[i][dir].print(printer, Highlight(3));
 }
 
