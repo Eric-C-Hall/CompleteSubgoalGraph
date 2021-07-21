@@ -28,8 +28,8 @@ class CompleteCornerGraph
   inline const std::vector<corner_index> &get_corner_index_to_first_corner(corner_index i) const {return pair_of_corner_indices_to_first_corner[i];}
 
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
-  void save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const;
-  void load(std::istream &stream, const Graph &graph, const CornerVector &corner_vector);
+  void save(std::ostream &stream, const CornerVector &corner_vector) const;
+  void load(std::istream &stream, const CornerVector &corner_vector);
 
   void print_first(corner_index i, corner_index j, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const;
   void print_first_and_dist(const corner_index i, const corner_index j, const Graph &graph, const CornerVector &corner_vector) const;

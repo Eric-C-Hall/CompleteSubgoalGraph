@@ -21,6 +21,7 @@ class PreprocessingData {
   CornerVector corner_vector;
   NearbyCorners nearby_corners;
   CompleteCornerGraph complete_corner_graph;
+  GeometricContainersIncoming geometric_containers_incoming;
 
   void _save(std::ostream & stream) const;
   void _load(std::istream &stream);

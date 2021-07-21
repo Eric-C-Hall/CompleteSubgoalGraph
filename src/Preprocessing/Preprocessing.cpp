@@ -68,6 +68,11 @@ void PreprocessingData::preprocess()
   geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
   end_computation("Found geometric containers", t, total_time);
   
+  // Convert outgoing geometric containers to incoming geometric containers
+  start_computation("Converting geometric containers", t);
+  geometric_containers_incoming.convert_from(geometric_containers_outgoing, corner_vector, relevant_points);
+  end_computation("Converted geometric containers", t, total_time);
+
   //geometric_containers_outgoing.print_all_bounds(graph, corner_vector);
 
   std::cout << "Preprocessing complete" << std::endl;
@@ -78,7 +83,8 @@ void PreprocessingData::_save(std::ostream & stream) const
 {
   corner_vector.save(stream);
   nearby_corners.save(stream, graph, corner_vector);
-  complete_corner_graph.save(stream, graph, corner_vector);
+  complete_corner_graph.save(stream, corner_vector);
+  //geometric_containers_incoming.save(stream);
 }
 
 void PreprocessingData::save(const std::string &filename) const
@@ -100,7 +106,8 @@ void PreprocessingData::_load(std::istream &stream)
 {
   corner_vector.load(stream);
   nearby_corners.load(stream, graph, corner_vector);
-  complete_corner_graph.load(stream, graph, corner_vector);
+  complete_corner_graph.load(stream, corner_vector);
+  //geometric_containers_incoming.load(stream, corner_vector);
 }
 
 void PreprocessingData::load(const std::string &filename)

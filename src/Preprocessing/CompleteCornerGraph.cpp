@@ -178,7 +178,7 @@ void CompleteCornerGraph::preprocess(const Graph &graph, const CornerVector &cor
   std::cout << i - 1 << std::endl;
 }
 
-void CompleteCornerGraph::save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const
+void CompleteCornerGraph::save(std::ostream &stream, const CornerVector &corner_vector) const
 {
   int num_exact_distances = 0;
   int num_first_corners = 0;
@@ -188,14 +188,14 @@ void CompleteCornerGraph::save(std::ostream &stream, const Graph &graph, const C
     for (corner_index j = 0; j < i; j++)
     {
       exact_distance d = get_exact_distance_between_corner_indices(i,j);
-      SaveLoad::save_uint16_t_as_binary(stream, d.num_straight);
-      SaveLoad::save_uint16_t_as_binary(stream, d.num_diagonal);
+      SaveLoad::save_as_binary(stream, d.num_straight);
+      SaveLoad::save_as_binary(stream, d.num_diagonal);
       num_exact_distances++;
     }
     for (corner_index j = 0; j < corner_vector.size(); j++)
     {
       assert(pair_of_corner_indices_to_first_corner[i][j] != j);
-      SaveLoad::save_uint16_t_as_binary(stream, pair_of_corner_indices_to_first_corner[i][j]);
+      SaveLoad::save_as_binary(stream, pair_of_corner_indices_to_first_corner[i][j]);
       num_first_corners++;
     }
   }
@@ -204,7 +204,7 @@ void CompleteCornerGraph::save(std::ostream &stream, const Graph &graph, const C
   std::cout << num_first_corners << " first corners saved" << std::endl;
 }
 
-void CompleteCornerGraph::load(std::istream &stream, const Graph &graph, const CornerVector &corner_vector)
+void CompleteCornerGraph::load(std::istream &stream, const CornerVector &corner_vector)
 {
   pair_of_corner_indices_to_dist.clear();
   pair_of_corner_indices_to_first_corner.clear();
@@ -218,14 +218,15 @@ void CompleteCornerGraph::load(std::istream &stream, const Graph &graph, const C
     pair_of_corner_indices_to_first_corner[i].reserve(corner_vector.size());
     for (corner_index j = 0; j < i; j++)
     {
-      int num_straight = SaveLoad::load_uint16_t_as_binary(stream);
-      int num_diagonal = SaveLoad::load_uint16_t_as_binary(stream);
-      exact_distance d(num_straight, num_diagonal);
+      exact_distance d;
+      SaveLoad::load_as_binary(stream, d.num_straight);
+      SaveLoad::load_as_binary(stream, d.num_diagonal);
       pair_of_corner_indices_to_dist[i].push_back(d);
     }
     for (corner_index j = 0; j < corner_vector.size(); j++)
     {
-      corner_index first_corner = SaveLoad::load_uint16_t_as_binary(stream);
+      corner_index first_corner;
+      SaveLoad::load_as_binary(stream, first_corner);
       assert(first_corner != j);
       pair_of_corner_indices_to_first_corner[i].push_back(first_corner);
     }

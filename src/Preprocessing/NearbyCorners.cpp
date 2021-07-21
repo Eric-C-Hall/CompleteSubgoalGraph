@@ -41,12 +41,12 @@ void NearbyCorners::save(std::ostream &stream, const Graph &graph, const CornerV
   int num_nearby_corner_indices = 0;
   for (map_position p = 0; p < graph.num_positions(); p++)
   {
-    for (unsigned int corner : point_to_nearby_corner_indices[p])
+    for (corner_index i : point_to_nearby_corner_indices[p])
     {
-      SaveLoad::save_unsigned_int_as_binary(stream,corner);
+      SaveLoad::save_as_binary(stream,i);
       num_nearby_corner_indices++;
     }
-    SaveLoad::save_unsigned_int_as_binary(stream, corner_vector.size());
+    SaveLoad::save_as_binary(stream, (corner_index)(corner_vector.size()));
   }
 
   std::cout << num_nearby_corner_indices << " nearby corner indices saved" << std::endl;
@@ -60,11 +60,12 @@ void NearbyCorners::load(std::istream &stream, const Graph &graph, const CornerV
   point_to_nearby_corner_indices.resize(graph.num_positions());
   for (map_position p = 0; p < graph.num_positions(); p++)
   {
-    map_position corner_index = SaveLoad::load_unsigned_int_as_binary(stream);
-    while (corner_index != corner_vector.size())
+    corner_index i;
+    SaveLoad::load_as_binary(stream, i);
+    while (i != corner_vector.size())
     {
-      point_to_nearby_corner_indices[p].push_back(corner_index);
-      corner_index = SaveLoad::load_unsigned_int_as_binary(stream);
+      point_to_nearby_corner_indices[p].push_back(i);
+      SaveLoad::load_as_binary(stream, i);
     }
   }
 }

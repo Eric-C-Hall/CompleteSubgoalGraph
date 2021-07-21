@@ -19,7 +19,10 @@ class Bound
   public:
   Bound(xyLoc input_upper_bound, xyLoc input_lower_bound) : upper_bound(input_upper_bound), lower_bound(input_lower_bound) {}
   inline Bound combine(const Bound &other) const;
-  void print(Printer &printer, const Highlight &highlight);
+  void print(Printer &printer, const Highlight &highlight) const;
+
+  void save(std::ostream &stream) const;
+  void load(std::istream &stream);
 };
 
 class GeometricContainersOutgoing
@@ -37,9 +40,10 @@ class GeometricContainersOutgoing
 
   public:
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const CompleteCornerGraph &complete_corner_graph, const RelevantPoints &relevant_points);
-  void print_bound(const corner_index i, const DivDirection dir, Printer &printer);
-  void print_immediate_bound(const corner_index i, const DivDirection dir, Printer &printer);
-  void print_all_bounds(const Graph &graph, const CornerVector &corner_vector);
+  void print_bound(const corner_index i, const DivDirection dir, Printer &printer) const;
+  void print_immediate_bound(const corner_index i, const DivDirection dir, Printer &printer) const;
+  void print_all_bounds(const Graph &graph, const CornerVector &corner_vector) const;
+  const Bound &get_bound(const corner_index i, const DivDirection dir) const  {return corner_to_outgoing_direction_to_bound[i][dir];}
 };
 
 class GeometricContainersIncoming
@@ -48,6 +52,10 @@ class GeometricContainersIncoming
   std::vector<std::vector<Bound>> corner_to_incoming_direction_to_bound;
 
   public:
+  void convert_from(const GeometricContainersOutgoing geometric_containers_outgoing, const CornerVector &corner_vector, const RelevantPoints &relevant_points);
+
+  void save(std::ostream &stream) const;
+  void load(std::istream &stream, const CornerVector &corner_vector);
 };
 
 inline Bound Bound::combine(const Bound &other) const
