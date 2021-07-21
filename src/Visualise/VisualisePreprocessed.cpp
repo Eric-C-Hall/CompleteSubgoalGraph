@@ -21,6 +21,7 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   const CompleteCornerGraph &complete_corner_graph = preprocessing_data.get_complete_corner_graph();
   const NearbyCorners &nearby_corners = preprocessing_data.get_nearby_corners();
+  const GeometricContainersIncoming &geometric_containers_incoming = preprocessing_data.get_geometric_containers_incoming();
 
   static GeometricContainersOutgoing geometric_containers_outgoing;
   static RelevantPoints relevant_points;
