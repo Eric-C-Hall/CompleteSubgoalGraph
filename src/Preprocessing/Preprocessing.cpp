@@ -84,7 +84,7 @@ void PreprocessingData::_save(std::ostream & stream) const
   corner_vector.save(stream);
   nearby_corners.save(stream, graph, corner_vector);
   complete_corner_graph.save(stream, corner_vector);
-  //geometric_containers_incoming.save(stream);
+  geometric_containers_incoming.save(stream);
 }
 
 void PreprocessingData::save(const std::string &filename) const
@@ -107,7 +107,7 @@ void PreprocessingData::_load(std::istream &stream)
   corner_vector.load(stream);
   nearby_corners.load(stream, graph, corner_vector);
   complete_corner_graph.load(stream, corner_vector);
-  //geometric_containers_incoming.load(stream, corner_vector);
+  geometric_containers_incoming.load(stream, corner_vector);
 }
 
 void PreprocessingData::load(const std::string &filename)

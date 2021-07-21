@@ -72,8 +72,8 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   if (args.show_bounds)
     if (selected_corner != corner_vector.size())
     {
-      geometric_containers_outgoing.print_bound(selected_corner, args.divdirection, printer);
-      geometric_containers_outgoing.print_immediate_bound(selected_corner, args.divdirection, printer);
+      geometric_containers_outgoing.print_bounds(selected_corner, args.divdirection, printer);
+      geometric_containers_outgoing.print_immediate_bounds(selected_corner, args.divdirection, printer);
     }
 
   // Print relevant corners

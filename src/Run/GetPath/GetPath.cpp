@@ -24,6 +24,7 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   const NearbyCorners &nearby_corners = preprocessing_data.get_nearby_corners();
   const CompleteCornerGraph &complete_corner_graph = preprocessing_data.get_complete_corner_graph();
+  const GeometricContainersIncoming &geometric_containers_incoming = preprocessing_data.get_geometric_containers_incoming();
 
   // TODO: we have now converted goal and start from xyLoc to map_position and back again. This is not ideal.
   // On the other hand, the time taken is probably insignificant.
@@ -49,11 +50,30 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
 
   if (test_double)
   {
+    // Find goal corner indices for which the start is in the correct bounding box
+    std::vector<corner_index> goal_test_corner_indices;
+    for (const corner_index i : nearby_corners.get_nearby_corner_indices(goal))
+    {
+      const DivDirection divdirection = get_divdirection_between_points(goal_loc, graph.loc(corner_vector.get_corner(i)));
+      const Bounds &bounds = geometric_containers_incoming.get_bounds(i, divdirection);
+      
+      if (bounds.contains(start_loc))
+        goal_test_corner_indices.push_back(i);
+    }
+
+    // Try all start corner indices for which the goal is in the correct bounding box, and update best_start_index and best_end_index if necessary
     for (corner_index i : nearby_corners.get_nearby_corner_indices(start))
     {
       const map_position ci = corner_vector.get_corner(i);
+      const xyLoc ci_loc = graph.loc(ci);
+      const DivDirection divdirection = get_divdirection_between_points(start_loc, ci_loc);
+      const Bounds &bounds = geometric_containers_incoming.get_bounds(i, divdirection);
+
+      if (!bounds.contains(goal_loc))
+        continue;
+
       const exact_distance i_dist = Reachable::octile_distance(graph, start, ci);
-      for (corner_index j : nearby_corners.get_nearby_corner_indices(goal))
+      for (corner_index j : goal_test_corner_indices)
       {
         const map_position cj = corner_vector.get_corner(j);
         const exact_distance j_dist = Reachable::octile_distance(graph, goal, cj);

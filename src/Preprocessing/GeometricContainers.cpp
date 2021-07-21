@@ -5,9 +5,9 @@
 #include "../Graph/XYLocStep.hpp"
 #include "../Utility/SaveLoad.hpp"
 
-Bound GeometricContainersOutgoing::search_relevant(const corner_index i, const DivDirection outgoing_divdirection, const Graph &graph, const CornerVector &corner_vector, const CompleteCornerGraph &complete_corner_graph, const RelevantPoints &relevant_points)
+Bounds GeometricContainersOutgoing::search_relevant(const corner_index i, const DivDirection outgoing_divdirection, const Graph &graph, const CornerVector &corner_vector, const CompleteCornerGraph &complete_corner_graph, const RelevantPoints &relevant_points)
 {
-  Bound return_value = get_immediate_bound(i, outgoing_divdirection);
+  Bounds return_value = get_immediate_bounds(i, outgoing_divdirection);
 
   std::deque<corner_index> open;
   std::deque<DivDirection> outgoing_divdirections;
@@ -30,7 +30,7 @@ Bound GeometricContainersOutgoing::search_relevant(const corner_index i, const D
       continue;
     closed[curr_index][curr_outgoing_divdirection] = true;
 
-    return_value = return_value.combine(get_immediate_bound(curr_index, curr_outgoing_divdirection));
+    return_value = return_value.combine(get_immediate_bounds(curr_index, curr_outgoing_divdirection));
 
     for (corner_index next_index : relevant_points.get_relevant_corners(i, curr_outgoing_divdirection))
     {
@@ -53,45 +53,45 @@ Bound GeometricContainersOutgoing::search_relevant(const corner_index i, const D
 
 void GeometricContainersOutgoing::preprocess_immediate(const Graph &graph, const CornerVector &corner_vector, const RelevantPoints &relevant_points)
 {
-  corner_to_outgoing_direction_to_immediate_bound.resize(corner_vector.size());
+  corner_to_outgoing_direction_to_immediate_bounds.resize(corner_vector.size());
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
-    corner_to_outgoing_direction_to_immediate_bound[i].reserve(num_divdirections());
+    corner_to_outgoing_direction_to_immediate_bounds[i].reserve(num_divdirections());
     for (const DivDirection outgoing_divdirection : get_divdirections())
     {
       const xyLoc corner_loc = graph.loc(corner_vector.get_corner(i));
-      Bound curr_bound(corner_loc, corner_loc);
+      Bounds curr_bounds(corner_loc, corner_loc);
       bool is_first_point = true;
       for (map_position p : relevant_points.get_relevant_points(i, outgoing_divdirection))
       {
         const xyLoc p_loc = graph.loc(p);
-        const Bound new_bound(p_loc, p_loc);
+        const Bounds new_bounds(p_loc, p_loc);
         if (is_first_point)
-          curr_bound = new_bound, is_first_point = false;
+          curr_bounds = new_bounds, is_first_point = false;
         else
-          curr_bound = curr_bound.combine(new_bound);
+          curr_bounds = curr_bounds.combine(new_bounds);
       }
 
       // TODO: assumes that the divdirections are looped through in order, so that these are put in the correct places
-      corner_to_outgoing_direction_to_immediate_bound[i].push_back(curr_bound);
+      corner_to_outgoing_direction_to_immediate_bounds[i].push_back(curr_bounds);
     }
   }
 }
 
 void GeometricContainersOutgoing::preprocess_overall(const Graph &graph, const CornerVector &corner_vector, const CompleteCornerGraph &complete_corner_graph, const RelevantPoints &relevant_points)
 {
-  corner_to_outgoing_direction_to_bound.resize(corner_vector.size());
+  corner_to_outgoing_direction_to_bounds.resize(corner_vector.size());
   corner_index i;
   for (i = 0; i < corner_vector.size(); i++)
   {
     if (i % 100 == 0)
       std::cout << i << ", " << std::flush;
-    corner_to_outgoing_direction_to_bound[i].reserve(num_divdirections());
+    corner_to_outgoing_direction_to_bounds[i].reserve(num_divdirections());
     for (const DivDirection outgoing_divdirection : get_divdirections())
     {
-      Bound curr_bound = search_relevant(i,outgoing_divdirection, graph, corner_vector, complete_corner_graph, relevant_points);
+      Bounds curr_bounds = search_relevant(i,outgoing_divdirection, graph, corner_vector, complete_corner_graph, relevant_points);
       // TODO: assumes that the divdirections are looped through in order, so that these are put in the correct places
-      corner_to_outgoing_direction_to_bound[i].push_back(curr_bound);
+      corner_to_outgoing_direction_to_bounds[i].push_back(curr_bounds);
     }
   }
   std::cout << i - 1<< std::endl;
@@ -103,21 +103,21 @@ void GeometricContainersOutgoing::preprocess(const Graph &graph, const CornerVec
   preprocess_overall(graph, corner_vector, complete_corner_graph, relevant_points);
 }
 
-void Bound::print(Printer &printer, const Highlight &highlight) const
+void Bounds::print(Printer &printer, const Highlight &highlight) const
 {
   for (int x = lower_bound.x; x <= upper_bound.x; x++)
     for (int y = lower_bound.y; y <= upper_bound.y; y++)
       printer.add_highlight(highlight, xyLoc(x,y));
 }
 
-void GeometricContainersOutgoing::print_bound(const corner_index i, const DivDirection dir, Printer &printer) const
+void GeometricContainersOutgoing::print_bounds(const corner_index i, const DivDirection dir, Printer &printer) const
 {
-  corner_to_outgoing_direction_to_bound[i][dir].print(printer, Highlight(1));
+  corner_to_outgoing_direction_to_bounds[i][dir].print(printer, Highlight(1));
 }
 
-void GeometricContainersOutgoing::print_immediate_bound(const corner_index i, const DivDirection dir, Printer &printer) const
+void GeometricContainersOutgoing::print_immediate_bounds(const corner_index i, const DivDirection dir, Printer &printer) const
 {
-  corner_to_outgoing_direction_to_immediate_bound[i][dir].print(printer, Highlight(2));
+  corner_to_outgoing_direction_to_immediate_bounds[i][dir].print(printer, Highlight(2));
 }
 
 void GeometricContainersOutgoing::print_all_bounds(const Graph &graph, const CornerVector &corner_vector) const
@@ -128,8 +128,8 @@ void GeometricContainersOutgoing::print_all_bounds(const Graph &graph, const Cor
     {
       Printer printer;
       graph.print(printer);
-      print_bound(i, divdirection, printer);
-      print_immediate_bound(i, divdirection, printer);
+      print_bounds(i, divdirection, printer);
+      print_immediate_bounds(i, divdirection, printer);
       
       const xyLoc corner_loc = graph.loc(corner_vector.get_corner(i));
       printer.add_char('X', corner_loc);
@@ -144,32 +144,32 @@ void GeometricContainersOutgoing::print_all_bounds(const Graph &graph, const Cor
 void GeometricContainersIncoming::convert_from(const GeometricContainersOutgoing geometric_containers_outgoing, const CornerVector &corner_vector, const RelevantPoints &relevant_points)
 {
   std::cout << "Converting outgoing geometric containers to incoming geometric containers: ";
-  corner_to_incoming_direction_to_bound.resize(corner_vector.size());
+  corner_to_incoming_direction_to_bounds.resize(corner_vector.size());
   corner_index i;
   for (i = 0; i < corner_vector.size(); i++)
   {
     if (i % 100 == 0)
       std::cout << i << ", " << std::flush;
-    corner_to_incoming_direction_to_bound[i].reserve(num_divdirections());
+    corner_to_incoming_direction_to_bounds[i].reserve(num_divdirections());
     for (DivDirection incoming_divdirection : get_divdirections())
     {
-      Bound bound(xyLoc(-1,-1),xyLoc(-1,-1));
-      bool bound_initialized = false;
+      Bounds bounds(xyLoc(-1,-1),xyLoc(-1,-1));
+      bool bounds_initialized = false;
       for (DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(i, incoming_divdirection))
       {
-        Bound new_bound = geometric_containers_outgoing.get_bound(i, outgoing_divdirection);
-        if (!bound_initialized)
-          bound = new_bound;
+        Bounds new_bounds = geometric_containers_outgoing.get_bounds(i, outgoing_divdirection);
+        if (!bounds_initialized)
+          bounds = new_bounds;
         else
-          bound = bound.combine(new_bound);
+          bounds = bounds.combine(new_bounds);
       }
-      corner_to_incoming_direction_to_bound[i].push_back(bound);
+      corner_to_incoming_direction_to_bounds[i].push_back(bounds);
     }
   }
   std::cout << i - 1 << std::endl;
 }
 
-void Bound::save(std::ostream &stream) const
+void Bounds::save(std::ostream &stream) const
 {
   SaveLoad::save_as_binary(stream, upper_bound.x);
   SaveLoad::save_as_binary(stream, upper_bound.y);
@@ -180,11 +180,11 @@ void Bound::save(std::ostream &stream) const
 void GeometricContainersIncoming::save(std::ostream &stream) const
 {
   int num_bounds_saved = 0;
-  for (const auto &incoming_direction_to_bound : corner_to_incoming_direction_to_bound)
+  for (const auto &incoming_direction_to_bounds : corner_to_incoming_direction_to_bounds)
   {
-    for (const auto &bound : incoming_direction_to_bound)
+    for (const auto &bounds : incoming_direction_to_bounds)
     {
-      bound.save(stream);
+      bounds.save(stream);
       num_bounds_saved++;
     }
   }
@@ -193,21 +193,21 @@ void GeometricContainersIncoming::save(std::ostream &stream) const
 
 void GeometricContainersIncoming::load(std::istream &stream, const CornerVector &corner_vector)
 {
-  corner_to_incoming_direction_to_bound.resize(corner_vector.size());
+  corner_to_incoming_direction_to_bounds.resize(corner_vector.size());
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
-    corner_to_incoming_direction_to_bound[i].reserve(num_divdirections());
+    corner_to_incoming_direction_to_bounds[i].reserve(num_divdirections());
     for (DivDirection dir : get_divdirections())
     {
       (void)dir;
-      Bound bound(xyLoc(-1,-1),xyLoc(-1,-1));
-      bound.load(stream);
-      corner_to_incoming_direction_to_bound[i].push_back(bound);
+      Bounds bounds(xyLoc(-1,-1),xyLoc(-1,-1));
+      bounds.load(stream);
+      corner_to_incoming_direction_to_bounds[i].push_back(bounds);
     }
   }
 }
 
-void Bound::load(std::istream &stream)
+void Bounds::load(std::istream &stream)
 {
   SaveLoad::load_as_binary(stream, upper_bound.x);
   SaveLoad::load_as_binary(stream, upper_bound.y);
