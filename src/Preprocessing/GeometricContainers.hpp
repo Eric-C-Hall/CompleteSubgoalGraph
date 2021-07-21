@@ -60,6 +60,8 @@ class GeometricContainersIncoming
   void load(std::istream &stream, const CornerVector &corner_vector);
 
   const Bounds &get_bounds(const corner_index i, const DivDirection dir) const  {return corner_to_incoming_direction_to_bounds[i][dir];}
+
+  void print_bounds(const corner_index i, const DivDirection dir, Printer &printer) const;
 };
 
 inline Bounds Bounds::combine(const Bounds &other) const

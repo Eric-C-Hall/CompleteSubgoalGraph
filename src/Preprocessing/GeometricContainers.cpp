@@ -207,6 +207,11 @@ void GeometricContainersIncoming::load(std::istream &stream, const CornerVector 
   }
 }
 
+void GeometricContainersIncoming::print_bounds(const corner_index i, const DivDirection dir, Printer &printer) const
+{
+  corner_to_incoming_direction_to_bounds[i][dir].print(printer, Highlight(3));
+}
+
 void Bounds::load(std::istream &stream)
 {
   SaveLoad::load_as_binary(stream, upper_bound.x);

@@ -68,13 +68,18 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
     for (selected_corner = 0; selected_corner < corner_vector.size() && corner_vector.get_corner(selected_corner) != cursors[0]; selected_corner++)
       (void)0;
 
-  // Print bounds
-  if (args.show_bounds)
+  // Print outgoing bounds
+  if (args.show_outgoing_bounds)
     if (selected_corner != corner_vector.size())
     {
       geometric_containers_outgoing.print_bounds(selected_corner, args.divdirection, printer);
       geometric_containers_outgoing.print_immediate_bounds(selected_corner, args.divdirection, printer);
     }
+
+  // Print incoming bounds
+  if (args.show_incoming_bounds)
+    if (selected_corner != corner_vector.size())
+      geometric_containers_incoming.print_bounds(selected_corner, args.divdirection, printer);
 
   // Print relevant corners
   if (args.show_relevant_corners)
@@ -174,9 +179,13 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cin >> n >> m;
       std::swap(cursors[n], cursors[m]);
     }
-    else if (input == "bounds")
+    else if (input == "outgoing_bounds")
     {
-      args.show_bounds = !args.show_bounds;
+      args.show_outgoing_bounds = !args.show_outgoing_bounds;
+    }
+    else if (input == "incoming_bounds")
+    {
+      args.show_incoming_bounds = !args.show_incoming_bounds;
     }
     else if (input == "divdirection" || input == "dd")
     {
@@ -205,7 +214,8 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "swap n m: swap the nth and mth cursors" << std::endl;
       std::cout << "compute: compute the path between cursors 1 and 2" << std::endl;
       std::cout << "nearby: show corners near the zeroth cursor" << std::endl;
-      std::cout << "bounds: show bounds with corner under cursor 0 and outgoing divdirection selected with divdirection command" << std::endl;
+      std::cout << "outgoing_bounds: show bounds with corner under cursor 0 and outgoing divdirection selected with divdirection command" << std::endl;
+      std::cout << "incoming_bounds: show bounds with corner under cursor 0 and incoming divdirection selected with divdirection command" << std::endl;
       std::cout << "divdirection i: select/highlight the ith divdirection, or unhighlight it if already selected. Alias: dd" << std::endl;
       std::cout << "relevant_corners: show corners relevant to corner under cursor 0 with outgoing divdirection selected with divdirection command" << std::endl;
       std::cout << "relevant_divdirections: show outgoing divdirections relevant to incoming divdirection selected with divdirection command" << std::endl;

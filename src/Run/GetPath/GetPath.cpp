@@ -48,6 +48,7 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
   corner_index best_start_index = corner_vector.size();
   corner_index best_end_index = corner_vector.size();
 
+  // TODO: Still includes single indices
   if (test_double)
   {
     // Find goal corner indices for which the start is in the correct bounding box
@@ -88,56 +89,11 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
     }
   }
 
-  /*if (test_double)
-  {
-    // Find goal corner indices for which the start is in the correct bounding box
-    std::vector<corner_index> goal_test_corner_indices;
-    const auto &goal_nearby_corner_indices = _point_to_nearby_corner_indices_with_next[goal];
-    for (const corner_index i : goal_nearby_corner_indices)
-    {
-      const MidDirection middirection = get_middirection_between_points(goal_loc, graph.loc(_corners[i]));
-      const std::pair<xyLoc, xyLoc> bounds = _corner_and_middirection_to_bounds[i][middirection];
-      
-      if (graph.is_point_in_bounds(start_loc, bounds))
-      {
-        goal_test_corner_indices.push_back(i);
-      }
-    }
-
-    // Test going through each pair of nearby indices with relevant next corners
-    for (corner_index i : _point_to_nearby_corner_indices_with_next[start])
-    {
-      map_position ci = _corners[i];
-
-      // Check if goal is in the correct bounding box for this corner index
-      const MidDirection middirection = get_middirection_between_points(start_loc, graph.loc(ci));
-      const std::pair<xyLoc, xyLoc> bounds = _corner_and_middirection_to_bounds[i][middirection];
-      if (!graph.is_point_in_bounds(goal_loc, bounds))
-      {
-        continue;
-      }
-
-      // Try each choice of goal index given this start index, compare to best distance so far
-      exact_distance i_dist = graph.octile_distance(start, ci);
-      for (corner_index j : goal_test_corner_indices)
-      {
-        exact_distance j_dist = graph.octile_distance(goal, _corners[j]);
-        exact_distance current_dist = i_dist + get_exact_distance_between_corner_indices(i,j) + j_dist;
-        if (current_dist < shortest_distance)
-        {
-          shortest_distance = current_dist;
-          best_start_index = i;
-          best_end_index = j;
-        }
-      }
-    }
-  }
-
-  if (test_single)
+  /*if (test_single)
   {
     // Test going through single nearby index possibly with no relevant next corner
-    const auto &start_nearby = _point_to_nearby_corner_indices[start];
-    const auto &goal_nearby = _point_to_nearby_corner_indices[goal];
+    const auto &start_nearby = nearby_corners.get_nearby_corner_indices(start);
+    const auto &goal_nearby = nearby_corners.get_nearby_corner_indices(goal);
 
     auto s_iter = start_nearby.begin();
     auto g_iter = goal_nearby.begin();
@@ -154,7 +110,7 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
       {
         if (*s_iter == *g_iter)
         {
-          const exact_distance current_dist = graph.octile_distance(start, _corners[*s_iter]) + graph.octile_distance(goal, _corners[*s_iter]);
+          const exact_distance current_dist = Reachable::octile_distance(graph, start, corner_vector.get_corner(*s_iter)) + Reachable::octile_distance(graph, goal, corner_vector.get_corner(*s_iter));
           if (current_dist < shortest_distance)
           {
             shortest_distance = current_dist;
