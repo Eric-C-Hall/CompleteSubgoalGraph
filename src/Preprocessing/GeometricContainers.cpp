@@ -53,6 +53,7 @@ Bounds GeometricContainersOutgoing::search_relevant(const corner_index i, const 
 
 void GeometricContainersOutgoing::preprocess_immediate(const Graph &graph, const CornerVector &corner_vector, const RelevantPoints &relevant_points)
 {
+  corner_to_outgoing_direction_to_immediate_bounds.clear();
   corner_to_outgoing_direction_to_immediate_bounds.resize(corner_vector.size());
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
@@ -80,6 +81,7 @@ void GeometricContainersOutgoing::preprocess_immediate(const Graph &graph, const
 
 void GeometricContainersOutgoing::preprocess_overall(const Graph &graph, const CornerVector &corner_vector, const CompleteCornerGraph &complete_corner_graph, const RelevantPoints &relevant_points)
 {
+  corner_to_outgoing_direction_to_bounds.clear();
   corner_to_outgoing_direction_to_bounds.resize(corner_vector.size());
   corner_index i;
   for (i = 0; i < corner_vector.size(); i++)

@@ -50,7 +50,7 @@ void PreprocessingData::preprocess()
   start_computation("Finding nearby corners", t);
   nearby_corners.preprocess(graph, corner_vector);
   end_computation("Nearby corners found", t, total_time);
-  
+
   // Find complete corner graph
   start_computation("Finding complete corner graph", t);
   complete_corner_graph.preprocess(graph, corner_vector, nearby_corners);
@@ -61,6 +61,11 @@ void PreprocessingData::preprocess()
   start_computation("Finding relevant points", t);
   relevant_points.preprocess(graph, corner_vector, nearby_corners);
   end_computation("Found relevant points", t, total_time);
+
+  // Find nearby corners with next
+  start_computation("Finding nearby corners with next", t);
+  nearby_corners_with_next.preprocess(graph, corner_vector, nearby_corners, relevant_points);
+  end_computation("Nearby corners with next found", t, total_time);
 
   // Geometric containers outgoing
   GeometricContainersOutgoing geometric_containers_outgoing;
@@ -83,6 +88,7 @@ void PreprocessingData::_save(std::ostream & stream) const
 {
   corner_vector.save(stream);
   nearby_corners.save(stream, graph, corner_vector);
+  nearby_corners_with_next.save(stream, graph, corner_vector);
   complete_corner_graph.save(stream, corner_vector);
   geometric_containers_incoming.save(stream);
 }
@@ -106,6 +112,7 @@ void PreprocessingData::_load(std::istream &stream)
 {
   corner_vector.load(stream);
   nearby_corners.load(stream, graph, corner_vector);
+  nearby_corners_with_next.load(stream, graph, corner_vector);
   complete_corner_graph.load(stream, corner_vector);
   geometric_containers_incoming.load(stream, corner_vector);
 }

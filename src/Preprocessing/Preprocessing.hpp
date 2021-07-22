@@ -9,6 +9,7 @@
 #include "../Graph/Directions.hpp"
 #include "CornerVector.hpp"
 #include "NearbyCorners.hpp"
+#include "NearbyCornersWithNext.hpp"
 #include "CompleteCornerGraph.hpp"
 #include "GeometricContainers.hpp"
 
@@ -20,6 +21,7 @@ class PreprocessingData {
 
   CornerVector corner_vector;
   NearbyCorners nearby_corners;
+  NearbyCornersWithNext nearby_corners_with_next;
   CompleteCornerGraph complete_corner_graph;
   GeometricContainersIncoming geometric_containers_incoming;
 
