@@ -105,6 +105,9 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   }
 
   printer.print();
+
+  if (selected_corner != corner_vector.size())
+    std::cout << "Selected corner: " << selected_corner << std::endl;
 }
 
 void set_cursor_to_pos(std::vector<map_position> &cursors, const Graph &graph, unsigned int which_cursor, map_position pos)

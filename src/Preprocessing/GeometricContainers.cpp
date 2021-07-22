@@ -32,7 +32,7 @@ Bounds GeometricContainersOutgoing::search_relevant(const corner_index i, const 
 
     return_value = return_value.combine(get_immediate_bounds(curr_index, curr_outgoing_divdirection));
 
-    for (corner_index next_index : relevant_points.get_relevant_corners(i, curr_outgoing_divdirection))
+    for (corner_index next_index : relevant_points.get_relevant_corners(curr_index, curr_outgoing_divdirection))
     {
       const exact_distance next_dist = curr_dist + complete_corner_graph.get_exact_distance_between_corner_indices(curr_index, next_index);
       assert(next_dist >= complete_corner_graph.get_exact_distance_between_corner_indices(i, next_index));
@@ -151,16 +151,19 @@ void GeometricContainersIncoming::convert_from(const GeometricContainersOutgoing
     if (i % 100 == 0)
       std::cout << i << ", " << std::flush;
     corner_to_incoming_direction_to_bounds[i].reserve(num_divdirections());
-    for (DivDirection incoming_divdirection : get_divdirections())
+    for (const DivDirection incoming_divdirection : get_divdirections())
     {
       const xyLoc ci_loc = graph.loc(corner_vector.get_corner(i));
       Bounds bounds(ci_loc, ci_loc);
       bool bounds_initialized = false;
-      for (DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(i, incoming_divdirection))
+      for (const DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(i, incoming_divdirection))
       {
-        Bounds new_bounds = geometric_containers_outgoing.get_bounds(i, outgoing_divdirection);
+        const Bounds new_bounds = geometric_containers_outgoing.get_bounds(i, outgoing_divdirection);
         if (!bounds_initialized)
+        {
           bounds = new_bounds;
+          bounds_initialized = true;
+        }
         else
           bounds = bounds.combine(new_bounds);
       }
