@@ -16,6 +16,7 @@ struct PrintGraphArguments
   bool show_relevant_divdirections = false;
   bool show_divdirection = false;
   DivDirection divdirection = DivDir_N;
+  int which_nearby_corner = -1;
 };
 
 void print_graph(const PreprocessingData &preprocessing_data, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &print_graph_arguments);

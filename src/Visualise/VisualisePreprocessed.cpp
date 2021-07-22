@@ -92,6 +92,18 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
     if (selected_corner != corner_vector.size())
       relevant_points.print_outgoing_divdirections(selected_corner, args.divdirection, printer, graph, corner_vector);
 
+  // Print which_nearby_corner
+  if (cursors.size() > 0)
+  {
+    const auto &cursor_nearby_corners = nearby_corners.get_nearby_corner_indices(cursors[0]);
+    if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners.size())
+    {
+      const corner_index nearby_corner_index = cursor_nearby_corners[args.which_nearby_corner];
+      const xyLoc nearby_corner_loc = graph.loc(corner_vector.get_corner(nearby_corner_index));
+      printer.add_highlight(Highlight(5), nearby_corner_loc);
+    }
+  }
+
   printer.print();
 }
 
@@ -203,6 +215,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       args.show_relevant_divdirections = !args.show_relevant_divdirections;
     }
+    else if (input == "which_nearby_corner" || input == "wnc")
+    {
+      std::cin >> args.which_nearby_corner;
+    }
 
     print_graph(preprocessing_data, cursors, path, args);
 
@@ -220,6 +236,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "divdirection i: select/highlight the ith divdirection, or unhighlight it if already selected. Alias: dd" << std::endl;
       std::cout << "relevant_corners: show corners relevant to corner under cursor 0 with outgoing divdirection selected with divdirection command" << std::endl;
       std::cout << "relevant_divdirections: show outgoing divdirections relevant to incoming divdirection selected with divdirection command" << std::endl;
+      std::cout << "which_nearby_corner n: select the nth nearby corner. Alias: wnc" << std::endl;
       std::cout << std::endl;
     }
 
