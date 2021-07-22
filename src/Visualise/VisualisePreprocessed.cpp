@@ -155,6 +155,8 @@ void move_cursor(std::vector<map_position> &cursors, const Graph &graph, const s
 void Visualise(const PreprocessingData &preprocessing_data)
 {
   const Graph &graph = preprocessing_data.get_graph();
+  const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
+  const NearbyCorners &nearby_corners = preprocessing_data.get_nearby_corners();
 
   std::string input = "";
   std::vector<map_position> cursors;
@@ -219,6 +221,21 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       std::cin >> args.which_nearby_corner;
     }
+    else if (input == "go_nearby_corner" || input == "gnc")
+    {
+      if (cursors.size() > 0)
+      {
+        const auto &cursor_nearby_corners = nearby_corners.get_nearby_corner_indices(cursors[0]);
+        if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners.size())
+        {
+          const corner_index nearby_corner_index = cursor_nearby_corners[args.which_nearby_corner];
+          const map_position nearby_corner_pos = corner_vector.get_corner(nearby_corner_index);
+          args.divdirection = get_divdirection_between_points(graph.loc(cursors[0]), graph.loc(nearby_corner_pos));
+          args.show_divdirection = true;
+          set_cursor_to_pos(cursors, graph, 0, nearby_corner_pos);
+        }
+      }
+    }
 
     print_graph(preprocessing_data, cursors, path, args);
 
@@ -237,6 +254,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "relevant_corners: show corners relevant to corner under cursor 0 with outgoing divdirection selected with divdirection command" << std::endl;
       std::cout << "relevant_divdirections: show outgoing divdirections relevant to incoming divdirection selected with divdirection command" << std::endl;
       std::cout << "which_nearby_corner n: select the nth nearby corner. Alias: wnc" << std::endl;
+      std::cout << "go_nearby_corner: go to the selected nearby corner, and update divdirection to direction travelled. Alias: gnc" << std::endl;
       std::cout << std::endl;
     }
 
