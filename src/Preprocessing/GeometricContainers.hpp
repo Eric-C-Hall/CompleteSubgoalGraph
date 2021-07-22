@@ -24,8 +24,15 @@ class Bounds
   void save(std::ostream &stream) const;
   void load(std::istream &stream);
 
-  bool contains(const xyLoc &l) const {return upper_bound.x > l.x && upper_bound.y > l.y && lower_bound.x < l.x && lower_bound.y < l.y;}
+  bool contains(const xyLoc &l) const {return upper_bound.x >= l.x && upper_bound.y >= l.y && lower_bound.x <= l.x && lower_bound.y <= l.y;}
+
+  friend inline std::ostream &operator<<(std::ostream &stream, const Bounds &bounds);
 };
+
+inline std::ostream &operator<<(std::ostream &stream, const Bounds &bounds)
+{
+  return stream << "(" << bounds.lower_bound << ", " << bounds.upper_bound << ")";
+}
 
 class GeometricContainersOutgoing
 {
