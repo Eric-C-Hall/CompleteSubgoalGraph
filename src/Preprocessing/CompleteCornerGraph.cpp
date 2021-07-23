@@ -2,6 +2,7 @@
 
 #include "../Utility/SaveLoad.hpp"
 #include "../Graph/Reachable.hpp"
+#include "../Run/GetPath/DirectPath.hpp"
 
 #include <deque>
 
@@ -268,5 +269,46 @@ void CompleteCornerGraph::print_all_first_and_dist(const Graph &graph, const Cor
 
       print_first_and_dist(i,j,graph,corner_vector);
     }
+}
+
+void CompleteCornerGraph::push_first_corners(const Graph &graph, const CornerVector &corner_vector)
+{
+  const auto &first_corners = pair_of_corner_indices_to_first_corner;
+  std::vector<std::vector<corner_index>> new_first_corners;
+  new_first_corners.resize(corner_vector.size());
+  for (auto row : new_first_corners)
+    row.resize(corner_vector.size());
+
+  for (corner_index i = 0; i < corner_vector.size(); i++)
+  {
+    const xyLoc i_loc = graph.loc(corner_vector.get_corner(i));
+    for (corner_index j = 0; j < corner_vector.size(); j++)
+    {
+      if (i == j)
+        new_first_corners[j][i] = corner_vector.size();
+
+      // Push the corner i, j
+      corner_index new_first_corner = first_corners[j][i];
+      while (true)
+      {
+        if (new_first_corner == j)
+          break;
+        const corner_index next_first_corner = first_corners[j][new_first_corner];
+        const xyLoc next_first_corner_loc = graph.loc(corner_vector.get_corner(next_first_corner));
+        std::vector<xyLoc> path;
+        Running::compute_octile_path<true>(i_loc, next_first_corner_loc, path, graph);
+        const bool can_get_to_next_first_corner = (!path.empty() && next_first_corner_loc == path.back());
+        if (can_get_to_next_first_corner)
+          new_first_corner = next_first_corner;
+        else
+          break;
+      }
+      assert(i < corner_vector.size());
+      assert(j < corner_vector.size());
+      assert(new_first_corners.size() == corner_vector.size());
+      assert(new_first_corners[j].size() == corner_vector.size());
+      new_first_corners[j][i] = new_first_corner;
+    }
+  }
 }
 

@@ -78,7 +78,10 @@ void PreprocessingData::preprocess()
   geometric_containers_incoming.convert_from(geometric_containers_outgoing, graph, corner_vector, relevant_points);
   end_computation("Converted geometric containers", t, total_time);
 
-  //geometric_containers_outgoing.print_all_bounds(graph, corner_vector);
+  // Push first corners
+  start_computation("Pushing first corners", t);
+  complete_corner_graph.push_first_corners(graph, corner_vector);
+  end_computation("First corners pushed", t, total_time);
 
   std::cout << "Preprocessing complete" << std::endl;
   std::cout << "Total preprocessing time: " << total_time << std::endl;
