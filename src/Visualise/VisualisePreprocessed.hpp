@@ -10,6 +10,7 @@ void Visualise(const PreprocessingData &preprocessing_data);
 struct PrintGraphArguments
 {
   bool show_nearby = false;
+  bool show_nearby_with_next = false;
   bool show_outgoing_bounds = false;
   bool show_incoming_bounds = false;
   bool show_relevant_corners = false;

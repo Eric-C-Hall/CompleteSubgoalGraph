@@ -56,3 +56,12 @@ void NearbyCornersWithNext::load(std::istream &stream, const Graph &graph, const
   }
 }
 
+void NearbyCornersWithNext::print_nearby_with_next(map_position pos, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const
+{
+  printer.add_highlight(Highlight(2), graph.loc(pos));
+  for (corner_index i : point_to_nearby_corner_indices_with_next[pos])
+  {
+    printer.add_highlight(Highlight(3), graph.loc(corner_vector.get_corner(i)));
+  }
+}
+
