@@ -23,6 +23,7 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
   const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   const NearbyCorners &nearby_corners = preprocessing_data.get_nearby_corners();
+  const NearbyCornersWithNext &nearby_corners_with_next = preprocessing_data.get_nearby_corners_with_next();
   const CompleteCornerGraph &complete_corner_graph = preprocessing_data.get_complete_corner_graph();
   const GeometricContainersIncoming &geometric_containers_incoming = preprocessing_data.get_geometric_containers_incoming();
 
@@ -48,12 +49,11 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
   corner_index best_start_index = corner_vector.size();
   corner_index best_end_index = corner_vector.size();
 
-  // TODO: Still includes single indices
   if (test_double)
   {
     // Find goal corner indices for which the start is in the correct bounding box
     std::vector<corner_index> goal_test_corner_indices;
-    for (const corner_index i : nearby_corners.get_nearby_corner_indices(goal))
+    for (const corner_index i : nearby_corners_with_next.get_nearby_corner_indices_with_next(goal))
     {
       const DivDirection divdirection = get_divdirection_between_points(goal_loc, graph.loc(corner_vector.get_corner(i)));
       const Bounds &bounds = geometric_containers_incoming.get_bounds(i, divdirection);
@@ -63,7 +63,7 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
     }
 
     // Try all start corner indices for which the goal is in the correct bounding box, and update best_start_index and best_end_index if necessary
-    for (corner_index i : nearby_corners.get_nearby_corner_indices(start))
+    for (corner_index i : nearby_corners_with_next.get_nearby_corner_indices_with_next(start))
     {
       const map_position ci = corner_vector.get_corner(i);
       const xyLoc ci_loc = graph.loc(ci);
@@ -89,7 +89,7 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
     }
   }
 
-  /*if (test_single)
+  if (test_single)
   {
     // Test going through single nearby index possibly with no relevant next corner
     const auto &start_nearby = nearby_corners.get_nearby_corner_indices(start);
@@ -131,7 +131,7 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
         }
       }
     }
-  }*/
+  }
 
   if (compute_path)
   {

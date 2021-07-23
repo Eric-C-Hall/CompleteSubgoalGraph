@@ -43,6 +43,7 @@ class PreprocessingData {
   const Graph &get_graph() const {return graph;}
   const CornerVector &get_corner_vector() const {return corner_vector;}
   const NearbyCorners &get_nearby_corners() const {return nearby_corners;}
+  const NearbyCornersWithNext &get_nearby_corners_with_next() const {return nearby_corners_with_next;}
   const CompleteCornerGraph &get_complete_corner_graph() const {return complete_corner_graph;}
   const GeometricContainersIncoming &get_geometric_containers_incoming() const {return geometric_containers_incoming;}
 };
