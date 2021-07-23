@@ -12,10 +12,13 @@ void NearbyCornersWithNext::preprocess(const Graph &graph, const CornerVector &c
     std::vector<corner_index> nearby_corner_indices_with_next;
     for (corner_index i : nearby_corner_indices)
     {
-      DivDirection divdirection = get_divdirection_between_points(graph.loc(p), graph.loc(corner_vector.get_corner(i)));
-      if (relevant_points.get_relevant_corners(i, divdirection).size() > 0)
+      DivDirection incoming_divdirection = get_divdirection_between_points(graph.loc(p), graph.loc(corner_vector.get_corner(i)));
+      for (DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(i, incoming_divdirection))
       {
-        nearby_corner_indices_with_next.push_back(i);
+        if (relevant_points.get_relevant_corners(i, outgoing_divdirection).size() > 0)
+        {
+          nearby_corner_indices_with_next.push_back(i);
+        }
       }
     }
     point_to_nearby_corner_indices_with_next.push_back(nearby_corner_indices_with_next);

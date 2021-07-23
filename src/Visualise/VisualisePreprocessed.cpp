@@ -113,6 +113,8 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
 
   if (selected_corner != corner_vector.size())
     std::cout << "Selected corner: " << selected_corner << std::endl;
+  if (args.show_divdirection)
+    std::cout << "Selected divdirection: " << args.divdirection << std::endl;
 }
 
 void set_cursor_to_pos(std::vector<map_position> &cursors, const Graph &graph, unsigned int which_cursor, map_position pos)
