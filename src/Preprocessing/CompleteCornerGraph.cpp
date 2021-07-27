@@ -279,8 +279,11 @@ void CompleteCornerGraph::push_first_corners(const Graph &graph, const CornerVec
   for (auto &row : new_first_corners)
     row.resize(corner_vector.size());
 
-  for (corner_index i = 0; i < corner_vector.size(); i++)
+  corner_index i;
+  for (i = 0; i < corner_vector.size(); i++)
   {
+    if (i % 100 == 0)
+      std::cout << i << ", ";
     const xyLoc i_loc = graph.loc(corner_vector.get_corner(i));
     for (corner_index j = 0; j < corner_vector.size(); j++)
     {
@@ -310,5 +313,6 @@ void CompleteCornerGraph::push_first_corners(const Graph &graph, const CornerVec
       new_first_corners[j][i] = new_first_corner;
     }
   }
+  std::cout << i - 1<< std::endl;
 }
 
