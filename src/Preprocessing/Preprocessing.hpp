@@ -8,7 +8,7 @@
 #include "../Graph/XYLoc.hpp"
 #include "../Graph/Directions.hpp"
 #include "CornerVector.hpp"
-#include "NearbyCorners.hpp"
+#include "NearbyCornersWithRelevant.hpp"
 #include "NearbyCornersWithNext.hpp"
 #include "CompleteCornerGraph.hpp"
 #include "GeometricContainers.hpp"
@@ -20,7 +20,7 @@ class PreprocessingData {
   const Graph &graph;
 
   CornerVector corner_vector;
-  NearbyCorners nearby_corners;
+  NearbyCornersWithRelevant nearby_corners_with_relevant;
   NearbyCornersWithNext nearby_corners_with_next;
   CompleteCornerGraph complete_corner_graph;
   GeometricContainersIncoming geometric_containers_incoming;
@@ -42,7 +42,7 @@ class PreprocessingData {
 
   const Graph &get_graph() const {return graph;}
   const CornerVector &get_corner_vector() const {return corner_vector;}
-  const NearbyCorners &get_nearby_corners() const {return nearby_corners;}
+  const NearbyCornersWithRelevant &get_nearby_corners_with_relevant() const {return nearby_corners_with_relevant;}
   const NearbyCornersWithNext &get_nearby_corners_with_next() const {return nearby_corners_with_next;}
   const CompleteCornerGraph &get_complete_corner_graph() const {return complete_corner_graph;}
   const GeometricContainersIncoming &get_geometric_containers_incoming() const {return geometric_containers_incoming;}

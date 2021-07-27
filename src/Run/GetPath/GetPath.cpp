@@ -22,7 +22,7 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
 {
   const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
-  const NearbyCorners &nearby_corners = preprocessing_data.get_nearby_corners();
+  const NearbyCornersWithRelevant &nearby_corners_with_relevant = preprocessing_data.get_nearby_corners_with_relevant();
   const NearbyCornersWithNext &nearby_corners_with_next = preprocessing_data.get_nearby_corners_with_next();
   const CompleteCornerGraph &complete_corner_graph = preprocessing_data.get_complete_corner_graph();
   const GeometricContainersIncoming &geometric_containers_incoming = preprocessing_data.get_geometric_containers_incoming();
@@ -92,8 +92,8 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
   if (test_single)
   {
     // Test going through single nearby index possibly with no relevant next corner
-    const auto &start_nearby = nearby_corners.get_nearby_corner_indices(start);
-    const auto &goal_nearby = nearby_corners.get_nearby_corner_indices(goal);
+    const auto &start_nearby = nearby_corners_with_relevant.get_nearby_corner_indices_with_relevant(start);
+    const auto &goal_nearby = nearby_corners_with_relevant.get_nearby_corner_indices_with_relevant(goal);
 
     auto s_iter = start_nearby.begin();
     auto g_iter = goal_nearby.begin();
