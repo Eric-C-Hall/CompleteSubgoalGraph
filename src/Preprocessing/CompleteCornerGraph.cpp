@@ -276,7 +276,7 @@ void CompleteCornerGraph::push_first_corners(const Graph &graph, const CornerVec
   const auto &first_corners = pair_of_corner_indices_to_first_corner;
   std::vector<std::vector<corner_index>> new_first_corners;
   new_first_corners.resize(corner_vector.size());
-  for (auto row : new_first_corners)
+  for (auto &row : new_first_corners)
     row.resize(corner_vector.size());
 
   for (corner_index i = 0; i < corner_vector.size(); i++)
