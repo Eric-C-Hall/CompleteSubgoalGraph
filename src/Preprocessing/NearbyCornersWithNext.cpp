@@ -4,6 +4,8 @@
 
 void NearbyCornersWithNext::preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners, const RelevantPoints &relevant_points)
 {
+  int num_with_next = 0;
+  int num_without_next = 0;
   point_to_nearby_corner_indices_with_next.clear();
   point_to_nearby_corner_indices_with_next.reserve(graph.num_positions());
   for (map_position p = 0; p < graph.num_positions(); p++)
@@ -18,11 +20,17 @@ void NearbyCornersWithNext::preprocess(const Graph &graph, const CornerVector &c
         if (relevant_points.get_relevant_corners(i, outgoing_divdirection).size() > 0)
         {
           nearby_corner_indices_with_next.push_back(i);
+          num_with_next++;
+        }
+        else
+        {
+          num_without_next++;
         }
       }
     }
     point_to_nearby_corner_indices_with_next.push_back(nearby_corner_indices_with_next);
   }
+  std::cout << num_with_next << " with next, " << num_without_next << " without next" << std::endl;
 }
 
 void NearbyCornersWithNext::save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const
