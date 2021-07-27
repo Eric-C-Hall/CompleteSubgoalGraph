@@ -42,6 +42,10 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   // Print graph
   graph.print(printer);
 
+  // Print corners
+  if (args.show_corners)
+    corner_vector.print(printer, graph);
+
   // Print nearby corners
   if (args.show_nearby && cursors.size() > 0)
     nearby_corners.print_nearby(cursors[0], printer, graph, corner_vector);
@@ -189,6 +193,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cin >> n >> m;
       set_cursor_to_pos(cursors, graph, n, preprocessing_data.get_corner_vector().get_corner(m));
     }
+    else if (input == "corners")
+    {
+      args.show_corners = !args.show_corners;
+    }
     else if (input == "compute" && cursors.size() >= 2)
     {
       path.clear();
@@ -259,6 +267,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "cursor n x y: moves the nth cursor to (x,y)" << std::endl;
       std::cout << "cursort n x y: translate the nth cursor by (x,y)" << std::endl;
       std::cout << "corner n m: move the nth cursor to select the mth corner" << std::endl;
+      std::cout << "corners: display corners" << std::endl;
       std::cout << "swap n m: swap the nth and mth cursors" << std::endl;
       std::cout << "compute: compute the path between cursors 1 and 2" << std::endl;
       std::cout << "nearby: show corners near the zeroth cursor" << std::endl;
