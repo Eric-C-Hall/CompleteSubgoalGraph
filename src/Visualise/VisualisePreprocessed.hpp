@@ -11,6 +11,7 @@ struct PrintGraphArguments
 {
   bool show_corners = false;
   bool show_nearby = false;
+  bool show_nearby_with_relevant = false;
   bool show_nearby_with_next = false;
   bool show_outgoing_bounds = false;
   bool show_incoming_bounds = false;

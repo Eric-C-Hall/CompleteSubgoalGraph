@@ -20,15 +20,17 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   const CompleteCornerGraph &complete_corner_graph = preprocessing_data.get_complete_corner_graph();
-  const NearbyCorners &nearby_corners = preprocessing_data.get_nearby_corners();
+  const NearbyCornersWithRelevant &nearby_corners_with_relevant = preprocessing_data.get_nearby_corners_with_relevant();
   const NearbyCornersWithNext &nearby_corners_with_next = preprocessing_data.get_nearby_corners_with_next();
   const GeometricContainersIncoming &geometric_containers_incoming = preprocessing_data.get_geometric_containers_incoming();
 
+  static NearbyCorners nearby_corners;
   static GeometricContainersOutgoing geometric_containers_outgoing;
   static RelevantPoints relevant_points;
   static bool preprocessing_done = false;
   if (!preprocessing_done)
   {
+    nearby_corners.preprocess(graph, corner_vector);
     relevant_points.preprocess(graph, corner_vector, nearby_corners);
     geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
     preprocessing_done = true;
@@ -49,6 +51,10 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   // Print nearby corners
   if (args.show_nearby && cursors.size() > 0)
     nearby_corners.print_nearby(cursors[0], printer, graph, corner_vector);
+
+  // Print nearby corners with relevant
+  if (args.show_nearby_with_relevant && cursors.size() > 0)
+    nearby_corners_with_relevant.print_nearby_with_relevant(cursors[0], printer, graph, corner_vector);
 
   // Print nearby corners with next
   if (args.show_nearby_with_next && cursors.size() > 0)
@@ -170,7 +176,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
 {
   const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
-  const NearbyCorners &nearby_corners = preprocessing_data.get_nearby_corners();
+  const NearbyCornersWithRelevant &nearby_corners_with_relevant = preprocessing_data.get_nearby_corners_with_relevant();
 
   std::string input = "";
   std::vector<map_position> cursors;
@@ -205,6 +211,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     else if (input == "nearby")
     {
       args.show_nearby = !args.show_nearby;
+    }
+    else if (input == "nearby_with_relevant")
+    {
+      args.show_nearby_with_relevant = !args.show_nearby_with_relevant;
     }
     else if (input == "nearby_with_next")
     {
@@ -247,10 +257,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       if (cursors.size() > 0)
       {
-        const auto &cursor_nearby_corners = nearby_corners.get_nearby_corner_indices(cursors[0]);
-        if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners.size())
+        const auto &cursor_nearby_corners_with_relevant = nearby_corners_with_relevant.get_nearby_corner_indices_with_relevant(cursors[0]);
+        if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners_with_relevant.size())
         {
-          const corner_index nearby_corner_index = cursor_nearby_corners[args.which_nearby_corner];
+          const corner_index nearby_corner_index = cursor_nearby_corners_with_relevant[args.which_nearby_corner];
           const map_position nearby_corner_pos = corner_vector.get_corner(nearby_corner_index);
           args.divdirection = get_divdirection_between_points(graph.loc(cursors[0]), graph.loc(nearby_corner_pos));
           args.show_divdirection = true;
@@ -271,14 +281,15 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "swap n m: swap the nth and mth cursors" << std::endl;
       std::cout << "compute: compute the path between cursors 1 and 2" << std::endl;
       std::cout << "nearby: show corners near the zeroth cursor" << std::endl;
+      std::cout << "nearby_with_relevant: show corners with relevant near the zeroth cursor" << std::endl;
       std::cout << "nearby_with_next: show corners with next near the zeroth cursor" << std::endl;
       std::cout << "outgoing_bounds: show bounds with corner under cursor 0 and outgoing divdirection selected with divdirection command" << std::endl;
       std::cout << "incoming_bounds: show bounds with corner under cursor 0 and incoming divdirection selected with divdirection command" << std::endl;
       std::cout << "divdirection i: select/highlight the ith divdirection, or unhighlight it if already selected. Alias: dd" << std::endl;
       std::cout << "relevant_corners: show corners relevant to corner under cursor 0 with outgoing divdirection selected with divdirection command" << std::endl;
       std::cout << "relevant_divdirections: show outgoing divdirections relevant to incoming divdirection selected with divdirection command" << std::endl;
-      std::cout << "which_nearby_corner n: select the nth nearby corner. Alias: wnc" << std::endl;
-      std::cout << "go_nearby_corner: go to the selected nearby corner, and update divdirection to direction travelled. Alias: gnc" << std::endl;
+      std::cout << "which_nearby_corner n: select the nth nearby corner with relevant. Alias: wnc" << std::endl;
+      std::cout << "go_nearby_corner: go to the selected nearby corner with relevant, and update divdirection to direction travelled. Alias: gnc" << std::endl;
       std::cout << std::endl;
     }
 
