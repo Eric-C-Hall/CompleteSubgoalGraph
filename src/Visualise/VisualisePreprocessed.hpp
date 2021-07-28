@@ -17,6 +17,7 @@ struct PrintGraphArguments
   bool show_incoming_bounds = false;
   bool show_relevant_corners = false;
   bool show_relevant_divdirections = false;
+  bool show_relevant_points = false;
   bool show_divdirection = false;
   DivDirection divdirection = DivDir_N;
   int which_nearby_corner = -1;

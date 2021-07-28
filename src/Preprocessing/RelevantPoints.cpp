@@ -184,6 +184,16 @@ void RelevantPoints::print_relevant_corners(const corner_index i, const DivDirec
   }
 }
 
+void RelevantPoints::print_relevant_points(const corner_index i, const DivDirection outgoing_divdirection, Printer &printer, const Graph &graph) const
+{
+  assert(corner_to_outgoing_divdirection_to_relevant_points.size() > i);
+  assert(corner_to_outgoing_divdirection_to_relevant_points[i].size() > outgoing_divdirection);
+  for (map_position p : corner_to_outgoing_divdirection_to_relevant_points[i][outgoing_divdirection])
+  {
+    printer.add_highlight(Highlight(5), graph.loc(p));
+  }
+}
+
 void RelevantPoints::print_num_relevant_corner_stats(const CornerVector &corner_vector) const
 {
   // Compute stats for num relevant corners

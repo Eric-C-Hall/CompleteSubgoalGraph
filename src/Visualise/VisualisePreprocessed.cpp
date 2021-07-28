@@ -102,7 +102,12 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
     if (selected_corner != corner_vector.size())
       relevant_points.print_relevant_corners(selected_corner, args.divdirection, printer, graph, corner_vector);
 
-  // Print outgoing divdirections
+  // Print relevant positions
+  if (args.show_relevant_points)
+    if (selected_corner != corner_vector.size())
+      relevant_points.print_relevant_points(selected_corner, args.divdirection, printer, graph);
+
+  // Print relevant outgoing divdirections
   if (args.show_relevant_divdirections)
     if (selected_corner != corner_vector.size())
       relevant_points.print_outgoing_divdirections(selected_corner, args.divdirection, printer, graph, corner_vector);
@@ -249,6 +254,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       args.show_relevant_divdirections = !args.show_relevant_divdirections;
     }
+    else if (input == "relevant_points")
+    {
+      args.show_relevant_points = !args.show_relevant_points;
+    }
     else if (input == "which_nearby_corner" || input == "wnc")
     {
       std::cin >> args.which_nearby_corner;
@@ -288,6 +297,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "divdirection i: select/highlight the ith divdirection, or unhighlight it if already selected. Alias: dd" << std::endl;
       std::cout << "relevant_corners: show corners relevant to corner under cursor 0 with outgoing divdirection selected with divdirection command" << std::endl;
       std::cout << "relevant_divdirections: show outgoing divdirections relevant to incoming divdirection selected with divdirection command" << std::endl;
+      std::cout << "relevant_points: show positions relevant to outgoing divdirection selected with divdireciton command" << std::endl;
       std::cout << "which_nearby_corner n: select the nth nearby corner with relevant. Alias: wnc" << std::endl;
       std::cout << "go_nearby_corner: go to the selected nearby corner with relevant, and update divdirection to direction travelled. Alias: gnc" << std::endl;
       std::cout << std::endl;
