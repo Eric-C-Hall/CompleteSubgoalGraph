@@ -2,6 +2,7 @@
 
 #include "../Graph/XYLocStep.hpp"
 #include "../Graph/Reachable.hpp"
+#include "../Utility/Stats.hpp"
 
 // Relevant: A corner is relevant to a pair of points if they are not safe reachable from each other, but c is safe-reachable from each point. 
 //
@@ -181,5 +182,32 @@ void RelevantPoints::print_relevant_corners(const corner_index i, const DivDirec
   {
     printer.add_char('R', graph.loc(corner_vector.get_corner(j)));
   }
+}
+
+void RelevantPoints::print_num_relevant_corner_stats(const CornerVector &corner_vector) const
+{
+  // Compute stats for num relevant corners
+  std::vector<int> n_relevant_corners_vec;
+  for (corner_index i = 0; i < corner_vector.size(); i++)
+  {
+    std::set<corner_index> relevant_corners;
+    for (DivDirection d : get_divdirections())
+    {
+      for (corner_index j : get_relevant_corners(i, d))
+      {
+        relevant_corners.insert(j);
+      }
+    }
+    n_relevant_corners_vec.push_back(relevant_corners.size());
+  }
+
+  // Print histogram
+  std::vector<int> n_relevant_corners_hist = to_histogram(n_relevant_corners_vec);
+  std::cout << "Histogram for number of corners relevant to corner in any direction:" << std::endl;
+  for (int n = 0; n < (int)n_relevant_corners_hist.size(); n++)
+  {
+    std::cout << n_relevant_corners_hist[n] << " ";
+  }
+  std::cout << std::endl;
 }
 

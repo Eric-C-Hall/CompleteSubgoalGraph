@@ -91,6 +91,9 @@ void PreprocessingData::preprocess()
 
   std::cout << "Preprocessing complete" << std::endl;
   std::cout << "Total preprocessing time: " << total_time << std::endl;
+
+  // Print stats
+  relevant_points.print_num_relevant_corner_stats(corner_vector);
 }
 
 void PreprocessingData::_save(std::ostream & stream) const

@@ -65,3 +65,25 @@ void print_stats(std::tuple<unsigned int, unsigned int, float, unsigned int, uns
   std::cout << "Mean:   " << std::get<2>(stats) << std::endl;
   std::cout << "Mode:   " << std::get<4>(stats) << std::endl;
 }
+
+std::vector<int> to_histogram(std::vector<int> vec)
+{
+  std::sort(vec.begin(), vec.end());
+
+  std::vector<int> return_value(vec.back()+1, 0);
+
+  auto iter = vec.begin();
+  while (iter != vec.end())
+  {
+    int curr_value = *iter;
+    int num_values = 0;
+    while (iter != vec.end() && *iter == curr_value)
+    {
+      num_values++;
+      iter++;
+    }
+    return_value[curr_value] = num_values;
+  }
+
+  return return_value;
+}
