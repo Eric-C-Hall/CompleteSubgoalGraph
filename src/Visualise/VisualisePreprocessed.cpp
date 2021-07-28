@@ -102,10 +102,16 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
     if (selected_corner != corner_vector.size())
       relevant_points.print_relevant_corners(selected_corner, args.divdirection, printer, graph, corner_vector);
 
-  // Print relevant positions
+  // Print relevant points
   if (args.show_relevant_points)
     if (selected_corner != corner_vector.size())
       relevant_points.print_relevant_points(selected_corner, args.divdirection, printer, graph);
+
+  // Print relevant points for incoming divdirection
+  if (args.show_incoming_to_relevant_points)
+    if (selected_corner != corner_vector.size())
+      for (DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(selected_corner, args.divdirection))
+        relevant_points.print_relevant_points(selected_corner, outgoing_divdirection, printer, graph);
 
   // Print relevant outgoing divdirections
   if (args.show_relevant_divdirections)
@@ -243,6 +249,8 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       int new_divdirection;
       std::cin >> new_divdirection;
+      // Ensure divdirection is in the correct range
+      new_divdirection = ((new_divdirection % num_divdirections()) + num_divdirections()) % num_divdirections();
       args.show_divdirection = (args.divdirection != new_divdirection || !args.show_divdirection);
       args.divdirection = (DivDirection)new_divdirection;
     }
@@ -257,6 +265,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     else if (input == "relevant_points")
     {
       args.show_relevant_points = !args.show_relevant_points;
+    }
+    else if (input == "incoming_to_relevant_points")
+    {
+      args.show_incoming_to_relevant_points = !args.show_incoming_to_relevant_points;
     }
     else if (input == "which_nearby_corner" || input == "wnc")
     {
@@ -297,7 +309,8 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "divdirection i: select/highlight the ith divdirection, or unhighlight it if already selected. Alias: dd" << std::endl;
       std::cout << "relevant_corners: show corners relevant to corner under cursor 0 with outgoing divdirection selected with divdirection command" << std::endl;
       std::cout << "relevant_divdirections: show outgoing divdirections relevant to incoming divdirection selected with divdirection command" << std::endl;
-      std::cout << "relevant_points: show positions relevant to outgoing divdirection selected with divdireciton command" << std::endl;
+      std::cout << "relevant_points: show positions relevant to outgoing divdirection selected with divdirection command" << std::endl;
+      std::cout << "incoming_to_relevant_points: show position relevant to incoming divdirection selected with divdirection command" << std::endl;
       std::cout << "which_nearby_corner n: select the nth nearby corner with relevant. Alias: wnc" << std::endl;
       std::cout << "go_nearby_corner: go to the selected nearby corner with relevant, and update divdirection to direction travelled. Alias: gnc" << std::endl;
       std::cout << std::endl;
