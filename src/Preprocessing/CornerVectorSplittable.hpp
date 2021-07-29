@@ -16,6 +16,8 @@ class CornerVectorSplittable
 
   public:
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const RelevantPoints &relevant_points);
+
+  void print(Printer &printer, const Graph &graph) const;
 };
 
 #endif

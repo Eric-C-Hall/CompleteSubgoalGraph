@@ -8,6 +8,7 @@
 #include "../Graph/Islands.hpp"
 #include "../Graph/XYLocStep.hpp"
 #include "Printer.hpp"
+#include "../Preprocessing/CornerVectorSplittable.hpp"
 
 void VisualiseRequestInput(std::string &input)
 {
@@ -27,13 +28,22 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   static NearbyCorners nearby_corners;
   static GeometricContainersOutgoing geometric_containers_outgoing;
   static RelevantPoints relevant_points;
+  static CornerVectorSplittable corner_vector_splittable;
   static bool preprocessing_done = false;
   if (!preprocessing_done)
   {
     nearby_corners.preprocess(graph, corner_vector);
     relevant_points.preprocess(graph, corner_vector, nearby_corners);
-    geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
+    corner_vector_splittable.preprocess(graph, corner_vector, relevant_points);
     preprocessing_done = true;
+  }
+
+  // Geometric containers outgoing take an especially long time to compute, so only compute them if you need to
+  static bool geometric_containers_outgoing_preprocessing_done = false;
+  if (args.show_outgoing_bounds && !geometric_containers_outgoing_preprocessing_done)
+  {
+    geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
+    geometric_containers_outgoing_preprocessing_done = true;
   }
 
   // TODO: Maybe don't compute this every time, on the other hand maybe it's not important to be efficient
@@ -47,6 +57,10 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   // Print corners
   if (args.show_corners)
     corner_vector.print(printer, graph);
+
+  // Print splittable corners
+  if (args.show_splittable_corners)
+    corner_vector_splittable.print(printer, graph);
 
   // Print nearby corners
   if (args.show_nearby && cursors.size() > 0)
@@ -214,6 +228,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       args.show_corners = !args.show_corners;
     }
+    else if (input == "splittable_corners")
+    {
+      args.show_splittable_corners = !args.show_splittable_corners;
+    }
     else if (input == "compute" && cursors.size() >= 2)
     {
       path.clear();
@@ -299,6 +317,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "cursort n x y: translate the nth cursor by (x,y)" << std::endl;
       std::cout << "corner n m: move the nth cursor to select the mth corner" << std::endl;
       std::cout << "corners: display corners" << std::endl;
+      std::cout << "splittable_corners: display splittable corners" << std::endl;
       std::cout << "swap n m: swap the nth and mth cursors" << std::endl;
       std::cout << "compute: compute the path between cursors 1 and 2" << std::endl;
       std::cout << "nearby: show corners near the zeroth cursor" << std::endl;

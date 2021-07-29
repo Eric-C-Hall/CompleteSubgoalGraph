@@ -44,3 +44,11 @@ void CornerVectorSplittable::preprocess(const Graph &graph, const CornerVector &
 
   std::cout << corners_splittable.size() << "/" << corner_vector.size() << " corners have no next corner in important directions" << std::endl;
 }
+
+void CornerVectorSplittable::print(Printer &printer, const Graph &graph) const
+{
+  for (map_position c : corners_splittable)
+  {
+    printer.add_char('s', graph.loc(c));
+  }
+}
