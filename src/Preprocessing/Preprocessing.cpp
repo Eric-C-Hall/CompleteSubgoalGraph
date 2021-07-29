@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "RelevantPoints.hpp"
+#include "CornerVectorSplittable.hpp"
 
 #include "../Graph/ExactDistance.hpp"
 #include "../Graph/Directions.hpp"
@@ -61,7 +62,7 @@ void PreprocessingData::preprocess()
   RelevantPoints relevant_points;
   start_computation("Finding relevant points", t);
   relevant_points.preprocess(graph, corner_vector, nearby_corners);
-  end_computation("Found relevant points", t, total_time);
+  end_computation("Relevant points found", t, total_time);
 
   // Find nearby corners with relevant
   start_computation("Finding nearby corners with relevant", t);
@@ -73,16 +74,22 @@ void PreprocessingData::preprocess()
   nearby_corners_with_next.preprocess(graph, corner_vector, nearby_corners, relevant_points);
   end_computation("Nearby corners with next found", t, total_time);
 
+  // Find corners with no next corners in important directions
+  CornerVectorSplittable corner_vector_splittable;
+  start_computation("Finding splittable corners", t);
+  corner_vector_splittable.preprocess(graph, corner_vector, relevant_points);
+  end_computation("Splittable corners found", t, total_time);
+
   // Geometric containers outgoing
   GeometricContainersOutgoing geometric_containers_outgoing;
   start_computation("Finding geometric containers", t);
   geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
-  end_computation("Found geometric containers", t, total_time);
+  end_computation("Geometric containers found", t, total_time);
   
   // Convert outgoing geometric containers to incoming geometric containers
   start_computation("Converting geometric containers", t);
   geometric_containers_incoming.convert_from(geometric_containers_outgoing, graph, corner_vector, relevant_points);
-  end_computation("Converted geometric containers", t, total_time);
+  end_computation("Geometric containers converted", t, total_time);
 
   // Push first corners
   start_computation("Pushing first corners", t);
