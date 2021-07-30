@@ -10,6 +10,7 @@
 
 #include "RelevantPoints.hpp"
 #include "CornerVectorSplittable.hpp"
+#include "DegreeTwoCorners.hpp"
 
 #include "../Graph/ExactDistance.hpp"
 #include "../Graph/Directions.hpp"
@@ -57,6 +58,12 @@ void PreprocessingData::preprocess()
   start_computation("Finding complete corner graph", t);
   complete_corner_graph.preprocess(graph, corner_vector, nearby_corners);
   end_computation("Complete corner graph found", t, total_time);
+
+  // Find degree two corners
+  DegreeTwoCorners degree_two_corners;
+  start_computation("Finding degree two corners", t);
+  degree_two_corners.preprocess(graph, corner_vector, nearby_corners, complete_corner_graph);
+  end_computation("Degree two corners found", t, total_time);
 
   // Find relevant points, corners, etc
   RelevantPoints relevant_points;

@@ -4,6 +4,7 @@
 
 void CornerVectorSplittable::preprocess(const Graph &graph, const CornerVector &corner_vector, const RelevantPoints &relevant_points)
 {
+  corners_splittable.clear();
   for (corner_index i = 0; i < corner_vector.size(); i++)
   {
     // Find directions in which there is no next corner, and opposites of directions with next corners
