@@ -59,6 +59,7 @@ class SmoothedGraph
   void preprocess(const Graph &graph, const CornerVector &corner_vector);
 
   void print(Printer &printer, const Graph &graph) const;
+  void print(const Graph &graph) const;
 };
 
 

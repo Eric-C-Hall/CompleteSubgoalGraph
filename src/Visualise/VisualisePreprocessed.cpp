@@ -160,6 +160,8 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
 
   printer.print();
 
+  if (cursors.size() > 0)
+    std::cout << "Selected map_position: " << cursors[0] << std::endl;
   if (selected_corner != corner_vector.size())
     std::cout << "Selected corner: " << selected_corner << std::endl;
   if (args.show_divdirection)
@@ -237,6 +239,12 @@ void Visualise(const PreprocessingData &preprocessing_data)
       int n, m;
       std::cin >> n >> m;
       set_cursor_to_pos(cursors, graph, n, preprocessing_data.get_corner_vector().get_corner(m));
+    }
+    else if (input == "map_position")
+    {
+      int cursor, pos;
+      std::cin >> cursor >> pos;
+      set_cursor_to_pos(cursors, graph, cursor, pos);
     }
     else if (input == "corners")
     {
@@ -339,6 +347,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "cursort n x y: translate the nth cursor by (x,y)" << std::endl;
       std::cout << "corner n m: move the nth cursor to select the mth corner" << std::endl;
       std::cout << "corners: display corners" << std::endl;
+      std::cout << "map_position n p: move the nth cursor to select the pth position" << std::endl;
       std::cout << "splittable_corners: display splittable corners" << std::endl;
       std::cout << "degree_two_corners: display degree two corners" << std::endl;
       std::cout << "smoothed_graph: display smoothed graph" << std::endl;

@@ -35,7 +35,6 @@ void SmoothedGraph::auto_smoothen_straight(const Graph &graph, const CornerVecto
     map_position c = corner_vector.get_corner(i);
     if (i % 100 == 0)
       std::cout << i << ", " << std::flush;
-    i++;
 
     for (const Direction diagonal_direction : get_diagonal_directions())
     {
@@ -339,6 +338,14 @@ void SmoothedGraph::print(Printer &printer, const Graph &graph) const
     if (is_corner[p])
       printer.add_char('T', graph.loc(p));
   }
+}
+
+void SmoothedGraph::print(const Graph &graph) const
+{
+  Printer printer;
+  graph.print(printer);
+  print(printer, graph);
+  printer.print();
 }
 
 /*void SmoothedGraph::auto_smoothen_diagonal()
