@@ -11,6 +11,7 @@
 #include "RelevantPoints.hpp"
 #include "CornerVectorSplittable.hpp"
 #include "DegreeTwoCorners.hpp"
+#include "SmoothedGraph.hpp"
 
 #include "../Graph/ExactDistance.hpp"
 #include "../Graph/Directions.hpp"
@@ -47,6 +48,12 @@ void PreprocessingData::preprocess()
   start_computation("Computing corners", t);
   corner_vector.preprocess(graph);
   end_computation("Corners computed", t, total_time);
+
+  // Compute smoothed graph
+  SmoothedGraph smoothed_graph;
+  start_computation("Computing smoothed graph", t);
+  smoothed_graph.preprocess(graph, corner_vector);
+  end_computation("Smoothed graph computed", t, total_time);
 
   // Find nearby corners
   NearbyCorners nearby_corners;

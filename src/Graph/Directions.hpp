@@ -66,13 +66,15 @@ inline std::vector<Direction> get_directions();
 inline std::vector<Direction> get_diagonal_directions();
 inline bool is_cardinal_direction(const Direction dir);
 
-inline Direction get_45_degrees_clockwise(Direction dir);
-inline Direction get_45_degrees_anticlockwise(Direction dir);
-inline Direction get_opposite_direction(Direction dir);
 template <int n>
 inline Direction get_n_steps_clockwise(Direction dir);
 template <int n>
 inline Direction get_n_steps_anticlockwise(Direction dir);
+inline Direction get_45_degrees_clockwise(Direction dir);
+inline Direction get_45_degrees_anticlockwise(Direction dir);
+inline Direction get_90_degrees_clockwise(Direction dir) {return get_n_steps_clockwise<2>(dir);}
+inline Direction get_90_degrees_anticlockwise(Direction dir) {return get_n_steps_anticlockwise<2>(dir);}
+inline Direction get_opposite_direction(Direction dir);
 
 inline Direction get_diagonal_direction_between_points(xyLoc source, xyLoc target);
 inline Direction get_straight_direction_between_points(xyLoc source, xyLoc target);
