@@ -243,7 +243,10 @@ std::vector<map_position> SmoothedGraph::calculate_corners(const Graph &graph)
     const bool stored_value = is_corner[p];
     assert (calculated_value == stored_value);
     if (stored_value)
+    {
+      assert (!is_blocked[p]);
       return_value.push_back(p);
+    }
   }
   return return_value;
 }
@@ -323,6 +326,18 @@ void SmoothedGraph::remove_obstacles(const std::vector<map_position> &removed_ob
   {
     assert(is_blocked[obstacle]);
     is_blocked[obstacle] = false;
+  }
+}
+
+void SmoothedGraph::print(Printer &printer, const Graph &graph) const
+{
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    if (is_blocked[p] && !graph.is_obstacle(p))
+      printer.add_char('Z', graph.loc(p));
+
+    if (is_corner[p])
+      printer.add_char('T', graph.loc(p));
   }
 }
 

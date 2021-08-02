@@ -12,6 +12,7 @@ struct PrintGraphArguments
   bool show_corners = false;
   bool show_splittable_corners = false;
   bool show_degree_two_corners = false;
+  bool show_smoothed_graph = false;
   bool show_nearby = false;
   bool show_nearby_with_relevant = false;
   bool show_nearby_with_next = false;

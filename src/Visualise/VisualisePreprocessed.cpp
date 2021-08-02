@@ -10,6 +10,7 @@
 #include "Printer.hpp"
 #include "../Preprocessing/CornerVectorSplittable.hpp"
 #include "../Preprocessing/DegreeTwoCorners.hpp"
+#include "../Preprocessing/SmoothedGraph.hpp"
 
 void VisualiseRequestInput(std::string &input)
 {
@@ -26,6 +27,7 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   const NearbyCornersWithNext &nearby_corners_with_next = preprocessing_data.get_nearby_corners_with_next();
   const GeometricContainersIncoming &geometric_containers_incoming = preprocessing_data.get_geometric_containers_incoming();
 
+  static SmoothedGraph smoothed_graph;
   static NearbyCorners nearby_corners;
   static DegreeTwoCorners degree_two_corners;
   static GeometricContainersOutgoing geometric_containers_outgoing;
@@ -34,6 +36,7 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   static bool preprocessing_done = false;
   if (!preprocessing_done)
   {
+    smoothed_graph.preprocess(graph, corner_vector);
     nearby_corners.preprocess(graph, corner_vector);
     degree_two_corners.preprocess(graph, corner_vector, nearby_corners, complete_corner_graph);
     relevant_points.preprocess(graph, corner_vector, nearby_corners);
@@ -68,6 +71,10 @@ void print_graph(const PreprocessingData &preprocessing_data, const std::vector<
   // Print degree two corners
   if (args.show_degree_two_corners)
     degree_two_corners.print(printer, graph, corner_vector);
+
+  // Print smoothed graph
+  if (args.show_smoothed_graph)
+    smoothed_graph.print(printer, graph);
 
   // Print nearby corners
   if (args.show_nearby && cursors.size() > 0)
@@ -243,6 +250,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       args.show_degree_two_corners = !args.show_degree_two_corners;
     }
+    else if (input == "smoothed_graph")
+    {
+      args.show_smoothed_graph = !args.show_smoothed_graph;
+    }
     else if (input == "compute" && cursors.size() >= 2)
     {
       path.clear();
@@ -330,6 +341,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       std::cout << "corners: display corners" << std::endl;
       std::cout << "splittable_corners: display splittable corners" << std::endl;
       std::cout << "degree_two_corners: display degree two corners" << std::endl;
+      std::cout << "smoothed_graph: display smoothed graph" << std::endl;
       std::cout << "swap n m: swap the nth and mth cursors" << std::endl;
       std::cout << "compute: compute the path between cursors 1 and 2" << std::endl;
       std::cout << "nearby: show corners near the zeroth cursor" << std::endl;
