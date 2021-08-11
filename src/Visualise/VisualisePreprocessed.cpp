@@ -217,7 +217,15 @@ void Visualise(const PreprocessingData &preprocessing_data)
 {
   const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
-  const NearbyCornersWithRelevant &nearby_corners_with_relevant = preprocessing_data.get_nearby_corners_with_relevant();
+  //const NearbyCornersWithRelevant &nearby_corners_with_relevant = preprocessing_data.get_nearby_corners_with_relevant();
+
+  static NearbyCorners nearby_corners;
+  static bool preprocessing_done = false;
+  if (!preprocessing_done)
+  {
+    preprocessing_done = true;
+    nearby_corners.preprocess(graph, corner_vector);
+  }
 
   std::string input = "";
   std::vector<map_position> cursors;
@@ -326,10 +334,10 @@ void Visualise(const PreprocessingData &preprocessing_data)
     {
       if (cursors.size() > 0)
       {
-        const auto &cursor_nearby_corners_with_relevant = nearby_corners_with_relevant.get_nearby_corner_indices_with_relevant(cursors[0]);
-        if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners_with_relevant.size())
+        const auto &cursor_nearby_corners = nearby_corners.get_nearby_corner_indices(cursors[0]);
+        if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners.size())
         {
-          const corner_index nearby_corner_index = cursor_nearby_corners_with_relevant[args.which_nearby_corner];
+          const corner_index nearby_corner_index = cursor_nearby_corners[args.which_nearby_corner];
           const map_position nearby_corner_pos = corner_vector.get_corner(nearby_corner_index);
           args.divdirection = get_divdirection_between_points(graph.loc(cursors[0]), graph.loc(nearby_corner_pos));
           args.show_divdirection = true;
