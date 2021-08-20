@@ -1,8 +1,11 @@
+# Ignore map-related files
 *.map
 *.map.scen
 *.map.cornergraph
-*.o
-.nfs00000000a*
+*.zip
 
-#ignore the compiled executable
+# Ignore 
+*.o
+
+# Ignore the compiled executable
 cornergraph
