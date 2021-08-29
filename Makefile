@@ -1,6 +1,9 @@
 CPP_DIR = src
 OBJ_DIR = obj
 MAP_DIR = maps
+EXPERIMENT_MAP_DIR = $(MAP_DIR)/experiment_maps
+EXPERIMENT_DIR = experiments
+EXPERIMENT_MAPS = $(wildcard $(EXPERIMENT_MAP_DIR)/*.map)
 CPP_DIRECTORIES = Graph Preprocessing Run/GetPath Run/RunScenario Test Utility Visualise Debug Time
 CPP_FILES = $(wildcard $(CPP_DIR)/*.cpp) $(foreach dir,$(CPP_DIRECTORIES),$(wildcard $(CPP_DIR)/$(dir)/*.cpp))
 OBJ = $(patsubst $(CPP_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(CPP_FILES))
@@ -61,6 +64,12 @@ ifneq ($(MAP),)
 else
 	@echo "Pass in a map using 'make rundbg MAP=...'. Do not include the file extension."
 endif
+
+experiment_pre:
+	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), timeout 1h ./cornergraph -pre $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen;)
+
+experiment_run:
+	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), ./cornergraph -run $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen > $(EXPERIMENT_MAP).results;)
 
 vis:
 ifneq ($(MAP),)
