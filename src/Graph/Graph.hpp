@@ -32,6 +32,7 @@ class Graph {
   Graph();
 
   void load_map(const char *fname);
+  void load_bits(const std::vector<bool> &bits, unsigned int input_width, unsigned int input_height);
 
   std::vector<std::pair<map_position, exact_distance>> adjacent_locations_and_dists(map_position p) const;  
 
@@ -56,7 +57,7 @@ class Graph {
 
   inline map_position pos(const unsigned int x, const unsigned int y) const {return y*get_width() + x;}
   inline map_position pos(const xyLoc &loc) const {return pos(loc.x, loc.y);}
-  inline xyLoc loc(map_position p) const {return xyLoc(x(p), y(p));}
+  inline xyLoc loc(map_position p) const {return make_xyLoc(x(p), y(p));}
 
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const std::vector<map_position> &v) const;
   inline std::pair<xyLoc, xyLoc> get_bounds_of_points(const xyLoc a, const xyLoc b) const;
@@ -75,8 +76,8 @@ class Graph {
 
 inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const xyLoc a, const xyLoc b) const
 {
-  const xyLoc lower_bound = xyLoc(std::min(a.x, b.x), std::min(a.y, b.y));
-  const xyLoc upper_bound = xyLoc(std::max(a.x, b.x), std::max(a.y, b.y));
+  const xyLoc lower_bound = make_xyLoc(std::min(a.x, b.x), std::min(a.y, b.y));
+  const xyLoc upper_bound = make_xyLoc(std::max(a.x, b.x), std::max(a.y, b.y));
   return std::pair<xyLoc, xyLoc>(lower_bound, upper_bound);
 }
 
@@ -98,15 +99,15 @@ inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const std::vector<map
 
 inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const std::pair<xyLoc, xyLoc> bounds, const xyLoc c) const
 {
-  xyLoc new_lower_bound = xyLoc(std::min(c.x, bounds.first.x), std::min(c.y, bounds.first.y));
-  xyLoc new_upper_bound = xyLoc(std::max(c.x, bounds.second.x), std::max(c.y, bounds.second.y));
+  xyLoc new_lower_bound = make_xyLoc(std::min(c.x, bounds.first.x), std::min(c.y, bounds.first.y));
+  xyLoc new_upper_bound = make_xyLoc(std::max(c.x, bounds.second.x), std::max(c.y, bounds.second.y));
   return std::pair<xyLoc, xyLoc>(new_lower_bound, new_upper_bound);
 }
 
 inline std::pair<xyLoc, xyLoc> Graph::get_bounds_of_points(const std::pair<xyLoc, xyLoc> a, const std::pair<xyLoc, xyLoc> b) const
 {
-  xyLoc new_lower_bound = xyLoc(std::min(a.first.x, b.first.x), std::min(a.first.y, b.first.y));
-  xyLoc new_upper_bound = xyLoc(std::max(a.second.x, b.second.x), std::max(a.second.y, b.second.y));
+  xyLoc new_lower_bound = make_xyLoc(std::min(a.first.x, b.first.x), std::min(a.first.y, b.first.y));
+  xyLoc new_upper_bound = make_xyLoc(std::max(a.second.x, b.second.x), std::max(a.second.y, b.second.y));
   return std::pair<xyLoc, xyLoc>(new_lower_bound, new_upper_bound);
 }
 

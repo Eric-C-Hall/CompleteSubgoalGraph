@@ -1,10 +1,8 @@
 #ifndef CORNERGRAPH_PROJECT__GET_PATH_HPP
 #define CORNERGRAPH_PROJECT__GET_PATH_HPP
 
-#include "../../Preprocessing/Preprocessing.hpp"
-#include "../../Graph/XYLoc.hpp"
-
-bool GetPath(const PreprocessingData &preprocessing_data, xyLoc s, xyLoc g, std::vector<xyLoc> &path);
+#include "../Preprocessing/Preprocessing.hpp"
+#include "../Graph/XYLoc.hpp"
 
 namespace Running
 {

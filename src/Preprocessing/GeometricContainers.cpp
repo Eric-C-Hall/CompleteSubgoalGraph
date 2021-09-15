@@ -109,7 +109,7 @@ void Bounds::print(Printer &printer, const Highlight &highlight) const
 {
   for (int x = lower_bound.x; x <= upper_bound.x; x++)
     for (int y = lower_bound.y; y <= upper_bound.y; y++)
-      printer.add_highlight(highlight, xyLoc(x,y));
+      printer.add_highlight(highlight, make_xyLoc(x,y));
 }
 
 void GeometricContainersOutgoing::print_bounds(const corner_index i, const DivDirection dir, Printer &printer) const
@@ -206,7 +206,7 @@ void GeometricContainersIncoming::load(std::istream &stream, const CornerVector 
     for (DivDirection dir : get_divdirections())
     {
       (void)dir;
-      Bounds bounds(xyLoc(-1,-1),xyLoc(-1,-1));
+      Bounds bounds(make_xyLoc(-1,-1),make_xyLoc(-1,-1));
       bounds.load(stream);
       corner_to_incoming_direction_to_bounds[i].push_back(bounds);
     }

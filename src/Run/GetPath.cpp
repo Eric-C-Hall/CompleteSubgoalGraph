@@ -1,21 +1,11 @@
 #include "GetPath.hpp"
 
 #include "DirectPath.hpp"
-#include "../../Graph/Reachable.hpp"
+#include "../Graph/Reachable.hpp"
 
 #include <vector>
 
 #include <cassert>
-
-bool GetPath(const PreprocessingData &preprocessing_data, xyLoc s, xyLoc g, std::vector<xyLoc> &path)
-{
-  const Graph &graph = preprocessing_data.get_graph();
-
-  map_position start = graph.pos(s.x, s.y);
-  map_position goal = graph.pos(g.x, g.y);
-
-  return Running::get_path(start, goal, path, preprocessing_data);
-}
 
 template<bool try_octile, bool test_double, bool test_single, bool compute_path>
 bool Running::get_path_partial_computation(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data)

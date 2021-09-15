@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <vector>
 
-#include "../../Graph/XYLoc.hpp"
-#include "../../Graph/Graph.hpp"
-#include "../../Visualise/Printer.hpp"
+#include "../Graph/XYLoc.hpp"
+#include "../Graph/Graph.hpp"
+#include "../Visualise/Printer.hpp"
 
 namespace Running
 {

@@ -16,7 +16,7 @@
 #include "../Graph/ExactDistance.hpp"
 #include "../Graph/Directions.hpp"
 
-#include "../Utility/Timer.h"
+#include "../PathCompetition/Timer.h"
 #include "../Utility/Stats.hpp"
 
 #include "../Test/Test.hpp"

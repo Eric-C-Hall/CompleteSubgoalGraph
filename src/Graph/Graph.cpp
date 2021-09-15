@@ -86,6 +86,27 @@ void Graph::load_map(const char *fname)
   }
 }
 
+void Graph::load_bits(const std::vector<bool> &input_bits, unsigned int input_width, unsigned int input_height)
+{
+  _width = input_width;
+  _height = input_height;
+
+  _width += 2;
+  _height += 2;
+
+  _obstacles.resize(get_width()*get_height());
+
+  for (unsigned int y = 1; y < get_height() - 1; y++)
+  {
+    for (unsigned int x = 1; x < get_width() - 1; x++)
+    {
+      _obstacles[pos(x,y)] = !input_bits[(y - 1) * (get_width() - 2) + (x - 1)];
+    }
+  }
+
+  add_collar();
+}
+
 std::vector<std::pair<map_position, exact_distance>> Graph::adjacent_locations_and_dists(map_position p) const
 {
   std::vector<std::pair<map_position, exact_distance>> return_value;

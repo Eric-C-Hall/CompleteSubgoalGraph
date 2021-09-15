@@ -2,7 +2,7 @@
 
 #include "../Graph/ExactDistance.hpp"
 #include "../Visualise/VisualisePreprocessed.hpp"
-#include "../Run/GetPath/GetPath.hpp"
+#include "../Run/GetPath.hpp"
 #include "../Graph/ValidatePath.hpp"
 #include "SimpleDijkstraExactDistance.hpp"
 #include "../Graph/Reachable.hpp"
@@ -68,9 +68,9 @@ std::pair<xyLoc,std::vector<xyLoc>> TestPointGenerator::get_random_point_and_poi
 
   if (TEST_SPECIFIC_POINTS)
   {
-    xyLoc specific_point_a(TEST_SPECIFIC_POINTS_A_X, TEST_SPECIFIC_POINTS_A_Y);
+    xyLoc specific_point_a = make_xyLoc(TEST_SPECIFIC_POINTS_A_X, TEST_SPECIFIC_POINTS_A_Y);
     std::vector<xyLoc> specific_point_b;
-    specific_point_b.push_back(xyLoc(TEST_SPECIFIC_POINTS_B_X, TEST_SPECIFIC_POINTS_B_Y));
+    specific_point_b.push_back(make_xyLoc(TEST_SPECIFIC_POINTS_B_X, TEST_SPECIFIC_POINTS_B_Y));
     return std::pair<xyLoc,std::vector<xyLoc>>(specific_point_a, specific_point_b);
   }
 
@@ -135,7 +135,7 @@ void Test(const PreprocessingData &preprocessing_data)
     for (xyLoc loc2 : test_points.second)
     {
       std::vector<xyLoc> path;
-      GetPath(preprocessing_data, loc1, loc2, path);
+      Running::get_path(graph.pos(loc1), graph.pos(loc2), path, preprocessing_data);
 
       if (path[0].x != loc1.x ||
           path[0].y != loc1.y ||

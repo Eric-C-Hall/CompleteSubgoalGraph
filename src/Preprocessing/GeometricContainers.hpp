@@ -73,8 +73,8 @@ class GeometricContainersIncoming
 
 inline Bounds Bounds::combine(const Bounds &other) const
 {
-  xyLoc new_upper_bound = xyLoc(std::max(upper_bound.x, other.upper_bound.x), std::max(upper_bound.y, other.upper_bound.y));
-  xyLoc new_lower_bound = xyLoc(std::min(lower_bound.x, other.lower_bound.x), std::min(lower_bound.y, other.lower_bound.y));
+  xyLoc new_upper_bound = make_xyLoc(std::max(upper_bound.x, other.upper_bound.x), std::max(upper_bound.y, other.upper_bound.y));
+  xyLoc new_lower_bound = make_xyLoc(std::min(lower_bound.x, other.lower_bound.x), std::min(lower_bound.y, other.lower_bound.y));
   return Bounds(new_upper_bound, new_lower_bound);
 }
 

@@ -1,8 +1,8 @@
 #include <random>
 
 #include "Time.hpp"
-#include "../Utility/Timer.h"
-#include "../Run/GetPath/GetPath.hpp"
+#include "../PathCompetition/Timer.h"
+#include "../Run/GetPath.hpp"
 #include "../Graph/Islands.hpp"
 
 xyLoc GetRandomValidLocation(std::mt19937 &gen,
@@ -76,7 +76,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    GetPath(preprocessing_data, sourceLoc, destLoc, path);
+    Running::get_path(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data);
   }
 
   t.EndTimer();

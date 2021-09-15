@@ -4,7 +4,7 @@ MAP_DIR = maps
 EXPERIMENT_MAP_DIR = $(MAP_DIR)/experiment_maps
 EXPERIMENT_DIR = $(EXPERIMENT_MAP_DIR)/experiments
 EXPERIMENT_MAPS = $(wildcard $(EXPERIMENT_MAP_DIR)/*.map)
-CPP_DIRECTORIES = Graph Preprocessing Run/GetPath Run/RunScenario Test Utility Visualise Debug Time
+CPP_DIRECTORIES = Graph Preprocessing Run Test Utility Visualise Debug Time PathCompetition
 CPP_FILES = $(wildcard $(CPP_DIR)/*.cpp) $(foreach dir,$(CPP_DIRECTORIES),$(wildcard $(CPP_DIR)/$(dir)/*.cpp))
 OBJ = $(patsubst $(CPP_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(CPP_FILES))
 

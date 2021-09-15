@@ -2,7 +2,7 @@
 
 #include "../Utility/SaveLoad.hpp"
 #include "../Graph/Reachable.hpp"
-#include "../Run/GetPath/DirectPath.hpp"
+#include "../Run/DirectPath.hpp"
 
 #include <deque>
 

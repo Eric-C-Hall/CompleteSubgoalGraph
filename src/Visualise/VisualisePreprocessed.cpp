@@ -4,7 +4,7 @@
 #include <cmath>
 
 #include "../Graph/MapPosition.hpp"
-#include "../Run/GetPath/GetPath.hpp"
+#include "../Run/GetPath.hpp"
 #include "../Graph/Islands.hpp"
 #include "../Graph/XYLocStep.hpp"
 #include "Printer.hpp"
@@ -273,7 +273,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
     else if (input == "compute" && cursors.size() >= 2)
     {
       path.clear();
-      GetPath(preprocessing_data, graph.loc(cursors[0]), graph.loc(cursors[1]), path);
+      Running::get_path(cursors[0], cursors[1], path, preprocessing_data);
     }
     else if (input == "nearby")
     {
