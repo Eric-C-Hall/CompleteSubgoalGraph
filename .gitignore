@@ -3,9 +3,13 @@
 *.map.scen
 *.map.cornergraph
 *.zip
+*.map.results
 
-# Ignore 
+# Ignore compiled files
 *.o
 
 # Ignore the compiled executable
 cornergraph
+
+# Ignore files containing results of experiments
+*7ime.txt

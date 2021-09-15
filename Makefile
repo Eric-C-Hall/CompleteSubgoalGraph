@@ -2,7 +2,7 @@ CPP_DIR = src
 OBJ_DIR = obj
 MAP_DIR = maps
 EXPERIMENT_MAP_DIR = $(MAP_DIR)/experiment_maps
-EXPERIMENT_DIR = experiments
+EXPERIMENT_DIR = $(EXPERIMENT_MAP_DIR)/experiments
 EXPERIMENT_MAPS = $(wildcard $(EXPERIMENT_MAP_DIR)/*.map)
 CPP_DIRECTORIES = Graph Preprocessing Run/GetPath Run/RunScenario Test Utility Visualise Debug Time
 CPP_FILES = $(wildcard $(CPP_DIR)/*.cpp) $(foreach dir,$(CPP_DIRECTORIES),$(wildcard $(CPP_DIR)/$(dir)/*.cpp))
@@ -66,10 +66,23 @@ else
 endif
 
 experiment_pre:
+	rm -f $(EXPERIMENT_MAP_DIR)/*.map.cornergraph
 	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), timeout 1h ./cornergraph -pre $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen;)
 
 experiment_run:
-	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), ./cornergraph -run $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen > $(EXPERIMENT_MAP).results;)
+	rm -f $(EXPERIMENT_DIR)/*.map.results
+	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), (./cornergraph -run $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(EXPERIMENT_MAP_DIR)/%.map,$(EXPERIMENT_DIR)/%.map.results,$(EXPERIMENT_MAP));)
+
+
+experiment_load_maps:
+ifneq ($(DIR),)
+	rm -f $(EXPERIMENT_MAP_DIR)/*.map
+	rm -f $(EXPERIMENT_MAP_DIR)/*.map.scen
+	cp $(MAP_DIR)/$(DIR)-map/*.map $(EXPERIMENT_MAP_DIR)
+	cp $(MAP_DIR)/$(DIR)-scen/*.map.scen $(EXPERIMENT_MAP_DIR)
+else
+	@echo "Pass in a directory using 'make experiment_load_maps DIR=...'"
+endif	
 
 vis:
 ifneq ($(MAP),)
