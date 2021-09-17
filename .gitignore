@@ -8,8 +8,9 @@
 # Ignore compiled files
 *.o
 
-# Ignore the compiled executable
+# Ignore the compiled executables
 cornergraph
+cornergraph_gppc
 
 # Ignore files containing results of experiments
 *7ime.txt
