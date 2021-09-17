@@ -5,7 +5,7 @@ EXPERIMENT_MAP_DIR = $(MAP_DIR)/experiment_maps
 EXPERIMENT_DIR = $(EXPERIMENT_MAP_DIR)/experiments
 EXPERIMENT_MAPS = $(wildcard $(EXPERIMENT_MAP_DIR)/*.map)
 CPP_DIRECTORIES = Graph Preprocessing Run Test Utility Visualise Debug Time PathCompetition
-CPP_FILES = $(wildcard $(CPP_DIR)/*.cpp) $(foreach dir,$(CPP_DIRECTORIES),$(wildcard $(CPP_DIR)/$(dir)/*.cpp))
+CPP_FILES = $(foreach dir,$(CPP_DIRECTORIES),$(wildcard $(CPP_DIR)/$(dir)/*.cpp))
 OBJ = $(patsubst $(CPP_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(CPP_FILES))
 
 OPTIMIZATION_LEVEL=-O3
@@ -30,8 +30,11 @@ ASSERTION_ARGUMENTS=-DNDEBUG
 # time (time how long it takes to solve random queries)
 # -------------------------------
 
-build: $(OBJ)
-	g++ -Wall -o cornergraph $(OPTIMIZATION_LEVEL) $(ADDITIONAL_ARGUMENTS) $(OBJ) $(CONCURRENCY_ARGUMENTS) $(ASSERTION_ARGUMENTS)
+build: $(OBJ_DIR)/main.o $(OBJ)
+	g++ -Wall -o cornergraph $(OPTIMIZATION_LEVEL) $(ADDITIONAL_ARGUMENTS) $(OBJ_DIR)/main.o $(OBJ) $(CONCURRENCY_ARGUMENTS) $(ASSERTION_ARGUMENTS)
+
+build_gppc: $(OBJ_DIR)/main_gppc.o $(OBJ)
+	g++ -Wall -o cornergraph_gppc $(OPTIMIZATION_LEVEL) $(ADDITIONAL_ARGUMENTS) $(OBJ_DIR)/main_gppc.o $(OBJ) $(CONCURRENCY_ARGUMENTS) $(ASSERTION_ARGUMENTS)
 
 debug: OPTIMIZATION_LEVEL=-Og
 debug: ADDITIONAL_ARGUMENTS=-g
@@ -53,7 +56,7 @@ endif
 
 run:
 ifneq ($(MAP),)
-	./cornergraph -run $(MAP_DIR)/$(MAP).map $(MAP_DIR)/$(MAP).map.scen
+	./cornergraph_gppc -run $(MAP_DIR)/$(MAP).map $(MAP_DIR)/$(MAP).map.scen
 else
 	@echo "Pass in a map using 'make run MAP=...'. Do not include the file extension."
 endif
@@ -67,11 +70,11 @@ endif
 
 experiment_pre:
 	rm -f $(EXPERIMENT_MAP_DIR)/*.map.cornergraph
-	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), timeout 1h ./cornergraph -pre $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen;)
+	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), timeout 1h ./cornergraph_gppc -pre $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen;)
 
 experiment_run:
 	rm -f $(EXPERIMENT_DIR)/*.map.results
-	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), (./cornergraph -run $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(EXPERIMENT_MAP_DIR)/%.map,$(EXPERIMENT_DIR)/%.map.results,$(EXPERIMENT_MAP));)
+	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), (./cornergraph_gppc -run $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(EXPERIMENT_MAP_DIR)/%.map,$(EXPERIMENT_DIR)/%.map.results,$(EXPERIMENT_MAP));)
 
 
 experiment_load_maps:
@@ -147,6 +150,7 @@ $(OBJ_DIR)/%.o: $(CPP_DIR)/%.cpp
 clean:
 	rm -f $(OBJ)
 	rm -f cornergraph
+	rm -f cornergraph_gppc
 
 cleanpre:
 	rm -f $(MAP_DIR)/*.map.cornergraph

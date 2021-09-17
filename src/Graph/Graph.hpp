@@ -22,16 +22,11 @@ class Graph {
   unsigned int _height;
   std::vector<bool> _obstacles;
 
-  // Used by load_map, you should call load_map instead
-  void read_width_height(FILE * f);
-  void read_map(FILE * f);
   void add_collar();
-  void read_file(FILE *f);
 
   public:
   Graph();
 
-  void load_map(const char *fname);
   void load_bits_without_collar(const std::vector<bool> &bits, unsigned int input_width, unsigned int input_height);
   void load_bits_with_collar(const std::vector<bool> &bits, unsigned int input_width, unsigned int input_height);
 

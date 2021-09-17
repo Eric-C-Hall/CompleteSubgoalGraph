@@ -9,46 +9,6 @@ Graph::Graph()
 {
 }
 
-void Graph::read_width_height(FILE * f)
-{
-  int num_args_filled = fscanf(f, "type octile\nheight %d\nwidth %d\nmap\n", &_height, &_width);
-
-  _width += 2;
-  _height += 2;
-
-  if (num_args_filled != 2)
-  {
-    throw std::runtime_error("Error finding height/width when scanning file");
-  }
-}
-
-// Assumes _width and _height are known
-void Graph::read_map(FILE * f)
-{
-  _obstacles.resize(get_width()*get_height());
-
-  // Note: we don't include x = 0, y = 0, x = width - 1, y = height - 1, since
-  // those will be obstacles in the collar
-  for (unsigned int y = 1; y < get_height() - 1; y++)
-  {
-    for (unsigned int x = 1; x < get_width() - 1; x++)
-    {
-      char c;
-      do {
-        int num_args_filled = fscanf(f, "%c", &c);
-        if (num_args_filled != 1)
-        {
-          throw std::runtime_error("Error finding character describing map");
-        }
-
-      } while (isspace(c));
-      _obstacles[pos(x,y)] = !(c == '.' || c == 'G' || c == 'S');
-      //printf("%c", c);
-    }
-    //printf("\n");
-  }
-}
-
 void Graph::add_collar()
 {
   for (unsigned int x = 0; x < get_width(); x++)
@@ -64,27 +24,6 @@ void Graph::add_collar()
   }
 }
 
-void Graph::read_file(FILE *f)
-{
-  read_width_height(f);
-  read_map(f);
-  add_collar();
-}
-
-void Graph::load_map(const char *fname)
-{
-  FILE *f;
-  f = fopen(fname, "r");
-  if (f)
-  {
-    read_file(f);
-    fclose(f);
-  }
-  else
-  {
-    throw std::runtime_error("Error opening file");
-  }
-}
 
 void Graph::load_bits_without_collar(const std::vector<bool> &input_bits, unsigned int input_width, unsigned int input_height)
 {
