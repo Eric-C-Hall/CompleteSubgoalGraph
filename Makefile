@@ -1,6 +1,7 @@
 CPP_DIR = src
 OBJ_DIR = obj
 MAP_DIR = maps
+PREPROCESS_DIR = CompleteCornerGraph-maps/experiment_maps
 EXPERIMENT_MAP_DIR = $(MAP_DIR)/experiment_maps
 EXPERIMENT_DIR = $(EXPERIMENT_MAP_DIR)/experiments
 EXPERIMENT_MAPS = $(wildcard $(EXPERIMENT_MAP_DIR)/*.map)
@@ -154,5 +155,6 @@ clean:
 
 cleanpre:
 	rm -f $(MAP_DIR)/*.map.cornergraph
+	rm -f $(PREPROCESS_DIR)/*.map
 
 # eof

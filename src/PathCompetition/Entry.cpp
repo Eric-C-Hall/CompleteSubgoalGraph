@@ -9,6 +9,7 @@
 #include "../Graph/Graph.hpp"
 #include "../Preprocessing/Preprocessing.hpp"
 #include "../Run/GetPath.hpp"
+#include "../Visualise/Printer.hpp"
 
 void GetSuccessors(xyLoc s, std::vector<xyLoc> &neighbors);
 int GetIndex(xyLoc s);
@@ -28,13 +29,13 @@ void PreprocessMap(std::vector<bool> &bits, int width, int height, const char *f
   preprocessing_data.preprocess(graph);
   preprocessing_data.remove_collar(graph);
   graph.remove_collar();
-  preprocessing_data.save(filename, graph);
+  preprocessing_data.save(std::string(filename), graph);
 }
 
 void *PrepareForSearch(std::vector<bool> &bits, int w, int h, const char *filename)
 {
   graph.load_bits_without_collar(bits, (unsigned int)w, (unsigned int)h);
-  preprocessing_data.load(filename, graph);
+  preprocessing_data.load(std::string(filename), graph);
 }
 
 bool GetPath(void *data, xyLoc s, xyLoc g, std::vector<xyLoc> &path)

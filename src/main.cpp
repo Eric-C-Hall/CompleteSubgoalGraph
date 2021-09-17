@@ -17,7 +17,7 @@
 #include "Visualise/VisualisePreprocessed.hpp"
 #include "Time/Time.hpp"
 
-const std::string ALGORITHM_NAME("cornergraph");
+const std::string ALGORITHM_NAME("CompleteCornerGraph");
 
 void LoadMap(const char *fname, std::vector<bool> &map, int &w, int &h);
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
   scen_filename = std::string(argv[3]);
 
   // Determine filename for the preprocessed map based on the map filename
-  processed_filename = map_filename + "." + ALGORITHM_NAME;
+  processed_filename = ALGORITHM_NAME + "-" + map_filename;
 
   // Determine which operating mode we should run in
   if (operating_mode.compare("-pre") == 0)
@@ -90,6 +90,7 @@ int main(int argc, char **argv)
   int width, height;
   std::vector<bool> mapData;
   LoadMap(map_filename.c_str(), mapData, width, height);
+  // TODO: Check if failed to load file
 
   Graph graph;
   //graph.debug_cut_sides(0,0,0,0);

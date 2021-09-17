@@ -52,7 +52,10 @@ void CornerVector::remove_collar(const Graph &graph)
 {
   for (map_position &p : corners)
   {
-    p = graph.left(graph.down(p));
+    xyLoc l = graph.loc(p);
+    l.x--;
+    l.y--;
+    p = l.y * (graph.get_width()-2) + l.x;
   }
 }
 
