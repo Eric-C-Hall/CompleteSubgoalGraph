@@ -62,7 +62,7 @@ class GeometricContainersIncoming
 
   public:
   void convert_from(const GeometricContainersOutgoing geometric_containers_outgoing, const Graph &graph, const CornerVector &corner_vector, const RelevantPoints &relevant_points);
-
+  void remove_collar(const Graph &graph);
   void save(std::ostream &stream) const;
   void load(std::istream &stream, const CornerVector &corner_vector);
 

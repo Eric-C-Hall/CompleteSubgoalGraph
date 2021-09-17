@@ -21,10 +21,6 @@
 
 #include "../Test/Test.hpp"
 
-PreprocessingData::PreprocessingData(const Graph &input_graph) : graph(input_graph)
-{
-}
-
 void start_computation(std::string message, Timer &t)
 {
   std::cout << message << std::endl;
@@ -39,7 +35,7 @@ void end_computation(std::string message, Timer &t, double &total_time)
   std::cout << std::endl;
 }
 
-void PreprocessingData::preprocess()
+void PreprocessingData::preprocess(const Graph &graph)
 {
   Timer t;
   double total_time = 0;
@@ -117,7 +113,17 @@ void PreprocessingData::preprocess()
   relevant_points.print_num_relevant_corner_stats(corner_vector);
 }
 
-void PreprocessingData::_save(std::ostream & stream) const
+// Note: does not remove graph's collar
+void PreprocessingData::remove_collar(const Graph &graph)
+{
+  corner_vector.remove_collar(graph);
+  nearby_corners_with_relevant.remove_collar(graph);
+  nearby_corners_with_next.remove_collar(graph);
+  complete_corner_graph.remove_collar(graph);
+  geometric_containers_incoming.remove_collar(graph);
+}
+
+void PreprocessingData::_save(std::ostream & stream, const Graph &graph) const
 {
   corner_vector.save(stream);
   nearby_corners_with_relevant.save(stream, graph, corner_vector);
@@ -126,7 +132,7 @@ void PreprocessingData::_save(std::ostream & stream) const
   geometric_containers_incoming.save(stream);
 }
 
-void PreprocessingData::save(const std::string &filename) const
+void PreprocessingData::save(const std::string &filename, const Graph &graph) const
 {
   Timer t; double total_time;
   start_computation("Saving preprocessed data", t);
@@ -136,12 +142,12 @@ void PreprocessingData::save(const std::string &filename) const
     std::cerr << "Attempt to save \"" << filename << "\"" << std::endl;
     throw std::runtime_error("Error saving preprocessed data file.");
   }
-  _save(file);
+  _save(file, graph);
   file.close();
   end_computation("Preprocessed data saved", t, total_time);
 }
 
-void PreprocessingData::_load(std::istream &stream)
+void PreprocessingData::_load(std::istream &stream, const Graph &graph)
 {
   corner_vector.load(stream);
   nearby_corners_with_relevant.load(stream, graph, corner_vector);
@@ -150,7 +156,7 @@ void PreprocessingData::_load(std::istream &stream)
   geometric_containers_incoming.load(stream, corner_vector);
 }
 
-void PreprocessingData::load(const std::string &filename)
+void PreprocessingData::load(const std::string &filename, const Graph &graph)
 {
   Timer t; double total_time;
   start_computation("Loading preprocessed data", t);
@@ -160,6 +166,6 @@ void PreprocessingData::load(const std::string &filename)
     std::cerr << "Attempt to open \"" << filename << "\"" << std::endl;
     throw std::runtime_error("Error opening preprocessed data file.");
   }
-  _load(file);
+  _load(file, graph);
   end_computation("Preprocessed data loaded", t, total_time);
 }

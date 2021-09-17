@@ -19,6 +19,7 @@ class CornerVector
 
   public:
   void preprocess(const Graph &graph);
+  void remove_collar(const Graph &graph);
   void save(std::ostream &stream) const;
   void load(std::istream &stream);
 

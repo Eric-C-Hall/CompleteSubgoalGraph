@@ -179,6 +179,11 @@ void CompleteCornerGraph::preprocess(const Graph &graph, const CornerVector &cor
   std::cout << i - 1 << std::endl;
 }
 
+void CompleteCornerGraph::remove_collar(const Graph &graph)
+{
+  // Deliberately empty: no processing needed
+}
+
 void CompleteCornerGraph::save(std::ostream &stream, const CornerVector &corner_vector) const
 {
   int num_exact_distances = 0;

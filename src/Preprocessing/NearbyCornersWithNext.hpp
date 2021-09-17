@@ -15,6 +15,7 @@ class NearbyCornersWithNext
 
   public:
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners, const RelevantPoints &relevant_points);
+  void remove_collar(const Graph &graph);
   void save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const;
   void load(std::istream &stream, const Graph &graph, const CornerVector &corner_vector);
 

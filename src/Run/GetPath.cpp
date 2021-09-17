@@ -8,14 +8,15 @@
 #include <cassert>
 
 template<bool try_octile, bool test_double, bool test_single, bool compute_path>
-bool Running::get_path_partial_computation(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data)
+bool Running::get_path_partial_computation(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data, const Graph &graph)
 {
-  const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   const NearbyCornersWithRelevant &nearby_corners_with_relevant = preprocessing_data.get_nearby_corners_with_relevant();
   const NearbyCornersWithNext &nearby_corners_with_next = preprocessing_data.get_nearby_corners_with_next();
   const CompleteCornerGraph &complete_corner_graph = preprocessing_data.get_complete_corner_graph();
   const GeometricContainersIncoming &geometric_containers_incoming = preprocessing_data.get_geometric_containers_incoming();
+
+  path.clear();
 
   // TODO: we have now converted goal and start from xyLoc to map_position and back again. This is not ideal.
   // On the other hand, the time taken is probably insignificant.
@@ -163,24 +164,24 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
 
 }
 
-bool Running::get_path_octile_step_only(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data)
+bool Running::get_path_octile_step_only(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data, const Graph &graph)
 {
-  return get_path_partial_computation<true,false,false,false>(start, goal, path, preprocessing_data);
+  return get_path_partial_computation<true,false,false,false>(start, goal, path, preprocessing_data, graph);
 }
 
-bool Running::get_path_up_to_double_step(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data)
+bool Running::get_path_up_to_double_step(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data, const Graph &graph)
 {
-  return get_path_partial_computation<true,true,false,false>(start, goal, path, preprocessing_data);
+  return get_path_partial_computation<true,true,false,false>(start, goal, path, preprocessing_data, graph);
 }
 
-bool Running::get_path_up_to_single_step(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data)
+bool Running::get_path_up_to_single_step(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data, const Graph &graph)
 {
-  return get_path_partial_computation<true,true,true,false>(start, goal, path, preprocessing_data);
+  return get_path_partial_computation<true,true,true,false>(start, goal, path, preprocessing_data, graph);
 }
 
-bool Running::get_path(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data)
+bool Running::get_path(map_position start, map_position goal, std::vector<xyLoc> &path, const PreprocessingData &preprocessing_data, const Graph &graph)
 {
-  return get_path_partial_computation<true,true,true,true>(start, goal, path, preprocessing_data);
+  return get_path_partial_computation<true,true,true,true>(start, goal, path, preprocessing_data, graph);
 }
 
 // eof

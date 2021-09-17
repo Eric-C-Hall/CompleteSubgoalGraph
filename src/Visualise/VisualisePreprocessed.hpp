@@ -5,7 +5,7 @@
 
 #include "../Preprocessing/Preprocessing.hpp"
 
-void Visualise(const PreprocessingData &preprocessing_data);
+void Visualise(const PreprocessingData &preprocessing_data, const Graph &graph);
 
 struct PrintGraphArguments
 {
@@ -27,6 +27,6 @@ struct PrintGraphArguments
   int which_nearby_corner = -1;
 };
 
-void print_graph(const PreprocessingData &preprocessing_data, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &print_graph_arguments);
+void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &print_graph_arguments);
 
 #endif

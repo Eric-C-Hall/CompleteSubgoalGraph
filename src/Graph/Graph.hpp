@@ -32,7 +32,10 @@ class Graph {
   Graph();
 
   void load_map(const char *fname);
-  void load_bits(const std::vector<bool> &bits, unsigned int input_width, unsigned int input_height);
+  void load_bits_without_collar(const std::vector<bool> &bits, unsigned int input_width, unsigned int input_height);
+  void load_bits_with_collar(const std::vector<bool> &bits, unsigned int input_width, unsigned int input_height);
+
+  void remove_collar();
 
   std::vector<std::pair<map_position, exact_distance>> adjacent_locations_and_dists(map_position p) const;  
 

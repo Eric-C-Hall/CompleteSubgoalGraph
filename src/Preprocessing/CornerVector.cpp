@@ -48,6 +48,14 @@ void CornerVector::preprocess(const Graph &graph)
   std::cout << "Number of corners: " << corners.size() << std::endl;
 }
 
+void CornerVector::remove_collar(const Graph &graph)
+{
+  for (map_position &p : corners)
+  {
+    p = graph.left(graph.down(p));
+  }
+}
+
 void CornerVector::save(std::ostream &stream) const
 {
   size_t num_corners = corners.size();

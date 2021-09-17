@@ -28,6 +28,7 @@ class CompleteCornerGraph
   inline const std::vector<corner_index> &get_corner_index_to_first_corner(corner_index i) const {return pair_of_corner_indices_to_first_corner[i];}
 
   void preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners);
+  void remove_collar(const Graph &graph);
   void save(std::ostream &stream, const CornerVector &corner_vector) const;
   void load(std::istream &stream, const CornerVector &corner_vector);
 

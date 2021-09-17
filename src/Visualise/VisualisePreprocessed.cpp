@@ -18,9 +18,8 @@ void VisualiseRequestInput(std::string &input)
   std::cin >> input;
 }
 
-void print_graph(const PreprocessingData &preprocessing_data, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &args)
+void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph, const std::vector<map_position> &cursors, const std::vector<xyLoc> &path, const PrintGraphArguments &args)
 {
-  const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   const CompleteCornerGraph &complete_corner_graph = preprocessing_data.get_complete_corner_graph();
   const NearbyCornersWithRelevant &nearby_corners_with_relevant = preprocessing_data.get_nearby_corners_with_relevant();
@@ -213,9 +212,8 @@ void move_cursor(std::vector<map_position> &cursors, const Graph &graph, const s
   }
 }
 
-void Visualise(const PreprocessingData &preprocessing_data)
+void Visualise(const PreprocessingData &preprocessing_data, const Graph &graph)
 {
-  const Graph &graph = preprocessing_data.get_graph();
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   //const NearbyCornersWithRelevant &nearby_corners_with_relevant = preprocessing_data.get_nearby_corners_with_relevant();
 
@@ -233,7 +231,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
 
   PrintGraphArguments args;
 
-  print_graph(preprocessing_data, cursors, path, args);
+  print_graph(preprocessing_data, graph, cursors, path, args);
   VisualiseRequestInput(input);
 
   while (input != "quit")
@@ -273,7 +271,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
     else if (input == "compute" && cursors.size() >= 2)
     {
       path.clear();
-      Running::get_path(cursors[0], cursors[1], path, preprocessing_data);
+      Running::get_path(cursors[0], cursors[1], path, preprocessing_data, graph);
     }
     else if (input == "nearby")
     {
@@ -346,7 +344,7 @@ void Visualise(const PreprocessingData &preprocessing_data)
       }
     }
 
-    print_graph(preprocessing_data, cursors, path, args);
+    print_graph(preprocessing_data, graph, cursors, path, args);
 
     if (input == "help")
     {

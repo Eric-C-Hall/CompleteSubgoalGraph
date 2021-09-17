@@ -86,7 +86,23 @@ void Graph::load_map(const char *fname)
   }
 }
 
-void Graph::load_bits(const std::vector<bool> &input_bits, unsigned int input_width, unsigned int input_height)
+void Graph::load_bits_without_collar(const std::vector<bool> &input_bits, unsigned int input_width, unsigned int input_height)
+{
+  _width = input_width;
+  _height = input_height;
+  
+  _obstacles.resize(get_width()*get_height());
+
+  for (unsigned int y = 0; y < get_height(); y++)
+  {
+    for (unsigned int x = 0; x < get_width(); x++)
+    {
+      _obstacles[pos(x,y)] = !input_bits[pos(x,y)];
+    }
+  }
+}
+
+void Graph::load_bits_with_collar(const std::vector<bool> &input_bits, unsigned int input_width, unsigned int input_height)
 {
   _width = input_width;
   _height = input_height;
@@ -105,6 +121,27 @@ void Graph::load_bits(const std::vector<bool> &input_bits, unsigned int input_wi
   }
 
   add_collar();
+}
+
+void Graph::remove_collar()
+{
+  int old_width = get_width();
+  int old_height = get_height();
+  int new_width = old_width-2;
+  int new_height = old_height-2;
+
+  std::vector<bool> new_obstacles;
+  new_obstacles.resize(new_width * new_height);
+
+  for (int y = 0; y < new_height; y++)
+  {
+    for (int x = 0; x < new_width; x++)
+    {
+      new_obstacles[y * new_width + x] = _obstacles[pos(x+1,y+1)];
+    }
+  }
+
+  _obstacles.swap(new_obstacles);
 }
 
 std::vector<std::pair<map_position, exact_distance>> Graph::adjacent_locations_and_dists(map_position p) const

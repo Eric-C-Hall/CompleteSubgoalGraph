@@ -39,6 +39,6 @@ class TestPointGenerator
 
 };
 
-void Test(const PreprocessingData &preprocessing_data);
+void Test(const PreprocessingData &preprocessing_data, const Graph &graph);
 
 #endif

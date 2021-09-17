@@ -12,8 +12,8 @@ OPTIMIZATION_LEVEL=-O3
 CONCURRENCY_ARGUMENTS=-pthread
 
 # Use this to disable assertions. "ASSERTION_ARGUMENTS=-DNDEBUG" should work.
-ASSERTION_ARGUMENTS=
-#ASSERTION_ARGUMENTS=-DNDEBUG
+#ASSERTION_ARGUMENTS=
+ASSERTION_ARGUMENTS=-DNDEBUG
 
 # -------------------------------
 # List of commands:

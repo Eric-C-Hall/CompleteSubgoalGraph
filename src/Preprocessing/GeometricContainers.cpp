@@ -175,6 +175,11 @@ void GeometricContainersIncoming::convert_from(const GeometricContainersOutgoing
   std::cout << i - 1 << std::endl;
 }
 
+void GeometricContainersIncoming::remove_collar(const Graph &graph)
+{
+  // Deliberately empty: No processing needed
+}
+
 void Bounds::save(std::ostream &stream) const
 {
   SaveLoad::save_as_binary(stream, upper_bound.x);

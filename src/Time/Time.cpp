@@ -50,9 +50,8 @@ void get_test_locs(std::vector<xyLoc> &testLocs, const unsigned int num_tests, c
   }
 }
 
-void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
+void Time(const PreprocessingData &preprocessing_data, const Graph &graph, unsigned int num_tests)
 {
-  const Graph &graph = preprocessing_data.get_graph();
   const Islands islands(graph);
 
   // A vector of pairs of locations, to calculate the distance from one to the other.
@@ -76,7 +75,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    Running::get_path(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data);
+    Running::get_path(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data, graph);
   }
 
   t.EndTimer();
@@ -99,7 +98,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    Running::get_path_octile_step_only(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data);
+    Running::get_path_octile_step_only(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data, graph);
   }
 
   octile_t.EndTimer();
@@ -122,7 +121,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    Running::get_path_up_to_double_step(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data);
+    Running::get_path_up_to_double_step(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data, graph);
   }
 
   double_t.EndTimer();
@@ -145,7 +144,7 @@ void Time(const PreprocessingData &preprocessing_data, unsigned int num_tests)
     xyLoc destLoc = *testLocIter;
     testLocIter++;
     
-    Running::get_path_up_to_single_step(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data);
+    Running::get_path_up_to_single_step(graph.pos(sourceLoc), graph.pos(destLoc), path, preprocessing_data, graph);
   }
 
   single_t.EndTimer();
