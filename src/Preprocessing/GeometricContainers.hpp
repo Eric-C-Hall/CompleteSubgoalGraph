@@ -21,6 +21,7 @@ class Bounds
   inline Bounds combine(const Bounds &other) const;
   void print(Printer &printer, const Highlight &highlight) const;
 
+  void remove_collar();
   void save(std::ostream &stream) const;
   void load(std::istream &stream);
 

@@ -175,9 +175,24 @@ void GeometricContainersIncoming::convert_from(const GeometricContainersOutgoing
   std::cout << i - 1 << std::endl;
 }
 
+void Bounds::remove_collar()
+{
+  upper_bound.x--;
+  upper_bound.y--;
+  lower_bound.x--;
+  lower_bound.y--;
+}
+
 void GeometricContainersIncoming::remove_collar(const Graph &graph)
 {
-  // Deliberately empty: No processing needed
+  for (auto & incoming_direction_to_bounds : corner_to_incoming_direction_to_bounds)\
+  {
+    for (Bounds & bounds : incoming_direction_to_bounds)
+    {
+      bounds.remove_collar();
+
+    }
+  }
 }
 
 void Bounds::save(std::ostream &stream) const
