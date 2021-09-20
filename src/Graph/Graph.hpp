@@ -48,6 +48,11 @@ class Graph {
   inline map_position translate_x(map_position p, int num) const {return p + num;}
   inline map_position translate_y(map_position p, int num) const {return p + num * get_width();}
 
+  inline bool up_possible(map_position p) const {return y(p) != get_height() - 1;}
+  inline bool down_possible(map_position p) const {return y(p) != 0;}
+  inline bool left_possible(map_position p) const {return x(p) != 0;}
+  inline bool right_possible(map_position p) const {return x(p) != get_width() - 1;}
+
   inline map_position num_positions() const {return _obstacles.size();}
 
   inline unsigned int get_width() const {return _width;}

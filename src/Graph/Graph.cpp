@@ -88,14 +88,29 @@ std::vector<std::pair<map_position, exact_distance>> Graph::adjacent_locations_a
   std::vector<std::pair<map_position, exact_distance>> return_value;
   return_value.reserve(8);
 
-  return_value.emplace_back(up(p), STRAIGHT_EXACT_DISTANCE);
-  return_value.emplace_back(up(right(p)), DIAGONAL_EXACT_DISTANCE);
-  return_value.emplace_back(right(p), STRAIGHT_EXACT_DISTANCE);
-  return_value.emplace_back(right(down(p)), DIAGONAL_EXACT_DISTANCE);
-  return_value.emplace_back(down(p), STRAIGHT_EXACT_DISTANCE);
-  return_value.emplace_back(down(left(p)), DIAGONAL_EXACT_DISTANCE);
-  return_value.emplace_back(left(p), STRAIGHT_EXACT_DISTANCE);
-  return_value.emplace_back(left(up(p)), DIAGONAL_EXACT_DISTANCE);
+  if (up_possible(p))
+    return_value.emplace_back(up(p), STRAIGHT_EXACT_DISTANCE);
+
+  if (up_possible(p) && right_possible(p))
+    return_value.emplace_back(up(right(p)), DIAGONAL_EXACT_DISTANCE);
+
+  if (right_possible(p))
+    return_value.emplace_back(right(p), STRAIGHT_EXACT_DISTANCE);
+
+  if (right_possible(p) && down_possible(p))
+    return_value.emplace_back(right(down(p)), DIAGONAL_EXACT_DISTANCE);
+
+  if (down_possible(p))
+    return_value.emplace_back(down(p), STRAIGHT_EXACT_DISTANCE);
+
+  if (down_possible(p) && left_possible(p))
+    return_value.emplace_back(down(left(p)), DIAGONAL_EXACT_DISTANCE);
+
+  if (left_possible(p))
+    return_value.emplace_back(left(p), STRAIGHT_EXACT_DISTANCE);
+
+  if (left_possible(p) && up_possible(p))
+    return_value.emplace_back(left(up(p)), DIAGONAL_EXACT_DISTANCE);
 
   return return_value;
 }

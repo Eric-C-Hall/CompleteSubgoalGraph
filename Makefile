@@ -4,6 +4,7 @@ MAP_DIR = maps
 PREPROCESS_DIR = CompleteCornerGraph-maps/experiment_maps
 EXPERIMENT_MAP_DIR = $(MAP_DIR)/experiment_maps
 EXPERIMENT_DIR = $(EXPERIMENT_MAP_DIR)/experiments
+EXPERIMENT_TIME_DIR = $(EXPERIMENT_MAP_DIR)/time
 EXPERIMENT_MAPS = $(wildcard $(EXPERIMENT_MAP_DIR)/*.map)
 CPP_DIRECTORIES = Graph Preprocessing Run Test Utility Visualise Debug Time PathCompetition
 CPP_FILES = $(foreach dir,$(CPP_DIRECTORIES),$(wildcard $(CPP_DIR)/$(dir)/*.cpp))
@@ -77,6 +78,9 @@ experiment_run:
 	rm -f $(EXPERIMENT_DIR)/*.map.results
 	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), (./cornergraph_gppc -run $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(EXPERIMENT_MAP_DIR)/%.map,$(EXPERIMENT_DIR)/%.map.results,$(EXPERIMENT_MAP));)
 
+experiment_time:
+	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time
+	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), (./cornergraph -time $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(EXPERIMENT_MAP_DIR)/%.map,$(EXPERIMENT_TIME_DIR)/%.map.time,$(EXPERIMENT_MAP));)
 
 experiment_load_maps:
 ifneq ($(DIR),)
