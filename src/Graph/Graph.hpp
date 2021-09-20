@@ -52,6 +52,7 @@ class Graph {
   inline bool down_possible(map_position p) const {return y(p) != 0;}
   inline bool left_possible(map_position p) const {return x(p) != 0;}
   inline bool right_possible(map_position p) const {return x(p) != get_width() - 1;}
+  inline bool is_corner_cut(map_position p, map_position q) const {return is_obstacle(pos(x(p), y(q))) || is_obstacle(pos(x(q),y(p)));}
 
   inline map_position num_positions() const {return _obstacles.size();}
 

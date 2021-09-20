@@ -80,6 +80,10 @@ experiment_run:
 
 experiment_time:
 	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time
+	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time.compute
+	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time.single
+	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time.double
+	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time.octile
 	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), (./cornergraph -time $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(EXPERIMENT_MAP_DIR)/%.map,$(EXPERIMENT_TIME_DIR)/%.map.time,$(EXPERIMENT_MAP));)
 
 experiment_load_maps:

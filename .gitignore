@@ -3,7 +3,6 @@
 *.map.scen
 *.map.cornergraph
 *.zip
-*.map.results
 
 # Ignore compiled files
 *.o
@@ -14,3 +13,14 @@ cornergraph_gppc
 
 # Ignore files containing results of experiments
 *7ime.txt
+*.map.results
+*.map.time
+*.map.pre
+*.map.time.single
+*.map.time.octile
+*.map.time.double
+*.map.time.compute
+compute
+double
+octile
+single

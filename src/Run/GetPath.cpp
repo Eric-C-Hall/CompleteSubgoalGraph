@@ -86,6 +86,10 @@ bool Running::get_path_partial_computation(map_position start, map_position goal
     const auto &start_nearby = nearby_corners_with_relevant.get_nearby_corner_indices_with_relevant(start);
     const auto &goal_nearby = nearby_corners_with_relevant.get_nearby_corner_indices_with_relevant(goal);
 
+    // If the octile path doesn't work, then neither the relevent corners to the start nor the relevant corners to the goal should be empty
+    assert (!start_nearby.empty());
+    assert (!goal_nearby.empty());
+
     auto s_iter = start_nearby.begin();
     auto g_iter = goal_nearby.begin();
 
