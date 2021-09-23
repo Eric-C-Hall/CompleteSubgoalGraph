@@ -71,8 +71,10 @@ else
 endif
 
 experiment_pre:
+	rm -f $(EXPERIMENT_MAP_DIR)/pre/*.map.pre
 	rm -f $(EXPERIMENT_MAP_DIR)/*.map.cornergraph
-	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), timeout 1h ./cornergraph_gppc -pre $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen;)
+	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), timeout 1h ./cornergraph_gppc -pre $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen > $(EXPERIMENT_MAP).pre;)
+	mv $(EXPERIMENT_MAP_DIR)/*.map.pre $(EXPERIMENT_MAP_DIR)/pre
 
 experiment_run:
 	rm -f $(EXPERIMENT_DIR)/*.map.results

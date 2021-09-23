@@ -60,6 +60,9 @@ class SmoothedGraph
 
   void print(Printer &printer, const Graph &graph) const;
   void print(const Graph &graph) const;
+
+  inline bool get_is_blocked(map_position p) {return is_blocked[p];}
+  inline bool get_is_corner(map_position p) {return is_corner[p];}
 };
 
 
