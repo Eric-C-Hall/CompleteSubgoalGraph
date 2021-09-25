@@ -6,7 +6,6 @@ void NearbyCornersWithNext::preprocess(const Graph &graph, const CornerVector &c
 {
   int num_with_next = 0;
   int num_without_next = 0;
-  int num_with_one_next = 0;
   point_to_nearby_corner_indices_with_next.clear();
   point_to_nearby_corner_indices_with_next.reserve(graph.num_positions());
   for (map_position p = 0; p < graph.num_positions(); p++)
@@ -16,27 +15,28 @@ void NearbyCornersWithNext::preprocess(const Graph &graph, const CornerVector &c
     for (corner_index i : nearby_corner_indices)
     {
       DivDirection incoming_divdirection = get_divdirection_between_points(graph.loc(p), graph.loc(corner_vector.get_corner(i)));
+      bool has_next = false;
       for (DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(i, incoming_divdirection))
       {
         if (relevant_points.get_relevant_corners(i, outgoing_divdirection).size() > 0)
         {
-          nearby_corner_indices_with_next.push_back(i);
-          num_with_next++;
-          if (relevant_points.get_relevant_corners(i, outgoing_divdirection).size() == 1)
-          {
-            num_with_one_next++;
-          }
+          has_next = true;
+          break;
         }
-        else
-        {
-          num_without_next++;
-        }
+      }
+      if (has_next)
+      {
+        nearby_corner_indices_with_next.push_back(i);
+        num_with_next++;
+      }
+      else
+      {
+        num_without_next++;
       }
     }
     point_to_nearby_corner_indices_with_next.push_back(nearby_corner_indices_with_next);
   }
   std::cout << num_with_next << " with next, " << num_without_next << " without next" << std::endl;
-  std::cout << num_with_one_next << " of those with next have exactly one next corner" << std::endl;
 }
 
 void NearbyCornersWithNext::remove_collar(const Graph &graph)

@@ -15,17 +15,23 @@ void NearbyCornersWithRelevant::preprocess(const Graph &graph, const CornerVecto
     for (corner_index i : nearby_corner_indices)
     {
       DivDirection incoming_divdirection = get_divdirection_between_points(graph.loc(p), graph.loc(corner_vector.get_corner(i)));
+      bool has_relevant = false;
       for (DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(i, incoming_divdirection))
       {
         if (relevant_points.get_relevant_points(i, outgoing_divdirection).size() > 0)
         {
+          has_relevant = true;
+          break;
+        }
+      }
+      if (has_relevant)
+      {
           nearby_corner_indices_with_relevant.push_back(i);
           num_with_relevant++;
-        }
-        else
-        {
-          num_without_relevant++;
-        }
+      }
+      else
+      {
+        num_without_relevant++;
       }
     }
     point_to_nearby_corner_indices_with_relevant.push_back(nearby_corner_indices_with_relevant);
