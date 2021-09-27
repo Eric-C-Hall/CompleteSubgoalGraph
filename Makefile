@@ -1,14 +1,12 @@
 CPP_DIR = src
 OBJ_DIR = obj
-MAP_DIR = maps
-PREPROCESS_DIR = CompleteCornerGraph-maps/experiment_maps
-EXPERIMENT_MAP_DIR = $(MAP_DIR)/experiment_maps
-EXPERIMENT_DIR = $(EXPERIMENT_MAP_DIR)/experiments
-EXPERIMENT_TIME_DIR = $(EXPERIMENT_MAP_DIR)/time
-EXPERIMENT_MAPS = $(wildcard $(EXPERIMENT_MAP_DIR)/*.map)
 CPP_DIRECTORIES = Graph Preprocessing Run Test Utility Visualise Debug Time PathCompetition
 CPP_FILES = $(foreach dir,$(CPP_DIRECTORIES),$(wildcard $(CPP_DIR)/$(dir)/*.cpp))
 OBJ = $(patsubst $(CPP_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(CPP_FILES))
+
+MAP_DIR = maps
+PREPROCESS_DIR = CompleteCornerGraph-$(MAP_DIR)
+EXPERIMENT_MAP_DIRS = manually-created bgmaps da2 dao wc3maps512 sc1
 
 OPTIMIZATION_LEVEL=-O3
 CONCURRENCY_ARGUMENTS=-pthread
@@ -68,32 +66,42 @@ else
 	@echo "Pass in a map using 'make rundbg MAP=...'. Do not include the file extension."
 endif
 
+experiment_pre_all:
+	$(foreach EXPERIMENT_MAP_DIR, $(EXPERIMENT_MAP_DIRS), time -f "Real: %E\nUser: %U\nSys: %S\n" -o $(MAP_DIR)/$(EXPERIMENT_MAP_DIR)/7ime.txt make experiment_pre DIR=$(EXPERIMENT_MAP_DIR);)
+
 experiment_pre:
-	rm -f $(EXPERIMENT_MAP_DIR)/pre/*.map.pre
-	rm -f $(EXPERIMENT_MAP_DIR)/*.map.cornergraph
-	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), timeout 1h ./cornergraph_gppc -pre $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen > $(EXPERIMENT_MAP).pre;)
-	mv $(EXPERIMENT_MAP_DIR)/*.map.pre $(EXPERIMENT_MAP_DIR)/pre
+ifneq ($(DIR),)
+	rm -f $(MAP_DIR)/$(DIR)/pre/*.map.pre
+	rm -f $(PREPROCESS_DIR)/$(DIR)/*.map
+	$(foreach EXPERIMENT_MAP, $(wildcard $(MAP_DIR)/$(DIR)/*.map), timeout 1h ./cornergraph_gppc -pre $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen > $(patsubst $(MAP_DIR)/$(DIR)/%.map,$(MAP_DIR)/$(DIR)/pre/%.map.pre,$(EXPERIMENT_MAP));)
+else
+	@echo "Pass in a directory using 'make experiment_pre DIR=...'"
+endif
+
+experiment_run_all:
+	$(foreach EXPERIMENT_MAP_DIR, $(EXPERIMENT_MAP_DIRS), make experiment_run DIR=$(EXPERIMENT_MAP_DIR);)
 
 experiment_run:
-	rm -f $(EXPERIMENT_DIR)/*.map.results
-	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), (./cornergraph_gppc -run $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(EXPERIMENT_MAP_DIR)/%.map,$(EXPERIMENT_DIR)/%.map.results,$(EXPERIMENT_MAP));)
+ifneq ($(DIR),)
+	rm -f $(MAP_DIR)/$(DIR)/pre/*.map.run
+	$(foreach EXPERIMENT_MAP, $(wildcard $(MAP_DIR)/$(DIR)/*.map), (./cornergraph_gppc -run $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(MAP_DIR)/$(DIR)/%.map,$(MAP_DIR)/$(DIR)/run/%.map.run,$(EXPERIMENT_MAP));)
+else
+	@echo "Pass in a directory using 'make experiment_run DIR=...'"
+endif
+
+experiment_time_all:
+	$(foreach EXPERIMENT_MAP_DIR, $(EXPERIMENT_MAP_DIRS), make experiment_time DIR=$(EXPERIMENT_MAP_DIR);)
 
 experiment_time:
-	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time
-	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time.compute
-	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time.single
-	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time.double
-	rm -f $(EXPERIMENT_TIME_DIR)/*.map.time.octile
-	$(foreach EXPERIMENT_MAP, $(EXPERIMENT_MAPS), (./cornergraph -time $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(EXPERIMENT_MAP_DIR)/%.map,$(EXPERIMENT_TIME_DIR)/%.map.time,$(EXPERIMENT_MAP));)
-
-experiment_load_maps:
 ifneq ($(DIR),)
-	rm -f $(EXPERIMENT_MAP_DIR)/*.map
-	rm -f $(EXPERIMENT_MAP_DIR)/*.map.scen
-	cp $(MAP_DIR)/$(DIR)-map/*.map $(EXPERIMENT_MAP_DIR)
-	cp $(MAP_DIR)/$(DIR)-scen/*.map.scen $(EXPERIMENT_MAP_DIR)
+	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time
+	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time.compute
+	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time.single
+	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time.double
+	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time.octile
+	$(foreach EXPERIMENT_MAP, $(wildcard $(MAP_DIR)/$(DIR)/*.map), (./cornergraph -time $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(MAP_DIR)/$(DIR)/%.map,$(MAP_DIR)/$(DIR)/time/%.map.time,$(EXPERIMENT_MAP));)
 else
-	@echo "Pass in a directory using 'make experiment_load_maps DIR=...'"
+	@echo "Pass in a directory using 'make experiment_time DIR=...'"
 endif	
 
 vis:

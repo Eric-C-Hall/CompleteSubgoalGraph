@@ -25,11 +25,5 @@ double
 octile
 single
 *.map.pre
-ccg
-corner
-nearby_corners
-push_corner
-relevant
-smooth_graph
-geometric_container
 *.avg
+*.cat
