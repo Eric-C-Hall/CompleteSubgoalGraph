@@ -13,17 +13,20 @@ cornergraph_gppc
 
 # Ignore files containing results of experiments
 *7ime.txt
-*.map.results
-*.map.time
-*.map.pre
-*.map.time.single
-*.map.time.octile
-*.map.time.double
-*.map.time.compute
+
+*.pre
+*.run
+*.time
+
+*.avg
+*.cat
+
+*.single
+*.double
+*.octile
+*.compute
+
 compute
 double
 octile
 single
-*.map.pre
-*.avg
-*.cat

@@ -72,6 +72,8 @@ experiment_pre_all:
 experiment_pre:
 ifneq ($(DIR),)
 	rm -f $(MAP_DIR)/$(DIR)/pre/*.map.pre
+	rm -f $(MAP_DIR)/$(DIR)/pre/avg/*.avg
+	rm -f $(MAP_DIR)/$(DIR)/pre/avg/*.cat
 	rm -f $(PREPROCESS_DIR)/$(DIR)/*.map
 	$(foreach EXPERIMENT_MAP, $(wildcard $(MAP_DIR)/$(DIR)/*.map), timeout 1h ./cornergraph_gppc -pre $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen > $(patsubst $(MAP_DIR)/$(DIR)/%.map,$(MAP_DIR)/$(DIR)/pre/%.map.pre,$(EXPERIMENT_MAP));)
 else
@@ -83,7 +85,7 @@ experiment_run_all:
 
 experiment_run:
 ifneq ($(DIR),)
-	rm -f $(MAP_DIR)/$(DIR)/pre/*.map.run
+	rm -f $(MAP_DIR)/$(DIR)/run/*.map.run
 	$(foreach EXPERIMENT_MAP, $(wildcard $(MAP_DIR)/$(DIR)/*.map), (./cornergraph_gppc -run $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(MAP_DIR)/$(DIR)/%.map,$(MAP_DIR)/$(DIR)/run/%.map.run,$(EXPERIMENT_MAP));)
 else
 	@echo "Pass in a directory using 'make experiment_run DIR=...'"
@@ -95,10 +97,9 @@ experiment_time_all:
 experiment_time:
 ifneq ($(DIR),)
 	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time
-	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time.compute
-	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time.single
-	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time.double
-	rm -f $(MAP_DIR)/$(DIR)/time/*.map.time.octile
+	rm -f $(MAP_DIR)/$(DIR)/time/avg/*.avg
+	rm -f $(MAP_DIR)/$(DIR)/time/avg/*.cat
+	rm -f $(MAP_DIR)/$(DIR)/time/avg/percentages.time
 	$(foreach EXPERIMENT_MAP, $(wildcard $(MAP_DIR)/$(DIR)/*.map), (./cornergraph -time $(EXPERIMENT_MAP) $(EXPERIMENT_MAP).scen) > $(patsubst $(MAP_DIR)/$(DIR)/%.map,$(MAP_DIR)/$(DIR)/time/%.map.time,$(EXPERIMENT_MAP));)
 else
 	@echo "Pass in a directory using 'make experiment_time DIR=...'"
