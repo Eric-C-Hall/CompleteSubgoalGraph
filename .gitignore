@@ -17,6 +17,7 @@ cornergraph_gppc
 *.pre
 *.run
 *.time
+*.mem
 
 *.avg
 *.cat
