@@ -1,6 +1,7 @@
 #include "NearbyCornersWithRelevant.hpp"
 
 #include "../Utility/SaveLoad.hpp"
+#include "../Utility/Stats.hpp"
 
 void NearbyCornersWithRelevant::preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners, const RelevantPoints &relevant_points)
 {
@@ -101,5 +102,27 @@ void NearbyCornersWithRelevant::print_nearby_with_relevant(map_position pos, Pri
   {
     printer.add_highlight(Highlight(3), graph.loc(corner_vector.get_corner(i)));
   }
+}
+
+void NearbyCornersWithRelevant::print_stats(const Graph &graph) const
+{
+  std::vector<int> num_nearby_with_relevant_vec;
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    if (graph.is_obstacle(p))
+      continue;
+    num_nearby_with_relevant_vec.push_back(get_nearby_corner_indices_with_relevant(p).size());
+  }
+
+  std::vector<int> num_nearby_with_relevant_hist = Stats::to_histogram(num_nearby_with_relevant_vec);
+
+  std::cout << "Num nearby corners with relevant histogram: " << std::flush;
+  Stats::print_histogram(num_nearby_with_relevant_hist);
+  std::cout << std::endl;
+
+  std::cout << "Num nearby corners with relevant stats: " << std::endl;
+  auto num_nearby_with_relevant_stats = Stats::get_stats(num_nearby_with_relevant_vec);
+  Stats::print_stats(num_nearby_with_relevant_stats);
+  std::cout << std::endl;
 }
 

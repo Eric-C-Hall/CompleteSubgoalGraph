@@ -5,34 +5,36 @@
 #include <iostream>
 
 // Min, Max, Mean, Median, Mode, First Quartile, Third Quartile
-std::tuple<unsigned int, unsigned int, float, unsigned int, unsigned int, unsigned int, unsigned int> get_stats(std::vector<unsigned int> vec)
+std::tuple<int, int, float, int, int, int, int> Stats::get_stats(std::vector<int> vec)
 {
   // Sorting the vector makes it much easier to find this data
   std::sort(vec.begin(), vec.end());
 
   // Min, max
-  unsigned int min = vec[0];
-  unsigned int max = vec[vec.size()-1];
+  int min = vec[0];
+  int max = vec[vec.size()-1];
 
   // Mean
-  unsigned int total = 0;
-  for (unsigned int i : vec)
+  int total = 0;
+  for (int i : vec)
   {
     total += i;
   }
   float mean = ((float)total)/((float)vec.size());
 
   // Median
-  unsigned int median = vec[vec.size()/2];
+  int median = vec[vec.size()/2];
 
   // Mode
-  std::map<unsigned int, unsigned int> freq_of_value;
-  for (unsigned int i : vec)
+  std::map<int, int> freq_of_value;
+  for (int i : vec)
   {
+    if (freq_of_value.find(i) == freq_of_value.end())
+      freq_of_value[i] = 0;
     freq_of_value[i]++;
   }
-  unsigned int highest_freq = 0;
-  unsigned int value_with_highest_freq = 0;
+  int highest_freq = 0;
+  int value_with_highest_freq = 0;
   for (auto key_value : freq_of_value)
   {
     if (key_value.second >= highest_freq)
@@ -41,21 +43,20 @@ std::tuple<unsigned int, unsigned int, float, unsigned int, unsigned int, unsign
       value_with_highest_freq = key_value.first;
     }
   }
-  unsigned int mode  = value_with_highest_freq;
+  int mode  = value_with_highest_freq;
 
   // First Quartile
-  unsigned int qt1 = vec[vec.size()/4];
+  int qt1 = vec[vec.size()/4];
 
   // Third Quartile
-  unsigned int qt3 = vec[(vec.size()*3)/4];
+  int qt3 = vec[(vec.size()*3)/4];
 
-  return std::tuple<unsigned int, unsigned int, float,
-                    unsigned int, unsigned int, unsigned int,
-                    unsigned int>(min, max, mean, median, mode, qt1, qt3);
+  return std::tuple<int, int, float, int, int, int, int>
+                   (min, max, mean, median, mode, qt1, qt3);
   
 }
 
-void print_stats(std::tuple<unsigned int, unsigned int, float, unsigned int, unsigned int, unsigned int, unsigned int> stats)
+void Stats::print_stats(std::tuple<int, int, float, int, int, int, int> stats)
 {
   std::cout << "Min:    " << std::get<0>(stats) << std::endl;
   std::cout << "Qt1:    " << std::get<5>(stats) << std::endl;
@@ -66,7 +67,7 @@ void print_stats(std::tuple<unsigned int, unsigned int, float, unsigned int, uns
   std::cout << "Mode:   " << std::get<4>(stats) << std::endl;
 }
 
-std::vector<int> to_histogram(std::vector<int> vec)
+std::vector<int> Stats::to_histogram(std::vector<int> vec)
 {
   std::sort(vec.begin(), vec.end());
 
@@ -86,4 +87,16 @@ std::vector<int> to_histogram(std::vector<int> vec)
   }
 
   return return_value;
+}
+
+void Stats::print_histogram(const std::vector<int> &hist, bool newline_and_flush)
+{
+  for (size_t n = 0; n < hist.size(); n++)
+  {
+    if (n != 0)
+      std::cout << " ";
+    std::cout << hist[n];
+  }
+  if (newline_and_flush)
+    std::cout << std::endl;
 }

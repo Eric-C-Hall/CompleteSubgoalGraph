@@ -24,6 +24,8 @@ class NearbyCorners
   void print(corner_index which_index, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const;
   void print(corner_index which_index, const Graph &graph, const CornerVector &corner_vector) const;
   void print_all(const Graph &graph, const CornerVector &corner_vector) const;
+
+  void print_stats(const Graph &graph) const;
 };
 
 #endif

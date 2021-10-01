@@ -22,6 +22,7 @@ class NearbyCornersWithRelevant
   inline const std::vector<corner_index> &get_nearby_corner_indices_with_relevant(const map_position p) const {return point_to_nearby_corner_indices_with_relevant[p];}
 
   void print_nearby_with_relevant(map_position pos, Printer &printer, const Graph &graph, const CornerVector &corner_vector) const;
+  void print_stats(const Graph &graph) const;
 };
 
 #endif

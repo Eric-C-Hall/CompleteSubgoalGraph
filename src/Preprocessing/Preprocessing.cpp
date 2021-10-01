@@ -107,10 +107,13 @@ void PreprocessingData::preprocess(const Graph &graph)
   end_computation("First corners pushed", t, total_time);
 
   std::cout << "Preprocessing complete" << std::endl;
-  std::cout << "Total preprocessing time: " << total_time << std::endl;
+  std::cout << "Total preprocessing time: " << total_time << "\n\n" << std::flush;
 
   // Print stats
   relevant_points.print_num_relevant_corner_stats(corner_vector);
+  nearby_corners.print_stats(graph);
+  nearby_corners_with_relevant.print_stats(graph);
+  nearby_corners_with_next.print_stats(graph);
 }
 
 // Note: does not remove graph's collar

@@ -4,6 +4,7 @@
 
 #include "../Graph/Reachable.hpp"
 #include "../Utility/SaveLoad.hpp"
+#include "../Utility/Stats.hpp"
 
 void NearbyCorners::find_points_near_corner(corner_index i, const Graph &graph, const CornerVector &corner_vector)
 {
@@ -110,3 +111,24 @@ void NearbyCorners::print_all(const Graph &graph, const CornerVector &corner_vec
   }
 }
 
+void NearbyCorners::print_stats(const Graph &graph) const
+{
+  std::vector<int> num_nearby_vec;
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    if (graph.is_obstacle(p))
+      continue;
+    num_nearby_vec.push_back(get_nearby_corner_indices(p).size());
+  }
+
+  std::vector<int> num_nearby_hist = Stats::to_histogram(num_nearby_vec);
+
+  std::cout << "Num nearby corners histogram: " << std::flush;
+  Stats::print_histogram(num_nearby_hist);
+  std::cout << std::endl;
+
+  std::cout << "Num nearby corners stats: " << std::endl;
+  auto num_nearby_stats = Stats::get_stats(num_nearby_vec);
+  Stats::print_stats(num_nearby_stats);
+  std::cout << std::endl;
+}

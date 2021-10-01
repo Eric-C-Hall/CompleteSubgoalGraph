@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     double d;
     f >> d;
 
-    if (f.eof())
+    if (f.fail())
       break;
 
     total += d;

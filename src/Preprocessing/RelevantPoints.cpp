@@ -212,12 +212,12 @@ void RelevantPoints::print_num_relevant_corner_stats(const CornerVector &corner_
   }
 
   // Print histogram
-  std::vector<int> n_relevant_corners_hist = to_histogram(n_relevant_corners_vec);
+  std::vector<int> n_relevant_corners_hist = Stats::to_histogram(n_relevant_corners_vec);
   std::cout << "Histogram for number of corners relevant to corner in any direction:" << std::endl;
   for (int n = 0; n < (int)n_relevant_corners_hist.size(); n++)
   {
     std::cout << n_relevant_corners_hist[n] << " ";
   }
-  std::cout << std::endl;
+  std::cout << "\n\n" << std::flush;
 }
 

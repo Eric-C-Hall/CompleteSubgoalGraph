@@ -1,6 +1,7 @@
 #include "NearbyCornersWithNext.hpp"
 
 #include "../Utility/SaveLoad.hpp"
+#include "../Utility/Stats.hpp"
 
 void NearbyCornersWithNext::preprocess(const Graph &graph, const CornerVector &corner_vector, const NearbyCorners &nearby_corners, const RelevantPoints &relevant_points)
 {
@@ -101,5 +102,27 @@ void NearbyCornersWithNext::print_nearby_with_next(map_position pos, Printer &pr
   {
     printer.add_highlight(Highlight(3), graph.loc(corner_vector.get_corner(i)));
   }
+}
+
+void NearbyCornersWithNext::print_stats(const Graph &graph) const
+{
+  std::vector<int> num_nearby_with_next_vec;
+  for (map_position p = 0; p < graph.num_positions(); p++)
+  {
+    if (graph.is_obstacle(p))
+      continue;
+    num_nearby_with_next_vec.push_back(get_nearby_corner_indices_with_next(p).size());
+  }
+
+  std::vector<int> num_nearby_with_next_hist = Stats::to_histogram(num_nearby_with_next_vec);
+
+  std::cout << "Num nearby corners with next histogram: " << std::flush;
+  Stats::print_histogram(num_nearby_with_next_hist);
+  std::cout << std::endl;
+
+  std::cout << "Num nearby corners with next stats: " << std::endl;
+  auto num_nearby_with_next_stats = Stats::get_stats(num_nearby_with_next_vec);
+  Stats::print_stats(num_nearby_with_next_stats);
+  std::cout << std::endl;
 }
 
