@@ -48,6 +48,14 @@ void expect_next_strings(std::ifstream &f, char const * str)
   expect_next_strings(f, std::string(str));
 }
 
+template <class T>
+void output_to_file(T value, std::string extension)
+{
+  std::ofstream f(filename + extension);
+  f << value << std::endl;
+  f.close();
+}
+
 int main(int argc, char **argv)
 {
   if (argc != 2)
@@ -82,6 +90,31 @@ int main(int argc, char **argv)
   double geometric_container_convert_time;
   double first_corner_push_time;
   double total_preprocessing_time;
+
+  int num_nearby_min;
+  int num_nearby_qt1;
+  int num_nearby_med;
+  int num_nearby_qt2;
+  int num_nearby_max;
+  double num_nearby_mean;
+  int num_nearby_mode;
+
+  int num_nearby_with_relevant_min;
+  int num_nearby_with_relevant_qt1;
+  int num_nearby_with_relevant_med;
+  int num_nearby_with_relevant_qt2;
+  int num_nearby_with_relevant_max;
+  double num_nearby_with_relevant_mean;
+  int num_nearby_with_relevant_mode;
+
+  int num_nearby_with_next_min;
+  int num_nearby_with_next_qt1;
+  int num_nearby_with_next_med;
+  int num_nearby_with_next_qt2;
+  int num_nearby_with_next_max;
+  double num_nearby_with_next_mean;
+  int num_nearby_with_next_mode;
+
   int num_corners_saved;
   int num_nearby_corner_indices_with_relevant_saved;
   int num_nearby_corner_indices_with_next_saved;
@@ -160,6 +193,61 @@ int main(int argc, char **argv)
   expect_next_strings(f, "Histogram for number of corners relevant to corner in any");
   std::getline(f,junk); // read "direction:" and newline
   std::getline(f,junk); // read histogram
+
+  expect_next_strings(f, "Num nearby corners histogram:");
+  std::getline(f,junk);
+  expect_next_strings(f, "Num nearby corners stats:");
+  expect_next_strings(f, "Min:");
+  f >> num_nearby_min;
+  expect_next_strings(f, "Qt1:");
+  f >> num_nearby_qt1;
+  expect_next_strings(f, "Median:");
+  f >> num_nearby_med;
+  expect_next_strings(f, "Qt2:");
+  f >> num_nearby_qt2;
+  expect_next_strings(f, "Max:");
+  f >> num_nearby_max;
+  expect_next_strings(f, "Mean:");
+  f >> num_nearby_mean;
+  expect_next_strings(f, "Mode:");
+  f >> num_nearby_mode;
+
+  expect_next_strings(f, "Num nearby corners with relevant histogram:");
+  std::getline(f,junk);
+  expect_next_strings(f, "Num nearby corners with relevant stats:");
+  expect_next_strings(f, "Min:");
+  f >> num_nearby_with_relevant_min;
+  expect_next_strings(f, "Qt1:");
+  f >> num_nearby_with_relevant_qt1;
+  expect_next_strings(f, "Median:");
+  f >> num_nearby_with_relevant_med;
+  expect_next_strings(f, "Qt2:");
+  f >> num_nearby_with_relevant_qt2;
+  expect_next_strings(f, "Max:");
+  f >> num_nearby_with_relevant_max;
+  expect_next_strings(f, "Mean:");
+  f >> num_nearby_with_relevant_mean;
+  expect_next_strings(f, "Mode:");
+  f >> num_nearby_with_relevant_mode;
+
+  expect_next_strings(f, "Num nearby corners with next histogram:");
+  std::getline(f,junk);
+  expect_next_strings(f, "Num nearby corners with next stats:");
+  expect_next_strings(f, "Min:");
+  f >> num_nearby_with_next_min;
+  expect_next_strings(f, "Qt1:");
+  f >> num_nearby_with_next_qt1;
+  expect_next_strings(f, "Median:");
+  f >> num_nearby_with_next_med;
+  expect_next_strings(f, "Qt2:");
+  f >> num_nearby_with_next_qt2;
+  expect_next_strings(f, "Max:");
+  f >> num_nearby_with_next_max;
+  expect_next_strings(f, "Mean:");
+  f >> num_nearby_with_next_mean;
+  expect_next_strings(f, "Mode:");
+  f >> num_nearby_with_next_mode;  
+
   expect_next_strings(f, "Saving preprocessed data");
   f >> num_corners_saved;
   expect_next_strings(f, "corners saved");
@@ -189,36 +277,38 @@ int main(int argc, char **argv)
   // VVVV double geometric_container_convert_time;
   // VVVV double first_corner_push_time;
 
-  std::ofstream num_corner_f(filename + ".num_corners");
-  num_corner_f << num_corners << std::endl;
+  output_to_file(num_corners, ".stats.num_corners");
+  output_to_file(corner_compute_time, ".time.corner");
+  output_to_file(complete_corner_graph_time, ".time.ccg");
+  output_to_file(smoothed_graph_time, ".time.smooth_graph");
+  output_to_file(nearby_corners_found_time, ".time.nearby_corners");
+  output_to_file(relevant_points_time + corners_with_relevant_time + corners_with_next_time, ".time.relevant");
+  output_to_file(geometric_containers_time + geometric_container_convert_time, ".time.geometric_container");
+  output_to_file(first_corner_push_time, ".time.push_corner");
 
-  std::ofstream corner_f(filename + ".corner");
-  corner_f << corner_compute_time << std::endl;
-  corner_f.close();
+  output_to_file(num_nearby_min, ".nearby.min");
+  output_to_file(num_nearby_qt1, ".nearby.qt1");
+  output_to_file(num_nearby_med, ".nearby.med");
+  output_to_file(num_nearby_qt2, ".nearby.qt2");
+  output_to_file(num_nearby_max, ".nearby.max");
+  output_to_file(num_nearby_mean, ".nearby.mean");
+  output_to_file(num_nearby_mode, ".nearby.mode");
 
-  std::ofstream ccg_f(filename + ".ccg");
-  ccg_f << complete_corner_graph_time << std::endl;
-  ccg_f.close();
+  output_to_file(num_nearby_with_relevant_min, ".with_relevant.min");
+  output_to_file(num_nearby_with_relevant_qt1, ".with_relevant.qt1");
+  output_to_file(num_nearby_with_relevant_med, ".with_relevant.med");
+  output_to_file(num_nearby_with_relevant_qt2, ".with_relevant.qt2");
+  output_to_file(num_nearby_with_relevant_max, ".with_relevant.max");
+  output_to_file(num_nearby_with_relevant_mean, ".with_relevant.mean");
+  output_to_file(num_nearby_with_relevant_mode, ".with_relevant.mode");
 
-  std::ofstream smooth_graph_f(filename + ".smooth_graph");
-  smooth_graph_f << smoothed_graph_time << std::endl;
-  smooth_graph_f.close();
-
-  std::ofstream nearby_corner_f(filename + ".nearby_corners");
-  nearby_corner_f << nearby_corners_found_time << std::endl;
-  nearby_corner_f.close();
-
-  std::ofstream relevant_f(filename + ".relevant");
-  relevant_f << relevant_points_time + corners_with_relevant_time + corners_with_next_time << std::endl;
-  relevant_f.close();
-
-  std::ofstream geometric_container_f(filename + ".geometric_container");
-  geometric_container_f << geometric_containers_time + geometric_container_convert_time << std::endl;
-  geometric_container_f.close();
-
-  std::ofstream push_corner_f(filename + ".push_corner");
-  push_corner_f << first_corner_push_time << std::endl;
-  push_corner_f.close();
+  output_to_file(num_nearby_with_next_min, ".with_next.min");
+  output_to_file(num_nearby_with_next_qt1, ".with_next.qt1");
+  output_to_file(num_nearby_with_next_med, ".with_next.med");
+  output_to_file(num_nearby_with_next_qt2, ".with_next.qt2");
+  output_to_file(num_nearby_with_next_max, ".with_next.max");
+  output_to_file(num_nearby_with_next_mean, ".with_next.mean");
+  output_to_file(num_nearby_with_next_mode, ".with_next.mode");
 
   return 0;
 }
