@@ -1,5 +1,6 @@
 #include "NearbyCornersWithNext.hpp"
 
+#include "../Graph/CollarOperations.hpp"
 #include "../Utility/SaveLoad.hpp"
 #include "../Utility/Stats.hpp"
 
@@ -42,23 +43,7 @@ void NearbyCornersWithNext::preprocess(const Graph &graph, const CornerVector &c
 
 void NearbyCornersWithNext::remove_collar(const Graph &graph)
 {
-  int old_width = graph.get_width();
-  int old_height = graph.get_height();
-  int new_width = old_width-2;
-  int new_height = old_height-2;
-
-  std::vector<std::vector<corner_index>> new_with_next;
-  new_with_next.resize(new_width * new_height);
-
-  for (int y = 0; y < new_height; y++)
-  {
-    for (int x = 0; x < new_width; x++)
-    {
-      new_with_next[y * new_width + x] = point_to_nearby_corner_indices_with_next[graph.pos(x+1,y+1)];
-    }
-  }
-
-  point_to_nearby_corner_indices_with_next.swap(new_with_next);
+  CollarOperations::remove_collar_map(point_to_nearby_corner_indices_with_next, graph);
 }
 
 void NearbyCornersWithNext::save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const

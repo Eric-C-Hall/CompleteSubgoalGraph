@@ -57,6 +57,7 @@ class SmoothedGraph
 
   public:
   void preprocess(const Graph &graph, const CornerVector &corner_vector);
+  void remove_collar(const Graph &graph);
 
   void print(Printer &printer, const Graph &graph) const;
   void print(const Graph &graph) const;

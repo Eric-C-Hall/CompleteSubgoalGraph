@@ -26,30 +26,32 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
   const NearbyCornersWithNext &nearby_corners_with_next = preprocessing_data.get_nearby_corners_with_next();
   const GeometricContainersIncoming &geometric_containers_incoming = preprocessing_data.get_geometric_containers_incoming();
 
-  static SmoothedGraph smoothed_graph;
-  static NearbyCorners nearby_corners;
-  static DegreeTwoCorners degree_two_corners;
-  static GeometricContainersOutgoing geometric_containers_outgoing;
-  static RelevantPoints relevant_points;
-  static CornerVectorSplittable corner_vector_splittable;
-  static bool preprocessing_done = false;
-  if (!preprocessing_done)
-  {
-    smoothed_graph.preprocess(graph, corner_vector);
-    nearby_corners.preprocess(graph, corner_vector);
-    degree_two_corners.preprocess(graph, corner_vector, nearby_corners, complete_corner_graph);
-    relevant_points.preprocess(graph, corner_vector, nearby_corners);
-    corner_vector_splittable.preprocess(graph, corner_vector, relevant_points);
-    preprocessing_done = true;
-  }
+  // TODO: These preprocessing things expect graph to have collar, but preprocessing_data expects graph to not have collar
+  //static SmoothedGraph smoothed_graph;
+  //static NearbyCorners nearby_corners;
+  //static DegreeTwoCorners degree_two_corners;
+  //static GeometricContainersOutgoing geometric_containers_outgoing;
+  //static RelevantPoints relevant_points;
+  //static CornerVectorSplittable corner_vector_splittable;
+  //static bool preprocessing_done = false;
+  //if (!preprocessing_done)
+  //{
+  //  smoothed_graph.preprocess(graph, corner_vector);
+  //  nearby_corners.preprocess(graph, corner_vector);
+  //  degree_two_corners.preprocess(graph, corner_vector, nearby_corners, complete_corner_graph);
+  //  relevant_points.preprocess(graph, corner_vector, nearby_corners);
+  //  corner_vector_splittable.preprocess(graph, corner_vector, relevant_points);
+  //  preprocessing_done = true;
+  //}
 
   // Geometric containers outgoing take an especially long time to compute, so only compute them if you need to
-  static bool geometric_containers_outgoing_preprocessing_done = false;
-  if (args.show_outgoing_bounds && !geometric_containers_outgoing_preprocessing_done)
-  {
-    geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
-    geometric_containers_outgoing_preprocessing_done = true;
-  }
+  // TODO: These preprocessing things expect graph to have collar, but preprocessing_data expects graph to not have collar
+  //static bool geometric_containers_outgoing_preprocessing_done = false;
+  //if (args.show_outgoing_bounds && !geometric_containers_outgoing_preprocessing_done)
+  //{
+  //  geometric_containers_outgoing.preprocess(graph, corner_vector, complete_corner_graph, relevant_points);
+  //  geometric_containers_outgoing_preprocessing_done = true;
+  //}
 
   // TODO: Maybe don't compute this every time, on the other hand maybe it's not important to be efficient
   const Islands islands(graph);
@@ -64,20 +66,24 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
     corner_vector.print(printer, graph);
 
   // Print splittable corners
-  if (args.show_splittable_corners)
-    corner_vector_splittable.print(printer, graph);
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (args.show_splittable_corners)
+  //  corner_vector_splittable.print(printer, graph);
 
   // Print degree two corners
-  if (args.show_degree_two_corners)
-    degree_two_corners.print(printer, graph, corner_vector);
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (args.show_degree_two_corners)
+  //  degree_two_corners.print(printer, graph, corner_vector);
 
   // Print smoothed graph
-  if (args.show_smoothed_graph)
-    smoothed_graph.print(printer, graph);
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (args.show_smoothed_graph)
+  //  smoothed_graph.print(printer, graph);
 
   // Print nearby corners
-  if (args.show_nearby && cursors.size() > 0)
-    nearby_corners.print_nearby(cursors[0], printer, graph, corner_vector);
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (args.show_nearby && cursors.size() > 0)
+  //  nearby_corners.print_nearby(cursors[0], printer, graph, corner_vector);
 
   // Print nearby corners with relevant
   if (args.show_nearby_with_relevant && cursors.size() > 0)
@@ -112,12 +118,13 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
       (void)0;
 
   // Print outgoing bounds
-  if (args.show_outgoing_bounds)
-    if (selected_corner != corner_vector.size())
-    {
-      geometric_containers_outgoing.print_bounds(selected_corner, args.divdirection, printer);
-      geometric_containers_outgoing.print_immediate_bounds(selected_corner, args.divdirection, printer);
-    }
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (args.show_outgoing_bounds)
+  //  if (selected_corner != corner_vector.size())
+  //  {
+  //    geometric_containers_outgoing.print_bounds(selected_corner, args.divdirection, printer);
+  //    geometric_containers_outgoing.print_immediate_bounds(selected_corner, args.divdirection, printer);
+  //  }
 
   // Print incoming bounds
   if (args.show_incoming_bounds)
@@ -125,37 +132,42 @@ void print_graph(const PreprocessingData &preprocessing_data, const Graph &graph
       geometric_containers_incoming.print_bounds(selected_corner, args.divdirection, printer);
 
   // Print relevant corners
-  if (args.show_relevant_corners)
-    if (selected_corner != corner_vector.size())
-      relevant_points.print_relevant_corners(selected_corner, args.divdirection, printer, graph, corner_vector);
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (args.show_relevant_corners)
+  //  if (selected_corner != corner_vector.size())
+  //    relevant_points.print_relevant_corners(selected_corner, args.divdirection, printer, graph, corner_vector);
 
   // Print relevant points
-  if (args.show_relevant_points)
-    if (selected_corner != corner_vector.size())
-      relevant_points.print_relevant_points(selected_corner, args.divdirection, printer, graph);
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (args.show_relevant_points)
+  //  if (selected_corner != corner_vector.size())
+  //    relevant_points.print_relevant_points(selected_corner, args.divdirection, printer, graph);
 
   // Print relevant points for incoming divdirection
-  if (args.show_incoming_to_relevant_points)
-    if (selected_corner != corner_vector.size())
-      for (DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(selected_corner, args.divdirection))
-        relevant_points.print_relevant_points(selected_corner, outgoing_divdirection, printer, graph);
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (args.show_incoming_to_relevant_points)
+  //  if (selected_corner != corner_vector.size())
+  //    for (DivDirection outgoing_divdirection : relevant_points.get_relevant_divdirections(selected_corner, args.divdirection))
+  //      relevant_points.print_relevant_points(selected_corner, outgoing_divdirection, printer, graph);
 
   // Print relevant outgoing divdirections
-  if (args.show_relevant_divdirections)
-    if (selected_corner != corner_vector.size())
-      relevant_points.print_outgoing_divdirections(selected_corner, args.divdirection, printer, graph, corner_vector);
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (args.show_relevant_divdirections)
+  //  if (selected_corner != corner_vector.size())
+  //    relevant_points.print_outgoing_divdirections(selected_corner, args.divdirection, printer, graph, corner_vector);
 
   // Print which_nearby_corner
-  if (cursors.size() > 0)
-  {
-    const auto &cursor_nearby_corners = nearby_corners.get_nearby_corner_indices(cursors[0]);
-    if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners.size())
-    {
-      const corner_index nearby_corner_index = cursor_nearby_corners[args.which_nearby_corner];
-      const xyLoc nearby_corner_loc = graph.loc(corner_vector.get_corner(nearby_corner_index));
-      printer.add_highlight(Highlight(5), nearby_corner_loc);
-    }
-  }
+  // TODO: Can uncomment when preprocessing with collar problem is fixed. See TODO near start.
+  //if (cursors.size() > 0)
+  //{
+  //  const auto &cursor_nearby_corners = nearby_corners.get_nearby_corner_indices(cursors[0]);
+  //  if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners.size())
+  //  {
+  //    const corner_index nearby_corner_index = cursor_nearby_corners[args.which_nearby_corner];
+  //    const xyLoc nearby_corner_loc = graph.loc(corner_vector.get_corner(nearby_corner_index));
+  //    printer.add_highlight(Highlight(5), nearby_corner_loc);
+  //  }
+  //}
 
   printer.print();
 
@@ -218,13 +230,14 @@ void Visualise(const PreprocessingData &preprocessing_data, const Graph &graph)
   const CornerVector &corner_vector = preprocessing_data.get_corner_vector();
   //const NearbyCornersWithRelevant &nearby_corners_with_relevant = preprocessing_data.get_nearby_corners_with_relevant();
 
-  static NearbyCorners nearby_corners;
-  static bool preprocessing_done = false;
-  if (!preprocessing_done)
-  {
-    preprocessing_done = true;
-    nearby_corners.preprocess(graph, corner_vector);
-  }
+  // TODO: Preprocessing NearbyCorners requires graph to have collar, but corner_vector does not have collar
+  //static NearbyCorners nearby_corners;
+  //static bool preprocessing_done = false;
+  //if (!preprocessing_done)
+  //{
+  //  preprocessing_done = true;
+  //  nearby_corners.preprocess(graph_with_collar, corner_vector);
+  //}
 
   std::string input = "";
   std::vector<map_position> cursors;
@@ -329,21 +342,22 @@ void Visualise(const PreprocessingData &preprocessing_data, const Graph &graph)
     {
       std::cin >> args.which_nearby_corner;
     }
-    else if (input == "go_nearby_corner" || input == "gnc")
-    {
-      if (cursors.size() > 0)
-      {
-        const auto &cursor_nearby_corners = nearby_corners.get_nearby_corner_indices(cursors[0]);
-        if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners.size())
-        {
-          const corner_index nearby_corner_index = cursor_nearby_corners[args.which_nearby_corner];
-          const map_position nearby_corner_pos = corner_vector.get_corner(nearby_corner_index);
-          args.divdirection = get_divdirection_between_points(graph.loc(cursors[0]), graph.loc(nearby_corner_pos));
-          args.show_divdirection = true;
-          set_cursor_to_pos(cursors, graph, 0, nearby_corner_pos);
-        }
-      }
-    }
+    // TODO: Should be able to uncomment when preprocessing nearby corners TODO is fixed
+    //else if (input == "go_nearby_corner" || input == "gnc")
+    //{
+    //  if (cursors.size() > 0)
+    //  {
+    //    const auto &cursor_nearby_corners = nearby_corners.get_nearby_corner_indices(cursors[0]);
+    //    if (args.which_nearby_corner >= 0 && args.which_nearby_corner < (int)cursor_nearby_corners.size())
+    //    {
+    //      const corner_index nearby_corner_index = cursor_nearby_corners[args.which_nearby_corner];
+    //      const map_position nearby_corner_pos = corner_vector.get_corner(nearby_corner_index);
+    //      args.divdirection = get_divdirection_between_points(graph.loc(cursors[0]), graph.loc(nearby_corner_pos));
+    //      args.show_divdirection = true;
+    //      set_cursor_to_pos(cursors, graph, 0, nearby_corner_pos);
+    //    }
+    //  }
+    //}
 
     print_graph(preprocessing_data, graph, cursors, path, args);
 

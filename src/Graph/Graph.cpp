@@ -9,6 +9,13 @@ Graph::Graph()
 {
 }
 
+Graph::Graph(const Graph &other_graph)
+{
+  _width = other_graph.get_width();
+  _height = other_graph.get_height();
+  _obstacles = other_graph._obstacles;
+}
+
 void Graph::set_collar()
 {
   for (unsigned int x = 0; x < get_width(); x++)

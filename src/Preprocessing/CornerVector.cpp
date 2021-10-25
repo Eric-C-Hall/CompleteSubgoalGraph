@@ -1,5 +1,6 @@
 #include "CornerVector.hpp"
 
+#include "../Graph/CollarOperations.hpp"
 #include "../Utility/SaveLoad.hpp"
 
 bool CornerVector::calculate_is_corner(map_position p, const Graph &graph)
@@ -50,13 +51,7 @@ void CornerVector::preprocess(const Graph &graph)
 
 void CornerVector::remove_collar(const Graph &graph)
 {
-  for (map_position &p : corners)
-  {
-    xyLoc l = graph.loc(p);
-    l.x--;
-    l.y--;
-    p = l.y * (graph.get_width()-2) + l.x;
-  }
+  CollarOperations::remove_collar_each(corners, graph);
 }
 
 void CornerVector::save(std::ostream &stream) const

@@ -27,6 +27,7 @@ class Graph {
 
   public:
   Graph();
+  Graph(const Graph &other_graph);
 
   void load_bits_without_collar(const std::vector<bool> &bits, unsigned int input_width, unsigned int input_height);
   void load_bits_with_collar(const std::vector<bool> &bits, unsigned int input_width, unsigned int input_height);

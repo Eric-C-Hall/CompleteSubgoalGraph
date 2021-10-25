@@ -190,7 +190,6 @@ void GeometricContainersIncoming::remove_collar(const Graph &graph)
     for (Bounds & bounds : incoming_direction_to_bounds)
     {
       bounds.remove_collar();
-
     }
   }
 }

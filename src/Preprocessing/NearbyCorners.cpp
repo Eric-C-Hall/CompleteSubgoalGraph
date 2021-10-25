@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "../Graph/CollarOperations.hpp"
 #include "../Graph/Reachable.hpp"
 #include "../Utility/SaveLoad.hpp"
 #include "../Utility/Stats.hpp"
@@ -34,6 +35,11 @@ void NearbyCorners::preprocess(const Graph &graph, const CornerVector &corner_ve
   }
 
   std::cout << i - 1 << "\n";
+}
+
+void NearbyCorners::remove_collar(const Graph &graph)
+{
+  CollarOperations::remove_collar_map(point_to_nearby_corner_indices, graph);
 }
 
 void NearbyCorners::save(std::ostream &stream, const Graph &graph, const CornerVector &corner_vector) const

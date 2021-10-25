@@ -1,5 +1,6 @@
 #include "SmoothedGraph.hpp"
 #include "../Graph/Directions.hpp"
+#include "../Graph/CollarOperations.hpp"
 #include "../PathCompetition/Timer.h"
 #include "../Visualise/VisualisePreprocessed.hpp"
 
@@ -21,6 +22,16 @@ void SmoothedGraph::preprocess(const Graph &graph, const CornerVector &corner_ve
 
   auto_smoothen_straight(graph, corner_vector);
   //auto_smoothen_diagonal();
+}
+
+void SmoothedGraph::remove_collar(const Graph &graph)
+{
+  CollarOperations::remove_collar_map(is_blocked, graph);
+  CollarOperations::remove_collar_map(is_corner, graph);
+
+  CollarOperations::remove_collar_each(last_added_obstacles, graph);
+  CollarOperations::remove_collar_each(removable_corners, graph);
+  CollarOperations::remove_collar_each(addable_corners, graph);
 }
 
 void SmoothedGraph::auto_smoothen_straight(const Graph &graph, const CornerVector &corner_vector)
