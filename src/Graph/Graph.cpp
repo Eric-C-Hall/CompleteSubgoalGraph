@@ -24,7 +24,6 @@ void Graph::set_collar()
   }
 }
 
-
 void Graph::load_bits_without_collar(const std::vector<bool> &input_bits, unsigned int input_width, unsigned int input_height)
 {
   _width = input_width;
@@ -81,6 +80,32 @@ void Graph::remove_collar()
   }
 
   _obstacles.swap(new_obstacles);
+  _width = new_width;
+  _height = new_height;
+}
+
+void Graph::add_collar()
+{
+  int old_width = get_width();
+  int old_height = get_height();
+  int new_width = old_width+2;
+  int new_height = old_height+2;
+
+  std::vector<bool> new_obstacles;
+  new_obstacles.resize(new_width * new_height);
+
+  for (int y = 0; y < old_height; y++)
+  {
+    for (int x = 0; x < old_width; x++)
+    {
+      new_obstacles[(y + 1) * new_width + (x + 1)] = _obstacles[pos(x,y)];
+    }
+  }
+  set_collar();
+
+  _obstacles.swap(new_obstacles);
+  _width = new_width;
+  _height = new_height;
 }
 
 // TODO: A little messy

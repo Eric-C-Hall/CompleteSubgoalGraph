@@ -23,6 +23,7 @@ class Graph {
   std::vector<bool> _obstacles;
 
   void set_collar();
+  void add_collar();
 
   public:
   Graph();
