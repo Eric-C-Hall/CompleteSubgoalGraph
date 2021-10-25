@@ -9,7 +9,7 @@ Graph::Graph()
 {
 }
 
-void Graph::add_collar()
+void Graph::set_collar()
 {
   for (unsigned int x = 0; x < get_width(); x++)
   {
@@ -59,7 +59,7 @@ void Graph::load_bits_with_collar(const std::vector<bool> &input_bits, unsigned 
     }
   }
 
-  add_collar();
+  set_collar();
 }
 
 void Graph::remove_collar()
@@ -149,7 +149,7 @@ void Graph::debug_cut_sides(int xlowercut, int xuppercut, int ylowercut, int yup
 
   _width = new_width;
   _height = new_height;
-  add_collar();
+  set_collar();
 }
 
 void Graph::print(Printer &printer) const

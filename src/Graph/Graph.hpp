@@ -22,7 +22,7 @@ class Graph {
   unsigned int _height;
   std::vector<bool> _obstacles;
 
-  void add_collar();
+  void set_collar();
 
   public:
   Graph();
