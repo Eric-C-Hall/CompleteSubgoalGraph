@@ -16,6 +16,7 @@ cornergraph_gppc
 
 *.pre
 *.run
+*.runtime
 *.time
 *.mem
 *.stat
