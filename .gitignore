@@ -1,6 +1,4 @@
-# Ignore map-related files
-*.map
-*.map.scen
+# Ignore preprocessed files and zips containing maps
 *.map.cornergraph
 *.zip
 
