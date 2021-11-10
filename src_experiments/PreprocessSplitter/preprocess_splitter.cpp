@@ -278,6 +278,7 @@ int main(int argc, char **argv)
   // VVVV double first_corner_push_time;
 
   output_to_file(num_corners, ".stats.num_corners");
+  output_to_file(num_corners*num_corners, ".stats.num_corners_sq");
   output_to_file(corner_compute_time, ".time.corner");
   output_to_file(complete_corner_graph_time, ".time.ccg");
   output_to_file(smoothed_graph_time, ".time.smooth_graph");

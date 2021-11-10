@@ -1,7 +1,7 @@
 MAP_DIR = ../../maps
 EXPERIMENT_MAP_DIRS = manually-created bgmaps da2 dao wc3maps512 sc1
 
-EXTENSIONS = .stats.num_corners\
+EXTENSIONS = .stats.num_corners .stats.num_corners_sq\
              .time.corner .time.ccg .time.smooth_graph .time.nearby_corners .time.relevant .time.geometric_container .time.push_corner\
              .nearby.min .nearby.qt1 .nearby.med .nearby.qt2 .nearby.max .nearby.mean .nearby.mode\
              .with_relevant.min .with_relevant.qt1 .with_relevant.med .with_relevant.qt2 .with_relevant.max .with_relevant.mean .with_relevant.mode\
