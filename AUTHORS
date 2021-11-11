@@ -1,0 +1,8 @@
+Created by Eric Hall.
+
+Parts of this code are based on the Brigitte code by Alban Grastien, although the vast majority of it is my work.
+
+Code in the PathCompetition folder and both main files are based on code provided by the GPPC organisers: https://movingai.com/GPPC/code.html.
+
+The maps in the maps folder are from the movingAI benchmarks, with the exception of those in the manually-created folder, which I created.
+https://www.movingai.com/benchmarks/
