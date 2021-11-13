@@ -30,7 +30,7 @@ ASSERTION_ARGUMENTS=-DNDEBUG
 # time (time how long it takes to solve random queries)
 # -------------------------------
 
-build: $(OBJ_DIR)/main.o $(OBJ)
+build: $(OBJ_DIR)/main_gppc.o $(OBJ_DIR)/main.o $(OBJ)
 	g++ -Wall -o cornergraph $(OPTIMIZATION_LEVEL) $(ADDITIONAL_ARGUMENTS) $(OBJ_DIR)/main.o $(OBJ) $(CONCURRENCY_ARGUMENTS) $(ASSERTION_ARGUMENTS)
 	g++ -Wall -o cornergraph_gppc $(OPTIMIZATION_LEVEL) $(ADDITIONAL_ARGUMENTS) $(OBJ_DIR)/main_gppc.o $(OBJ) $(CONCURRENCY_ARGUMENTS) $(ASSERTION_ARGUMENTS)
 
